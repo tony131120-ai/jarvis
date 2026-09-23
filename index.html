@@ -5568,17 +5568,16 @@ async function processYouTubeCommand(text) {
     );
 
 
-    await searchYouTube(
+       await searchYouTube(
       query,
       false
     );
 
-
     return true;
-
   }
 
-
+  return false;
+}
   /* =====================================================
      첫 번째 영상
      
