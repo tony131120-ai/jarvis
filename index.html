@@ -14,7 +14,192 @@
 
 
 <style>
+/* =========================================================
+   YOUTUBE CONTROL PANEL
+========================================================= */
 
+#youtubePanel {
+
+  position: fixed;
+
+  left: 50%;
+
+  top: 50%;
+
+  transform:
+    translate(-50%, -50%);
+
+  width: min(900px, 90vw);
+
+  height: min(560px, 80vh);
+
+  background:
+    rgba(2, 10, 18, .96);
+
+  border:
+    1px solid
+    rgba(70, 200, 255, .35);
+
+  box-shadow:
+    0 0 60px
+    rgba(20, 150, 255, .18);
+
+  border-radius: 14px;
+
+  overflow: hidden;
+
+  z-index: 150;
+
+  display: none;
+
+}
+
+
+#youtubePanel.show {
+
+  display: block;
+
+}
+
+
+#youtubeHeader {
+
+  height: 45px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  padding:
+    0 16px;
+
+  border-bottom:
+    1px solid
+    rgba(80, 200, 255, .15);
+
+  color:
+    #bdeeff;
+
+  font-size: 12px;
+
+  letter-spacing: 2px;
+
+}
+
+
+#youtubeClose {
+
+  border: 0;
+
+  background: transparent;
+
+  color: #8bdfff;
+
+  cursor: pointer;
+
+  font-size: 18px;
+
+}
+
+
+#youtubePlayer {
+
+  width: 100%;
+
+  height: calc(
+    100% - 45px
+  );
+
+}
+
+
+#youtubeResults {
+
+  position: absolute;
+
+  left: 15px;
+
+  right: 15px;
+
+  bottom: 15px;
+
+  max-height: 180px;
+
+  overflow-y: auto;
+
+  background:
+    rgba(0, 8, 15, .92);
+
+  border:
+    1px solid
+    rgba(80, 200, 255, .18);
+
+  border-radius: 8px;
+
+  display: none;
+
+}
+
+
+.youtubeResult {
+
+  display: flex;
+
+  gap: 10px;
+
+  padding: 8px;
+
+  cursor: pointer;
+
+  border-bottom:
+    1px solid
+    rgba(80, 200, 255, .08);
+
+}
+
+
+.youtubeResult:hover {
+
+  background:
+    rgba(60, 180, 255, .12);
+
+}
+
+
+.youtubeResult img {
+
+  width: 120px;
+
+  height: 68px;
+
+  object-fit: cover;
+
+  border-radius: 5px;
+
+}
+
+
+.youtubeResultTitle {
+
+  color: #d5f5ff;
+
+  font-size: 12px;
+
+}
+
+
+.youtubeResultChannel {
+
+  color:
+    rgba(180, 230, 255, .5);
+
+  font-size: 10px;
+
+  margin-top: 6px;
+
+}
 * {
 
   box-sizing:
@@ -4301,6 +4486,30 @@ if (
 }
 
 </script>
+  <div id="youtubePanel">
+
+  <div id="youtubeHeader">
+
+    <span>
+      E.B. / YOUTUBE CORE
+    </span>
+
+    <button
+      id="youtubeClose"
+      onclick="closeYouTube()"
+    >
+      ×
+    </button>
+
+  </div>
+
+
+  <div id="youtubePlayer"></div>
+
+
+  <div id="youtubeResults"></div>
+
+</div>
 </body>
 
 </html>
