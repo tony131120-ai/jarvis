@@ -4502,52 +4502,40 @@ let youtubeCurrentQuery = "";
 /* =========================================================
    YOUTUBE API READY
 ========================================================= */
-
 events: {
 
-  onReady:
-    () => {
+  onReady: function () {
 
-      youtubeReady =
-        true;
+    youtubeReady = true;
 
-      console.log(
-        "YouTube Player 준비 완료"
-      );
+    console.log(
+      "YouTube Player 준비 완료"
+    );
 
-    },
+  },
 
+  onStateChange: function (event) {
 
-  onStateChange:
-    event => {
+    console.log(
+      "YouTube 상태:",
+      event.data
+    );
 
-      console.log(
-        "YouTube 상태:",
-        event.data
-      );
+  },
 
-    },
+  onAutoplayBlocked: function () {
 
+    console.warn(
+      "YouTube 자동재생이 브라우저에 의해 차단되었습니다."
+    );
 
-  onAutoplayBlocked:
-    () => {
+    speak(
+      "브라우저에서 자동재생을 차단했습니다. 영상의 재생 버튼을 한 번 눌러주세요."
+    );
 
-      console.warn(
-        "YouTube 자동재생이 브라우저에 의해 차단되었습니다."
-      );
-
-      speak(
-        "브라우저에서 자동재생을 차단했습니다. 영상의 재생 버튼을 한 번 눌러주세요."
-      );
-
-    }
+  }
 
 }
-
-        }
-      );
-
-  };
 
 
 /* =========================================================
