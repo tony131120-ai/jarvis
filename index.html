@@ -21,21 +21,129 @@
 <div class="help">마이크를 시작한 뒤 <b>👏 박수를 빠르게 2번</b> 치세요. 활성화되면 음성 명령을 받습니다.<br>예: "현재 시간", "서울 날씨", "마인크래프트 검색해줘", "쉬어"</div>
 </div>
 <script>
-const $=id=>document.getElementById(id);let audioContext,analyser,micStream,running=false,awake=false,listening=false,clapCount=0,clapTimer=0,clapLastPeak=0,clapArmed=true,noiseFloor=.015,recognition=null,recognitionAvailable=false,history=[];
-function say(t){$("message").textContent=t;if("speechSynthesis"in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang="ko-KR";u.rate=.95;u.pitch=.9;speechSynthesis.speak(u)}}
-function log(t){history.unshift(t);history=history.slice(0,12);$("history").innerHTML=history.map(x=>`<div class="item">${esc(x)}</div>`).join("")}
-function esc(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
-function mode(v){awake=v;$("mode").textContent=v?"ACTIVE":"SLEEP";$("status").textContent=v?"JARVIS 활성화":"휴면 상태"}
-function activate(){if(!running)return;mode(true);say("안녕하세요. 오늘은 무엇을 도와드릴까요?");log("👏👏 JARVIS 활성화");startRecognition()}
-function sleep(){mode(false);stopRecognition();say("휴면 상태에 돌입합니다.");log("휴면 상태 진입")}
-function clap(){const now=Date.now();if(now-clapTimer>1200)clapCount=0;clapCount++;clapTimer=now;$("clap").textContent=clapCount+"/2";if(clapCount>=2){clapCount=0;$("clap").textContent="감지 완료";if(!awake)activate()}}
-async function startMic(){if(running)return;try{micStream=await navigator.mediaDevices.getUserMedia({audio:true});audioContext=new(window.AudioContext||window.webkitAudioContext)();analyser=audioContext.createAnalyser();analyser.fftSize=1024;audioContext.createMediaStreamSource(micStream).connect(analyser);running=true;$("mic").textContent="정상";$("startBtn").classList.add("active");$("startBtn").textContent="마이크 ON";say("마이크가 준비되었습니다. 박수를 두 번 쳐주세요.");log("마이크 연결 완료");detectClap()}catch(e){console.error(e);$("mic").textContent="권한 필요";say("마이크 권한을 허용해주세요.")}}
-function detectClap(){if(!running)return;const data=new Uint8Array(analyser.fftSize);analyser.getByteTimeDomainData(data);let sum=0,peak=0;for(const v of data){const n=Math.abs((v-128)/128);sum+=n*n;if(n>peak)peak=n}const rms=Math.sqrt(sum/data.length),now=Date.now();if(rms<.12)noiseFloor=noiseFloor*.96+rms*.04;const sudden=rms>Math.max(.13,noiseFloor*4.5)&&peak>.45;const cooldown=now-clapLastPeak>180;if(sudden&&cooldown&&clapArmed){clapLastPeak=now;clapArmed=false;clap();setTimeout(()=>clapArmed=true,180)}if(clapCount===1&&now-clapTimer>1200){clapCount=0;$("clap").textContent="대기"}requestAnimationFrame(detectClap)}
-function setupRecognition(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$("speech").textContent="지원 안 함";return}recognitionAvailable=true;recognition=new SR();recognition.lang="ko-KR";recognition.continuous=true;recognition.interimResults=false;recognition.maxAlternatives=1;recognition.onstart=()=>{listening=true;$("speech").textContent="듣는 중"};recognition.onresult=e=>{const r=e.results[e.results.length-1];if(!r.isFinal||!awake)return;const t=r[0].transcript.trim();if(t){log("YOU: "+t);handleCommand(t)}};recognition.onerror=e=>{$("speech").textContent="재연결";console.log(e.error)};recognition.onend=()=>{listening=false;$("speech").textContent="대기";if(awake&&running)setTimeout(startRecognition,300)}}
-function startRecognition(){if(!recognitionAvailable||!recognition||!running||!awake||listening)return;try{recognition.start()}catch{}}
-function stopRecognition(){try{recognition?.stop()}catch{}}
-function city(t){return ["서울","부산","인천","대구","대전","광주","울산","수원","용인","성남","제주","강릉","전주","청주"].find(x=>t.includes(x))||""}
-async function handleCommand(raw){const t=raw.toLowerCase().replace(/\s+/g," ").trim();if(t.includes("쉬어")||t.includes("휴면")||t.includes("잠자")){sleep();return}if(t.includes("시간")){try{const d=await(await fetch("/api/time")).json();say("현재 시간은 "+d.text+"입니다.");log("TIME: "+d.text)}catch{say("시간 정보를 가져오지 못했습니다.")}return}if(t.includes("날씨")||t.includes("기온")){const c=city(t)||"서울";try{const r=await fetch("/api/weather?city="+encodeURIComponent(c));const d=await r.json();if(!r.ok)throw 0;const s=`${d.city}의 현재 날씨는 ${d.condition}, 기온은 ${d.temperature}도, 체감온도는 ${d.feelsLike}도입니다.`;say(s);log("WEATHER: "+s)}catch{say("날씨 정보를 가져오지 못했습니다.")}return}if(t.includes("검색")){const q=t.replace(/검색해줘|검색해|검색|찾아줘|찾아/g,"").trim();if(!q){say("무엇을 검색할까요?");return}const d=await(await fetch("/api/search?q="+encodeURIComponent(q))).json();window.open(d.url,"_blank");say(`"${q}" 검색 결과를 열었습니다.`);log("SEARCH: "+q);return}if(t.includes("안녕")||t.includes("자비스")){say("네. 말씀하세요.");return}say(`"${raw}" 명령을 이해했습니다. 현재 지원하는 명령은 시간, 날씨, 검색, 쉬어입니다.`);log("UNKNOWN: "+raw)}
-$("startBtn").onclick=startMic;$("sleepBtn").onclick=()=>{if(!running)startMic();else awake?sleep():activate()};$("testBtn").onclick=()=>{if(!running)say("먼저 마이크 시작 버튼을 눌러주세요.");else if(!awake)say("현재 휴면 상태입니다. 박수를 두 번 쳐서 깨워주세요.");else say("음성 테스트가 정상적으로 작동하고 있습니다.")};$("send").onclick=()=>{const v=$("manual").value.trim();if(!v)return;if(!awake){say("현재 휴면 상태입니다. 박수를 두 번 쳐주세요.");return}$("manual").value="";log("MANUAL: "+v);handleCommand(v)};$("manual").addEventListener("keydown",e=>{if(e.key==="Enter")$("send").click()});setupRecognition();
+const $ = id => document.getElementById(id);
+let recognition=null, recognitionAvailable=false, listening=false, running=false;
+let awake=false, micStream=null, audioContext=null, analyser=null;
+let history=[]; let wakeBuffer=""; let wakeTimer=null; let speaking=false;
+const WAKE_WORDS=["이비","이비야","에이비","j비스","자비스","jarvis"];
+
+function say(text){
+  $("message").textContent=text;
+  speaking=true;
+  if("speechSynthesis" in window){
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text); u.lang="ko-KR"; u.rate=.96; u.pitch=.9;
+    u.onend=()=>{speaking=false; if(awake) restartRecognition(250);};
+    speechSynthesis.speak(u);
+  } else { speaking=false; }
+}
+function log(t){history.unshift(t);history=history.slice(0,15);$("history").innerHTML=history.map(x=>`<div class="item">${escapeHtml(x)}</div>`).join("");}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;", "'":"&#39;"}[c]));}
+function setMode(v){awake=v;$("mode").textContent=v?"ACTIVE":"SLEEP";$("status").textContent=v?"대화 대기 중":"휴면 상태";}
+
+function normalize(t){
+  return t.toLowerCase().replace(/[.,!?]/g," ").replace(/\s+/g," ").trim();
+}
+function findWake(t){
+  const n=normalize(t);
+  for(const w of WAKE_WORDS){ if(n.includes(w)) return w; }
+  return null;
+}
+function removeWake(t){
+  let n=normalize(t);
+  for(const w of WAKE_WORDS){ n=n.replace(w," "); }
+  return n.replace(/\s+/g," ").trim();
+}
+
+function setupRecognition(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){$("speech").textContent="지원 안 함";return;}
+  recognitionAvailable=true;
+  recognition=new SR();
+  recognition.lang="ko-KR";
+  recognition.continuous=true;
+  recognition.interimResults=true;
+  recognition.maxAlternatives=5;
+  recognition.onstart=()=>{listening=true;$("speech").textContent=awake?"이비 대기 중":"휴면";};
+  recognition.onresult=e=>{
+    let finalText="";
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal){finalText+=e.results[i][0].transcript;}
+    }
+    if(!finalText.trim()||speaking)return;
+    processSpeech(finalText.trim());
+  };
+  recognition.onerror=e=>{$("speech").textContent="재연결 중";console.log("speech",e.error);};
+  recognition.onend=()=>{listening=false;$("speech").textContent=awake?"이비 대기 중":"휴면"; if(running) restartRecognition(350);};
+}
+function restartRecognition(ms=200){if(!running||!recognitionAvailable||!recognition)return;clearTimeout(wakeTimer);wakeTimer=setTimeout(()=>{if(!listening){try{recognition.start()}catch{}}},ms);}
+function stopRecognition(){if(!recognition)return;try{recognition.stop()}catch{}}
+
+function processSpeech(text){
+  const wake=findWake(text);
+  if(!awake){
+    // 휴면 상태에서는 음성을 포함한 모든 말을 무시한다.
+    return;
+  }
+  if(!wake) return; // 반드시 "이비"가 있어야 다음 내용을 처리한다.
+  const command=removeWake(text);
+  log("YOU: "+text);
+  if(!command){say("네, 말씀하세요.");return;}
+  handleCommand(command);
+}
+
+async function handleCommand(raw){
+  const t=normalize(raw);
+  if(/^(쉬어|쉬어줘|휴면|휴면해|잠자|자러가|그만할게|대기해)$/.test(t)||t.includes("휴면 상태로 들어가")){sleep();return;}
+  if(t.includes("시간")||t.includes("몇 시")||t.includes("시계")){
+    try{const r=await fetch('/api/time');const d=await r.json();say('현재 시간은 '+d.text+'입니다.');log('TIME: '+d.text);}catch{say('시간 정보를 가져오지 못했어요.');}return;
+  }
+  if(t.includes("날씨")||t.includes("기온")||t.includes("비 와")||t.includes("비가 와")){
+    const city=extractCity(t)||"서울";
+    try{const r=await fetch('/api/weather?city='+encodeURIComponent(city));const d=await r.json();if(!r.ok)throw 0;const msg=`${d.city}의 현재 날씨는 ${d.condition}이고, 기온은 ${d.temperature}도, 체감온도는 ${d.feelsLike}도예요.`;say(msg);log('WEATHER: '+msg);}catch{say('날씨 정보를 가져오지 못했어요.');}return;
+  }
+  if(t.includes("검색")||t.includes("찾아봐")||t.includes("찾아줘")||t.includes("검색해줘")){
+    let q=t.replace(/검색해줘|검색해|검색|찾아봐줘|찾아봐|찾아줘|찾아/g,'').trim();
+    if(!q){say('무엇을 찾아볼까요?');return;}
+    const r=await fetch('/api/search?q='+encodeURIComponent(q));const d=await r.json();window.open(d.url,'_blank');say(q+' 검색 결과를 열었어요.');log('SEARCH: '+q);return;
+  }
+  if(t.includes("안녕")||t.includes("반가워")){say('안녕하세요. 무엇을 도와드릴까요?');return;}
+  if(t.includes("누구")&&t.includes("너")){say('저는 이비예요. 음성으로 대화하고 여러 가지 간단한 작업을 도와드릴 수 있어요.');return;}
+  if(t.includes("고마워")||t.includes("감사")){say('천만에요.');return;}
+  if(t.includes("이름")&&t.includes("뭐")){say('제 이름은 이비예요.');return;}
+  if(t.includes("잘 지내")||t.includes("어때")){say('정상 작동 중이에요. 언제든 말씀하세요.');return;}
+  if(t.includes("유튜브")){window.open('https://www.youtube.com','_blank');say('유튜브를 열었어요.');return;}
+  if(t.includes("구글")){window.open('https://www.google.com','_blank');say('구글을 열었어요.');return;}
+  if(t.includes("네이버")){window.open('https://www.naver.com','_blank');say('네이버를 열었어요.');return;}
+  if(t.includes("계산")){
+    const expr=t.replace(/계산해줘|계산해|계산|해줘/g,'').replace(/더하기/g,'+').replace(/빼기/g,'-').replace(/곱하기/g,'*').replace(/나누기/g,'/').replace(/[^0-9+\-*/().]/g,'');
+    if(expr){try{const result=Function('"use strict";return ('+expr+')')();say('계산 결과는 '+result+'입니다.');return}catch{}}
+  }
+  say(`말씀하신 내용은 "${raw}"이에요. 현재 시간, 날씨, 검색, 계산, 사이트 열기, 일반 대화와 휴면 명령을 처리할 수 있어요.`);
+}
+function extractCity(t){const a=["서울","부산","인천","대구","대전","광주","울산","수원","용인","성남","제주","강릉","전주","청주","평택","화성","천안"] ;return a.find(x=>t.includes(x))||'';}
+
+async function startMic(){
+  if(running)return;
+  try{
+    micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}});
+    audioContext=new (window.AudioContext||window.webkitAudioContext)();
+    analyser=audioContext.createAnalyser(); analyser.fftSize=2048;
+    const source=audioContext.createMediaStreamSource(micStream);source.connect(analyser);
+    running=true;$("mic").textContent="정상";$("startBtn").classList.add('active');$("startBtn").textContent='마이크 ON';
+    say('마이크가 준비됐어요. 휴면 상태에서는 아무 말에도 반응하지 않아요. 깨우려면 이비라고 말해주세요.');
+    log('마이크 연결 완료');
+    restartRecognition(400);
+  }catch(e){console.error(e);$("mic").textContent='권한 필요';say('마이크 권한을 허용해주세요.');}
+}
+function activate(){if(!running)return;setMode(true);say('네, 듣고 있어요. 무엇을 도와드릴까요?');log('WAKE: 이비');restartRecognition(500);}
+function sleep(){setMode(false);say('휴면 상태에 들어갈게요.');log('SLEEP');stopRecognition();restartRecognition(800);}
+
+$("startBtn").onclick=startMic;
+$("sleepBtn").onclick=()=>{if(!running)startMic();else sleep();};
+$("testBtn").onclick=()=>say(awake?'음성 인식 테스트가 정상 작동 중이에요.':'현재 휴면 상태예요.');
+$("send").onclick=()=>{const v=$("manual").value.trim();if(!v)return;$("manual").value='';if(!awake){say('현재 휴면 상태예요.');return}handleCommand(v)};
+$("manual").addEventListener('keydown',e=>{if(e.key==='Enter')$("send").click()});
+setMode(false);setupRecognition();
 </script>
 </body></html>
