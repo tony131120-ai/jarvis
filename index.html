@@ -5065,9 +5065,55 @@ async function playYouTubeResult(
   );
 
 
-  youtubePlayer.loadVideoById(
-    video.videoId
-  );
+  try {
+
+    youtubePlayer.loadVideoById({
+      videoId:
+        video.videoId,
+
+      startSeconds:
+        0
+    });
+
+
+    setTimeout(
+      function () {
+
+        try {
+
+          youtubePlayer.playVideo();
+
+        }
+
+        catch (error) {
+
+          console.error(
+            "YouTube PLAY ERROR:",
+            error
+          );
+
+        }
+
+      },
+      500
+    );
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "YouTube 영상 재생 오류:",
+      error
+    );
+
+    await respond(
+      "영상을 재생하는 중 오류가 발생했습니다."
+    );
+
+    return;
+
+  }
 
 
   await respond(
