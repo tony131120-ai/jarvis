@@ -1,8 +1,12 @@
 {
-  "name": "jarvis-voice-assistant",
-  "version": "1.0.0",
+  "name": "ebi-voice-assistant",
+  "version": "3.0.0",
   "private": true,
   "type": "module",
-  "scripts": { "start": "node server.js" },
-  "dependencies": { "express": "^5.1.0" }
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
 }
