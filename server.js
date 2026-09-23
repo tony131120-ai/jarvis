@@ -106,7 +106,16 @@ const weatherCache = new Map();
 app.get("/api/weather", async (req, res) => {
   try {
     const cityInput = String(req.query.city || "서울").trim();
+const cacheKey = cityInput;
 
+const cached = weatherCache.get(cacheKey);
+
+if (
+  cached &&
+  Date.now() - cached.time < 5 * 60 * 1000
+) {
+  return res.json(cached.data);
+}
     // 한국 주요 지역 좌표
     const cities = {
       "서울": { lat: 37.5665, lon: 126.9780, name: "서울" },
@@ -229,16 +238,22 @@ app.get("/api/weather", async (req, res) => {
       description = "뇌우";
     }
 
-    res.json({
-      city: place.name,
-      temperature: Math.round(current.temperature_2m),
-      feelsLike: Math.round(current.apparent_temperature),
-      humidity: Math.round(current.relative_humidity_2m),
-      windSpeed: Math.round(current.wind_speed_10m),
-      weatherCode,
-      description
-    });
+   const result = {
+  city: place.name,
+  temperature: Math.round(current.temperature_2m),
+  feelsLike: Math.round(current.apparent_temperature),
+  humidity: Math.round(current.relative_humidity_2m),
+  windSpeed: Math.round(current.wind_speed_10m),
+  weatherCode,
+  description
+};
 
+weatherCache.set(cacheKey, {
+  time: Date.now(),
+  data: result
+});
+
+res.json(result);
   } catch (error) {
     console.error("날씨 조회 오류:", error);
 
