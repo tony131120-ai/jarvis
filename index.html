@@ -5596,18 +5596,201 @@ async function processYouTubeCommand(text) {
      "유튜브에서 마인크래프트 찾아줘"
   ===================================================== */
 
+async function processYouTubeCommand(text) {
+
+  text = String(text || "")
+    .trim()
+    .replace(/\s+/g, " ");
+
+  console.log(
+    "YOUTUBE COMMAND:",
+    text
+  );
+
   if (
-    text.includes("유튜브") &&
-    (
-      text.includes("검색") ||
-      text.includes("찾아")
-    )
+    !text.includes("유튜브")
+  ) {
+    return false;
+  }
+
+
+  // 첫 번째 영상 재생
+  if (
+    /첫\s*번째|첫번째|1번/.test(text) &&
+    /영상|비디오|재생|틀어/.test(text)
+  ) {
+
+    if (
+      !youtubeResults ||
+      youtubeResults.length === 0
+    ) {
+
+      await respond(
+        "먼저 유튜브에서 영상을 검색해주세요."
+      );
+
+      return true;
+    }
+
+    await playYouTubeResult(0);
+
+    return true;
+  }
+
+
+  // 번호로 영상 재생
+  const numberMatch =
+    text.match(/(\d+)\s*번/);
+
+  if (
+    numberMatch &&
+    /영상|비디오|재생|틀어/.test(text)
+  ) {
+
+    if (
+      !youtubeResults ||
+      youtubeResults.length === 0
+    ) {
+
+      await respond(
+        "먼저 유튜브에서 영상을 검색해주세요."
+      );
+
+      return true;
+    }
+
+    const index =
+      Number(numberMatch[1]) - 1;
+
+    if (
+      index < 0 ||
+      index >= youtubeResults.length
+    ) {
+
+      await respond(
+        `검색 결과는 ${youtubeResults.length}개까지 있습니다.`
+      );
+
+      return true;
+    }
+
+    await playYouTubeResult(index);
+
+    return true;
+  }
+
+
+  // 일시정지
+  if (
+    /일시정지|멈춰|pause/i.test(text)
+  ) {
+
+    youtubePause();
+
+    return true;
+  }
+
+
+  // 재생
+  if (
+    /재생|틀어|플레이|다시 재생/.test(text) &&
+    !text.includes("검색")
+  ) {
+
+    youtubePlay();
+
+    return true;
+  }
+
+
+  // 정지
+  if (
+    /정지|그만/.test(text)
+  ) {
+
+    youtubeStop();
+
+    return true;
+  }
+
+
+  // 볼륨 올리기
+  if (
+    /볼륨.*(올려|높여|키워)/.test(text) ||
+    /소리.*(올려|높여|키워)/.test(text)
+  ) {
+
+    youtubeVolumeUp();
+
+    return true;
+  }
+
+
+  // 볼륨 내리기
+  if (
+    /볼륨.*(내려|낮춰|줄여)/.test(text) ||
+    /소리.*(내려|낮춰|줄여)/.test(text)
+  ) {
+
+    youtubeVolumeDown();
+
+    return true;
+  }
+
+
+  // 음소거
+  if (
+    /음소거|뮤트|소리 꺼/.test(text)
+  ) {
+
+    youtubeMute();
+
+    return true;
+  }
+
+
+  // 음소거 해제
+  if (
+    /음소거 해제|뮤트 해제|소리 켜/.test(text)
+  ) {
+
+    youtubeUnmute();
+
+    return true;
+  }
+
+
+  // 다음 영상
+  if (
+    /다음 영상|다음거|다음 것|다음곡/.test(text)
+  ) {
+
+    youtubeNext();
+
+    return true;
+  }
+
+
+  // 이전 영상
+  if (
+    /이전 영상|이전거|이전 것|이전곡/.test(text)
+  ) {
+
+    youtubePrevious();
+
+    return true;
+  }
+
+
+  // 유튜브 검색
+  if (
+    text.includes("검색") ||
+    text.includes("찾아")
   ) {
 
     let query = text;
 
 
-    // 유튜브 관련 표현 제거
     query = query
       .replace(/유튜브에서/g, "")
       .replace(/유튜브에/g, "")
@@ -5615,54 +5798,46 @@ async function processYouTubeCommand(text) {
       .replace(/유튜브/g, "");
 
 
-    // "라고 검색해줘" 같은 말투 제거
     query = query
-      .replace(/라고\s*검색해줘/g, "")
       .replace(/이라고\s*검색해줘/g, "")
-      .replace(/라고\s*검색해/g, "")
-      .replace(/이라고\s*검색해/g, "");
+      .replace(/라고\s*검색해줘/g, "")
+      .replace(/이라고\s*검색해/g, "")
+      .replace(/라고\s*검색해/g, "");
 
 
-    // 일반적인 검색 표현 제거
     query = query
+      .replace(/검색해주세요/g, "")
       .replace(/검색해줘/g, "")
       .replace(/검색해/g, "")
-      .replace(/검색해주세요/g, "")
-      .replace(/검색하라고/g, "")
       .replace(/검색/g, "");
 
 
-    // 찾아줘 표현 제거
     query = query
-      .replace(/찾아줘/g, "")
       .replace(/찾아주세요/g, "")
+      .replace(/찾아줘/g, "")
       .replace(/찾아/g, "");
 
 
-    // 문장 끝의 "라고" 제거
     query = query
       .replace(/\s*이라고\s*$/g, "")
       .replace(/\s*라고\s*$/g, "");
 
 
-    // 따옴표 제거
     query = query
-      .replace(/["'“”‘’「」『』]/g, "");
-
-
-    query = query.trim();
+      .replace(
+        /["'“”‘’「」『』]/g,
+        ""
+      )
+      .trim();
 
 
     if (!query) {
-
-      processing = false;
 
       await speak(
         "유튜브에서 무엇을 검색할까요?"
       );
 
       return true;
-
     }
 
 
@@ -5672,13 +5847,14 @@ async function processYouTubeCommand(text) {
     );
 
 
-       await searchYouTube(
+    await searchYouTube(
       query,
       false
     );
 
     return true;
   }
+
 
   return false;
 }
