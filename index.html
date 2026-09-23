@@ -2,7 +2,7 @@
 <html lang="ko">
 
 <head>
-
+<script src="https://www.youtube.com/iframe_api"></script>
 <meta charset="UTF-8">
 
 <meta
@@ -17,7 +17,18 @@
 /* =========================================================
    YOUTUBE CONTROL PANEL
 ========================================================= */
+<div id="youtubePanel">
 
+  <div id="youtubeHeader">
+    <span>E.B. / YOUTUBE CORE</span>
+    <button id="youtubeClose" onclick="closeYouTube()">×</button>
+  </div>
+
+  <div id="youtubePlayer"></div>
+
+  <div id="youtubeResults"></div>
+
+</div>
 #youtubePanel {
 
   position: fixed;
@@ -4489,7 +4500,67 @@ if (
 ========================================================= */
 
 let youtubePlayer = null;
+let youtubePlayer = null;
+let youtubeReady = false;
+let youtubeResults = [];
+let youtubeCurrentIndex = -1;
+let youtubeCurrentQuery = "";
 
+window.onYouTubeIframeAPIReady = function () {
+
+  youtubePlayer = new YT.Player(
+    "youtubePlayer",
+    {
+      width: "100%",
+      height: "100%",
+      videoId: "",
+
+      playerVars: {
+        autoplay: 0,
+        controls: 1,
+        rel: 0,
+        playsinline: 1
+      },
+
+      events: {
+
+        onReady: function () {
+
+          youtubeReady = true;
+
+          console.log(
+            "YouTube Player 준비 완료"
+          );
+
+        },
+
+        onStateChange: function (event) {
+
+          console.log(
+            "YouTube 상태:",
+            event.data
+          );
+
+        },
+
+        onAutoplayBlocked: function () {
+
+          console.warn(
+            "YouTube 자동재생이 브라우저에 의해 차단되었습니다."
+          );
+
+          speak(
+            "브라우저에서 자동재생을 차단했습니다. 영상의 재생 버튼을 한 번 눌러주세요."
+          );
+
+        }
+
+      }
+
+    }
+  );
+
+};
 let youtubeReady = false;
 
 let youtubeResults = [];
