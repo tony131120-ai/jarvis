@@ -2292,308 +2292,168 @@ function calculateExpression(
    YOUTUBE COMMAND
 ========================================================= */
 
-async function processYouTubeCommand(
-  text
-) {
+async function processYouTubeCommand(text) {
 
-  const hasYoutube =
-    text.includes("유튜브");
+  const t = String(text || "").trim();
 
-  const hasVideoCommand =
-    /영상|노래|뮤직|재생|틀어|검색/.test(
-      text
-    );
-
-  /*
-    "첫번째 영상 틀어줘"
-    같은 명령도 허용
-  */
+  // ==========================================
+  // 1. 유튜브 사이트 자체를 열어달라는 명령
+  // 반드시 검색보다 먼저 처리
+  // ==========================================
 
   if (
-    !hasYoutube &&
-    !hasVideoCommand &&
-    !youtubeResults.length
+    /^유튜브\s*(열어|열어줘|켜|켜줘|들어가|들어가줘|사이트 열어|사이트 열어줘)?$/i.test(t) ||
+    /^(유튜브 사이트)\s*(열어|열어줘|켜|켜줘)?$/i.test(t)
   ) {
 
-    return false;
-
-  }
-
-  /*
-    번호 선택
-  */
-
-  const numberMatch =
-    text.match(
-      /(\d+)\s*(번|번째)/
+    rememberAction(
+      "open-youtube",
+      {
+        website: "youtube"
+      }
     );
 
-  if (
-    numberMatch &&
-    youtubeResults.length
-  ) {
-
-    const index =
-      Number(
-        numberMatch[1]
-      ) - 1;
-
-    await playYouTubeResult(
-      index
+    window.open(
+      "https://www.youtube.com/",
+      "_blank",
+      "noopener,noreferrer"
     );
-
-    return true;
-
-  }
-
-  if (
-    /첫\s*번째|첫번째|1번/.test(
-      text
-    ) &&
-    youtubeResults.length
-  ) {
-
-    await playYouTubeResult(
-      0
-    );
-
-    return true;
-
-  }
-
-  if (
-    /두\s*번째|두번째|2번/.test(
-      text
-    ) &&
-    youtubeResults.length
-  ) {
-
-    await playYouTubeResult(
-      1
-    );
-
-    return true;
-
-  }
-
-  if (
-    /세\s*번째|세번째|3번/.test(
-      text
-    ) &&
-    youtubeResults.length
-  ) {
-
-    await playYouTubeResult(
-      2
-    );
-
-    return true;
-
-  }
-
-  if (
-    /네\s*번째|네번째|4번/.test(
-      text
-    ) &&
-    youtubeResults.length
-  ) {
-
-    await playYouTubeResult(
-      3
-    );
-
-    return true;
-
-  }
-
-  /*
-    재생 / 일시정지
-  */
-
-  if (
-    /일시정지|잠깐 멈춰|멈춰줘/.test(
-      text
-    )
-  ) {
-
-    youtubePause();
 
     await respond(
-      "일시정지했습니다."
+      "유튜브를 새 탭에서 엽니다."
     );
 
     return true;
-
   }
 
-  if (
-    /계속 재생|다시 재생|재생해|틀어줘/.test(
-      text
-    ) &&
-    youtubeCurrentIndex >= 0
-  ) {
 
-    youtubePlay();
-
-    return true;
-
-  }
+  // ==========================================
+  // 2. YouTube 검색
+  // ==========================================
 
   if (
-    /정지|그만 틀어|꺼줘/.test(
-      text
-    )
+    /^유튜브에서\s+/.test(t) ||
+    /^유튜브로\s+/.test(t) ||
+    /^유튜브\s+검색/.test(t)
   ) {
 
-    youtubeStop();
+    let query = t
+      .replace(/^유튜브에서\s*/i, "")
+      .replace(/^유튜브로\s*/i, "")
+      .replace(/^유튜브\s*검색\s*/i, "")
+      .replace(/검색해줘$/i, "")
+      .replace(/검색해$/i, "")
+      .replace(/검색$/i, "")
+      .trim();
 
-    await respond(
-      "영상을 정지했습니다."
-    );
+    if (!query) {
 
-    return true;
-
-  }
-
-  /*
-    다음 / 이전
-  */
-
-  if (
-    /다음 영상|다음 곡|다음 노래|다음/.test(
-      text
-    ) &&
-    youtubeResults.length
-  ) {
-
-    youtubeNext();
-
-    return true;
-
-  }
-
-  if (
-    /이전 영상|이전 곡|이전 노래|이전/.test(
-      text
-    ) &&
-    youtubeResults.length
-  ) {
-
-    youtubePrevious();
-
-    return true;
-
-  }
-
-  /*
-    볼륨
-  */
-
-  if (
-    /볼륨.*올려|소리.*올려|크게/.test(
-      text
-    )
-  ) {
-
-    youtubeVolumeUp();
-
-    await respond(
-      "볼륨을 높였습니다."
-    );
-
-    return true;
-
-  }
-
-  if (
-    /볼륨.*내려|소리.*내려|작게/.test(
-      text
-    )
-  ) {
-
-    youtubeVolumeDown();
-
-    await respond(
-      "볼륨을 낮췄습니다."
-    );
-
-    return true;
-
-  }
-
-  if (
-    /음소거|뮤트/.test(
-      text
-    )
-  ) {
-
-    youtubeMute();
-
-    await respond(
-      "음소거했습니다."
-    );
-
-    return true;
-
-  }
-
-  if (
-    /음소거 해제|뮤트 해제/.test(
-      text
-    )
-  ) {
-
-    youtubeUnmute();
-
-    await respond(
-      "음소거를 해제했습니다."
-    );
-
-    return true;
-
-  }
-
-  /*
-    YouTube 검색
-  */
-
-  if (
-    hasYoutube
-  ) {
-
-    let query =
-      text
-        .replace(
-          /유튜브/g,
-          ""
-        )
-        .replace(
-          /에서/g,
-          ""
-        )
-        .replace(
-          /검색해줘|검색해|검색|찾아줘|찾아|틀어줘|틀어|재생해줘|재생해/g,
-          ""
-        )
-        .trim();
-
-    if (query) {
-
-      await searchYouTube(
-        query,
-        false
+      await respond(
+        "유튜브에서 무엇을 검색할까요?"
       );
 
       return true;
-
     }
 
+    rememberAction(
+      "youtube-search",
+      {
+        search: query,
+        website: "youtube"
+      }
+    );
+
+    const url =
+      "https://www.youtube.com/results?search_query=" +
+      encodeURIComponent(query);
+
+    window.open(
+      url,
+      "_blank",
+      "noopener,noreferrer"
+    );
+
+    await respond(
+      `${query}를 유튜브에서 검색합니다.`
+    );
+
+    return true;
   }
 
+
+  // ==========================================
+  // 3. 기존 검색 결과가 있는 경우 번호 선택
+  // ==========================================
+
+  if (
+    youtubeResults &&
+    youtubeResults.length
+  ) {
+
+    const numberMatch =
+      t.match(/(\d+)\s*(번|번째)/);
+
+    if (numberMatch) {
+
+      const index =
+        Number(numberMatch[1]) - 1;
+
+      if (
+        youtubeResults[index]
+      ) {
+
+        /*
+          기존 내부 플레이어 대신
+          새 YouTube 탭에서 영상 열기
+        */
+
+        const video =
+          youtubeResults[index];
+
+        window.open(
+          "https://www.youtube.com/watch?v=" +
+          encodeURIComponent(
+            video.videoId
+          ),
+          "_blank",
+          "noopener,noreferrer"
+        );
+
+        await respond(
+          `${Number(numberMatch[1])}번 영상을 새 탭에서 엽니다.`
+        );
+
+        return true;
+      }
+    }
+
+    if (
+      /첫번째|첫 번째|1번/.test(t)
+    ) {
+
+      const video =
+        youtubeResults[0];
+
+      window.open(
+        "https://www.youtube.com/watch?v=" +
+        encodeURIComponent(
+          video.videoId
+        ),
+        "_blank",
+        "noopener,noreferrer"
+      );
+
+      await respond(
+        "첫 번째 영상을 새 탭에서 엽니다."
+      );
+
+      return true;
+    }
+  }
+
+
   return false;
-
 }
-
 
 /* =========================================================
    FOLLOW-UP COMMAND
