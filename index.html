@@ -3240,49 +3240,42 @@ async function processCommand(
 
 async function startAssistant() {
 
-  if (running) {
-    return;
-  }
+  if (running) return;
 
   try {
 
     setCommand("마이크 권한 요청 중...");
 
-    /*
-      마이크 권한
-    */
-
+    // 마이크 기능 자체 확인
     if (
       !navigator.mediaDevices ||
       !navigator.mediaDevices.getUserMedia
     ) {
-
       throw new Error(
         "이 브라우저에서는 마이크 기능을 사용할 수 없습니다."
       );
-
     }
 
+    // 마이크 권한 요청
     microphoneStream =
       await navigator.mediaDevices.getUserMedia({
         audio: true
       });
 
+    console.log(
+      "마이크 연결 성공:",
+      microphoneStream
+    );
 
-    /*
-      AudioContext
-    */
-
+    // AudioContext
     const AudioContext =
       window.AudioContext ||
       window.webkitAudioContext;
 
     if (!AudioContext) {
-
       throw new Error(
         "AudioContext를 지원하지 않습니다."
       );
-
     }
 
     audioContext =
@@ -3290,44 +3283,24 @@ async function startAssistant() {
 
     await audioContext.resume();
 
-
-    /*
-      실행 상태
-    */
-
+    // 실행 상태
     running = true;
-
     awake = false;
 
-
     loadMemory();
-
     updateStateUI();
 
-
-    /*
-      음성 인식
-    */
-
+    // 음성 인식 설정
     setupRecognition();
 
-
-    /*
-      마이크 소리 감지
-    */
-
+    // 마이크 소리 감지
     await startAudioMonitor();
 
-
-    /*
-      음성 인식 시작
-    */
-
+    // 음성 인식 시작
     startRecognition();
 
-
     setCommand(
-      "E.B. 대기 중 / 두 번 박수로 활성화"
+      "E.B. 대기 중 · 두 번 박수로 활성화"
     );
 
     console.log(
@@ -3343,10 +3316,7 @@ async function startAssistant() {
 
     running = false;
 
-    /*
-      실패한 마이크 스트림 정리
-    */
-
+    // 마이크 정리
     if (microphoneStream) {
 
       microphoneStream
@@ -3355,33 +3325,36 @@ async function startAssistant() {
           track => track.stop()
         );
 
-      microphoneStream =
-        null;
-
+      microphoneStream = null;
     }
 
+    if (audioContext) {
 
-    /*
-      사용자에게 실제 오류 표시
-    */
+      try {
+        await audioContext.close();
+      } catch (_) {}
+
+      audioContext = null;
+    }
 
     setCommand(
       "마이크 시작 실패: " +
-      (error.message || error.name)
+      (error.name || "") +
+      " " +
+      (error.message || "")
     );
 
     alert(
       "마이크를 시작할 수 없습니다.\n\n" +
       "오류: " +
-      (error.message || error.name) +
+      (error.name || "UnknownError") +
+      "\n" +
+      (error.message || "") +
       "\n\n" +
-      "Chrome의 사이트 설정에서 마이크를 허용한 뒤 새로고침해주세요."
+      "Chrome 주소창 왼쪽의 🔒 아이콘 → 마이크 → 허용으로 설정한 뒤 새로고침해주세요."
     );
-
   }
-
 }
-
 /* =========================================================
    GLOBAL EXPORTS
 ========================================================= */
