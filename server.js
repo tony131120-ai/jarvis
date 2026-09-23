@@ -103,131 +103,151 @@ app.get(
    WEATHER
 ========================================================= */
 
-app.get(
-  "/api/weather",
-  async (req, res) => {
+app.get("/api/weather", async (req, res) => {
+  try {
+    const cityInput = String(req.query.city || "서울").trim();
 
-    const city =
-      String(
-        req.query.city ||
-        "서울"
-      ).trim();
+    // 한국 주요 지역 좌표
+    const cities = {
+      "서울": { lat: 37.5665, lon: 126.9780, name: "서울" },
+      "수원": { lat: 37.2636, lon: 127.0286, name: "수원" },
+      "용인": { lat: 37.2411, lon: 127.1776, name: "용인" },
+      "인천": { lat: 37.4563, lon: 126.7052, name: "인천" },
+      "부산": { lat: 35.1796, lon: 129.0756, name: "부산" },
+      "대전": { lat: 36.3504, lon: 127.3845, name: "대전" },
+      "대구": { lat: 35.8714, lon: 128.6014, name: "대구" },
+      "광주": { lat: 35.1595, lon: 126.8526, name: "광주" },
+      "울산": { lat: 35.5384, lon: 129.3114, name: "울산" },
+      "제주": { lat: 33.4996, lon: 126.5312, name: "제주" },
+      "청주": { lat: 36.6424, lon: 127.4890, name: "청주" },
+      "전주": { lat: 35.8242, lon: 127.1480, name: "전주" },
+      "춘천": { lat: 37.8813, lon: 127.7298, name: "춘천" },
+      "강릉": { lat: 37.7519, lon: 128.8761, name: "강릉" },
+      "포항": { lat: 36.0190, lon: 129.3435, name: "포항" }
+    };
 
+    let place = cities[cityInput];
 
-    try {
+    // 등록된 도시가 아니면 Open-Meteo 지오코딩 사용
+    if (!place) {
+      const geoUrl =
+        "https://geocoding-api.open-meteo.com/v1/search" +
+        "?name=" +
+        encodeURIComponent(cityInput) +
+        "&count=1" +
+        "&language=ko" +
+        "&format=json";
 
-      const geocodeResponse =
-        await fetch(
-          "https://geocoding-api.open-meteo.com/v1/search" +
-          "?name=" +
-          encodeURIComponent(city) +
-          "&count=1" +
-          "&language=ko" +
-          "&format=json"
-        );
+      const geoResponse = await fetch(geoUrl);
 
-
-      if (!geocodeResponse.ok) {
-
-        throw new Error(
-          "Geocoding failed"
-        );
-
+      if (!geoResponse.ok) {
+        throw new Error("지역 검색 실패");
       }
 
+      const geoData = await geoResponse.json();
 
-      const geocode =
-        await geocodeResponse.json();
-
-
-      const place =
-        geocode.results?.[0];
-
-
-      if (!place) {
-
-        return res
-          .status(404)
-          .json({
-            error:
-              "도시를 찾지 못했습니다."
-          });
-
-      }
-
-
-      const weatherResponse =
-        await fetch(
-          "https://api.open-meteo.com/v1/forecast" +
-          "?latitude=" +
-          encodeURIComponent(
-            place.latitude
-          ) +
-          "&longitude=" +
-          encodeURIComponent(
-            place.longitude
-          ) +
-          "&current=" +
-          encodeURIComponent(
-            [
-              "temperature_2m",
-              "apparent_temperature",
-              "weather_code",
-              "relative_humidity_2m",
-              "wind_speed_10m"
-            ].join(",")
-          ) +
-          "&timezone=Asia%2FSeoul"
-        );
-
-
-      if (!weatherResponse.ok) {
-
-        throw new Error(
-          "Weather failed"
-        );
-
-      }
-
-
-      const weather =
-        await weatherResponse.json();
-
-
-      res.json({
-
-        city:
-          place.name,
-
-        country:
-          place.country,
-
-        current:
-          weather.current
-
-      });
-
-
-    } catch (error) {
-
-      console.error(
-        "WEATHER ERROR:",
-        error
-      );
-
-
-      res
-        .status(500)
-        .json({
-          error:
-            "날씨 정보를 가져오지 못했습니다."
+      if (!geoData.results || geoData.results.length === 0) {
+        return res.status(404).json({
+          error: "해당 지역을 찾을 수 없습니다."
         });
+      }
 
+      const result = geoData.results[0];
+
+      place = {
+        lat: result.latitude,
+        lon: result.longitude,
+        name: result.name || cityInput
+      };
     }
 
-  }
-);
+    const weatherUrl =
+      "https://api.open-meteo.com/v1/forecast" +
+      "?latitude=" +
+      encodeURIComponent(place.lat) +
+      "&longitude=" +
+      encodeURIComponent(place.lon) +
+      "&current=" +
+      [
+        "temperature_2m",
+        "relative_humidity_2m",
+        "apparent_temperature",
+        "weather_code",
+        "wind_speed_10m"
+      ].join(",") +
+      "&timezone=Asia%2FSeoul";
 
+    const weatherResponse = await fetch(weatherUrl);
+
+    if (!weatherResponse.ok) {
+      throw new Error(
+        `날씨 API 오류: ${weatherResponse.status}`
+      );
+    }
+
+    const data = await weatherResponse.json();
+
+    if (!data.current) {
+      throw new Error("현재 날씨 데이터가 없습니다.");
+    }
+
+    const current = data.current;
+
+    const weatherCode = Number(current.weather_code);
+
+    let description = "맑음";
+
+    if (weatherCode === 0) {
+      description = "맑음";
+    } else if ([1, 2, 3].includes(weatherCode)) {
+      description = "구름 많음";
+    } else if ([45, 48].includes(weatherCode)) {
+      description = "안개";
+    } else if (
+      [51, 53, 55, 56, 57].includes(weatherCode)
+    ) {
+      description = "이슬비";
+    } else if (
+      [61, 63, 65, 66, 67].includes(weatherCode)
+    ) {
+      description = "비";
+    } else if (
+      [71, 73, 75, 77].includes(weatherCode)
+    ) {
+      description = "눈";
+    } else if (
+      [80, 81, 82].includes(weatherCode)
+    ) {
+      description = "소나기";
+    } else if (
+      [85, 86].includes(weatherCode)
+    ) {
+      description = "눈 소나기";
+    } else if (
+      [95, 96, 99].includes(weatherCode)
+    ) {
+      description = "뇌우";
+    }
+
+    res.json({
+      city: place.name,
+      temperature: Math.round(current.temperature_2m),
+      feelsLike: Math.round(current.apparent_temperature),
+      humidity: Math.round(current.relative_humidity_2m),
+      windSpeed: Math.round(current.wind_speed_10m),
+      weatherCode,
+      description
+    });
+
+  } catch (error) {
+    console.error("날씨 조회 오류:", error);
+
+    res.status(500).json({
+      error: "날씨 정보를 가져오지 못했습니다.",
+      detail: error.message
+    });
+  }
+});
 
 /* =========================================================
    GOOGLE SEARCH
