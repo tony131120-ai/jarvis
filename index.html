@@ -3006,14 +3006,21 @@ async function speak(text) {
     analyser.fftSize =
       1024;
 
-    microphoneSource =
-      audioContext.createMediaStreamSource(
-        microphoneStream
-      );
+   microphoneSource = audioContext.createMediaStreamSource(microphoneStream);
 
-    microphoneSource.connect(
-      analyser
-    );
+const inputGain = audioContext.createGain();
+
+// 수신 음성 증폭
+inputGain.gain.value = 5.0;
+
+analyser = audioContext.createAnalyser();
+
+analyser.fftSize = 2048;
+analyser.smoothingTimeConstant = 0.35;
+
+// 마이크 → 증폭 → 분석기
+microphoneSource.connect(inputGain);
+inputGain.connect(analyser);
 
     function loop() {
 
@@ -3477,16 +3484,15 @@ async function speak(text) {
 
     try {
 
-      microphoneStream =
-        await navigator.mediaDevices.getUserMedia(
-          {
-            audio: {
-              echoCancellation: false,
-              noiseSuppression: false,
-              autoGainControl: false
-            }
-          }
-        );
+     microphoneStream = await navigator.mediaDevices.getUserMedia({
+  audio: {
+    echoCancellation: false,
+    noiseSuppression: false,
+    autoGainControl: false,
+    channelCount: 1,
+    sampleRate: 48000
+  }
+});
 
 
       audioContext =
