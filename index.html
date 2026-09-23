@@ -6,2175 +6,3453 @@
 <meta charset="UTF-8">
 
 <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
 >
 
-<title>E.B.</title>
+<title>이비</title>
 
 
 <style>
 
+* {
+
+  box-sizing:
+    border-box;
+
+}
+
+
 html,
 body {
 
-    margin: 0;
+  width:
+    100%;
 
-    width: 100%;
+  height:
+    100%;
 
-    height: 100%;
+  margin:
+    0;
 
-    overflow: hidden;
+  overflow:
+    hidden;
 
-    background: #000;
+  background:
+    #02070d;
+
+  font-family:
+    Arial,
+    sans-serif;
 
 }
 
 
 body {
 
-    display: flex;
-
-    justify-content: center;
-
-    align-items: center;
+  color:
+    #bdeeff;
 
 }
 
 
-#screen {
+#app {
 
-    position: fixed;
+  position:
+    fixed;
 
-    inset: 0;
+  inset:
+    0;
 
-    display: flex;
+  overflow:
+    hidden;
 
-    justify-content: center;
+  background:
 
-    align-items: center;
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(
+        0,
+        120,
+        190,
+        .15
+      ),
+      transparent 32%
+    ),
 
-    background:
-        radial-gradient(
-            circle at center,
-            #08223b 0%,
-            #030b15 35%,
-            #000 72%
-        );
+    radial-gradient(
+      circle at 50% 50%,
+      #06131f 0%,
+      #02070d 55%,
+      #000 100%
+    );
 
 }
 
 
-/* =====================================================
-   중앙 코어
-===================================================== */
+/* =========================================================
+   HUD GRID
+========================================================= */
+
+#grid {
+
+  position:
+    absolute;
+
+  inset:
+    0;
+
+  opacity:
+    .20;
+
+  background-image:
+
+    linear-gradient(
+      rgba(
+        70,
+        190,
+        255,
+        .08
+      ) 1px,
+      transparent 1px
+    ),
+
+    linear-gradient(
+      90deg,
+      rgba(
+        70,
+        190,
+        255,
+        .08
+      ) 1px,
+      transparent 1px
+    );
+
+  background-size:
+    70px 70px;
+
+  mask-image:
+    radial-gradient(
+      circle,
+      black 0%,
+      transparent 75%
+    );
+
+}
+
+
+/* =========================================================
+   TOP HUD
+========================================================= */
+
+#top {
+
+  position:
+    absolute;
+
+  top:
+    24px;
+
+  left:
+    30px;
+
+  right:
+    30px;
+
+  display:
+    flex;
+
+  justify-content:
+    space-between;
+
+  align-items:
+    center;
+
+  z-index:
+    20;
+
+}
+
+
+.brand {
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  gap:
+    10px;
+
+}
+
+
+.brandDot {
+
+  width:
+    9px;
+
+  height:
+    9px;
+
+  border-radius:
+    50%;
+
+  background:
+    #55d9ff;
+
+  box-shadow:
+    0 0 15px
+    #36c8ff;
+
+}
+
+
+.brandText {
+
+  font-size:
+    18px;
+
+  font-weight:
+    600;
+
+  letter-spacing:
+    5px;
+
+  color:
+    rgba(
+      180,
+      235,
+      255,
+      .9
+    );
+
+}
+
+
+.status {
+
+  font-size:
+    10px;
+
+  letter-spacing:
+    3px;
+
+  color:
+    rgba(
+      120,
+      210,
+      255,
+      .55
+    );
+
+}
+
+
+/* =========================================================
+   SIDE HUD
+========================================================= */
+
+.side {
+
+  position:
+    absolute;
+
+  top:
+    50%;
+
+  transform:
+    translateY(-50%);
+
+  width:
+    170px;
+
+  height:
+    270px;
+
+  opacity:
+    .38;
+
+}
+
+
+#left {
+
+  left:
+    25px;
+
+}
+
+
+#right {
+
+  right:
+    25px;
+
+}
+
+
+.side::before {
+
+  content:
+    "";
+
+  position:
+    absolute;
+
+  inset:
+    0;
+
+  border-top:
+    1px solid
+    rgba(
+      80,
+      200,
+      255,
+      .18
+    );
+
+  border-bottom:
+    1px solid
+    rgba(
+      80,
+      200,
+      255,
+      .18
+    );
+
+}
+
+
+.sideLine {
+
+  position:
+    absolute;
+
+  width:
+    100%;
+
+  height:
+    1px;
+
+  background:
+    rgba(
+      80,
+      200,
+      255,
+      .15
+    );
+
+}
+
+
+.sideLine:nth-child(1) {
+
+  top:
+    25%;
+
+}
+
+
+.sideLine:nth-child(2) {
+
+  top:
+    50%;
+
+}
+
+
+.sideLine:nth-child(3) {
+
+  top:
+    75%;
+
+}
+
+
+/* =========================================================
+   CENTRAL CORE
+========================================================= */
+
+#center {
+
+  position:
+    absolute;
+
+  left:
+    50%;
+
+  top:
+    50%;
+
+  width:
+    430px;
+
+  height:
+    430px;
+
+  transform:
+    translate(
+      -50%,
+      -50%
+    );
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+}
+
+
+/* =========================================================
+   ROTATING RINGS
+========================================================= */
+
+.ring {
+
+  position:
+    absolute;
+
+  left:
+    50%;
+
+  top:
+    50%;
+
+  border-radius:
+    50%;
+
+  transform:
+    translate(
+      -50%,
+      -50%
+    );
+
+  border:
+    1px solid
+    rgba(
+      50,
+      190,
+      255,
+      .25
+    );
+
+}
+
+
+.ring1 {
+
+  width:
+    250px;
+
+  height:
+    250px;
+
+  animation:
+    rotate1
+    18s
+    linear
+    infinite;
+
+}
+
+
+.ring2 {
+
+  width:
+    310px;
+
+  height:
+    310px;
+
+  border-style:
+    dashed;
+
+  border-color:
+    rgba(
+      60,
+      200,
+      255,
+      .18
+    );
+
+  animation:
+    rotate2
+    25s
+    linear
+    infinite;
+
+}
+
+
+.ring3 {
+
+  width:
+    375px;
+
+  height:
+    375px;
+
+  border:
+    1px solid
+    rgba(
+      60,
+      180,
+      255,
+      .10
+    );
+
+  animation:
+    rotate1
+    35s
+    linear
+    infinite;
+
+}
+
+
+@keyframes rotate1 {
+
+  from {
+
+    transform:
+      translate(
+        -50%,
+        -50%
+      )
+      rotate(0deg);
+
+  }
+
+  to {
+
+    transform:
+      translate(
+        -50%,
+        -50%
+      )
+      rotate(360deg);
+
+  }
+
+}
+
+
+@keyframes rotate2 {
+
+  from {
+
+    transform:
+      translate(
+        -50%,
+        -50%
+      )
+      rotate(360deg);
+
+  }
+
+  to {
+
+    transform:
+      translate(
+        -50%,
+        -50%
+      )
+      rotate(0deg);
+
+  }
+
+}
+
+
+/* =========================================================
+   CORE
+========================================================= */
 
 #core {
 
-    position: relative;
+  position:
+    relative;
 
-    width: 145px;
+  width:
+    130px;
 
-    height: 145px;
+  height:
+    130px;
 
-    border-radius: 50%;
+  border-radius:
+    50%;
 
-    background:
-        radial-gradient(
-            circle at 35% 28%,
-            #ffffff 0%,
-            #a9ecff 8%,
-            #35baff 25%,
-            #0872c4 48%,
-            #032849 72%,
-            #000 100%
-        );
+  background:
 
-    box-shadow:
-        0 0 25px #159dff,
-        0 0 60px rgba(
-            20,
-            150,
-            255,
-            .70
-        ),
-        0 0 120px rgba(
-            20,
-            150,
-            255,
-            .30
-        );
+    radial-gradient(
+      circle at 35% 30%,
+      #d9fbff 0%,
+      #66dfff 8%,
+      #159bdf 25%,
+      #07558b 48%,
+      #021c32 72%,
+      #000 100%
+    );
 
-    z-index: 5;
+  box-shadow:
+
+    0 0 20px
+    rgba(
+      50,
+      205,
+      255,
+      .8
+    ),
+
+    0 0 55px
+    rgba(
+      20,
+      160,
+      255,
+      .55
+    ),
+
+    0 0 110px
+    rgba(
+      10,
+      120,
+      220,
+      .35
+    );
+
+  z-index:
+    10;
+
+  transition:
+    transform .08s
+    ease-out;
 
 }
 
 
-/* =====================================================
-   아우라
-===================================================== */
+/* =========================================================
+   CORE INNER
+========================================================= */
+
+#core::before {
+
+  content:
+    "";
+
+  position:
+    absolute;
+
+  inset:
+    17px;
+
+  border-radius:
+    50%;
+
+  border:
+    1px solid
+    rgba(
+      190,
+      245,
+      255,
+      .55
+    );
+
+  box-shadow:
+    inset
+    0 0 25px
+    rgba(
+      80,
+      210,
+      255,
+      .45
+    );
+
+}
+
+
+#core::after {
+
+  content:
+    "";
+
+  position:
+    absolute;
+
+  inset:
+    38px;
+
+  border-radius:
+    50%;
+
+  background:
+    rgba(
+      210,
+      250,
+      255,
+      .75
+    );
+
+  box-shadow:
+    0 0 25px
+    rgba(
+      150,
+      240,
+      255,
+      .9
+    );
+
+  opacity:
+    .75;
+
+}
+
+
+/* =========================================================
+   AURA
+========================================================= */
 
 .aura {
 
-    position: absolute;
+  position:
+    absolute;
 
-    left: 50%;
+  left:
+    50%;
 
-    top: 50%;
+  top:
+    50%;
 
-    width: 145px;
+  width:
+    140px;
 
-    height: 145px;
+  height:
+    140px;
 
-    margin-left: -72.5px;
+  transform:
+    translate(
+      -50%,
+      -50%
+    );
 
-    margin-top: -72.5px;
+  border-radius:
+    50%;
 
-    border-radius: 50%;
+  border:
+    1px solid
+    rgba(
+      60,
+      200,
+      255,
+      .35
+    );
 
-    border:
-        1px solid
-        rgba(
-            70,
-            190,
-            255,
-            .45
-        );
-
-    pointer-events: none;
+  pointer-events:
+    none;
 
 }
 
 
 #aura1 {
 
-    box-shadow:
-        0 0 35px
-        rgba(
-            20,
-            160,
-            255,
-            .35
-        );
+  box-shadow:
+    0 0 40px
+    rgba(
+      30,
+      180,
+      255,
+      .35
+    );
 
 }
 
 
 #aura2 {
 
-    box-shadow:
-        0 0 75px
-        rgba(
-            20,
-            160,
-            255,
-            .25
-        );
+  width:
+    190px;
+
+  height:
+    190px;
+
+  opacity:
+    .5;
 
 }
 
 
 #aura3 {
 
-    box-shadow:
-        0 0 130px
-        rgba(
-            20,
-            160,
-            255,
-            .18
-        );
+  width:
+    260px;
+
+  height:
+    260px;
+
+  opacity:
+    .25;
 
 }
 
 
-/* =====================================================
-   휴면
-===================================================== */
-
-.sleep #core {
-
-    transform: scale(.68);
-
-    box-shadow:
-        0 0 15px
-        rgba(
-            30,
-            110,
-            170,
-            .25
-        );
-
-}
-
-
-.sleep .aura {
-
-    opacity: .08;
-
-}
-
-
-/* =====================================================
-   듣는 중
-===================================================== */
+/* =========================================================
+   LISTENING
+========================================================= */
 
 .listening #core {
 
-    box-shadow:
-        0 0 30px #24aaff,
-        0 0 80px rgba(
-            30,
-            170,
-            255,
-            .90
-        ),
-        0 0 150px rgba(
-            30,
-            170,
-            255,
-            .45
-        );
+  box-shadow:
+
+    0 0 25px
+    #36caff,
+
+    0 0 65px
+    rgba(
+      30,
+      190,
+      255,
+      .85
+    ),
+
+    0 0 140px
+    rgba(
+      30,
+      160,
+      255,
+      .45
+    );
 
 }
 
 
-/* =====================================================
-   말하는 중
-===================================================== */
+/* =========================================================
+   SPEAKING
+========================================================= */
 
 .speaking #core {
 
-    box-shadow:
-        0 0 35px #72ddff,
-        0 0 90px rgba(
-            90,
-            210,
-            255,
-            1
-        ),
-        0 0 180px rgba(
-            50,
-            180,
-            255,
-            .55
-        );
+  box-shadow:
+
+    0 0 35px
+    #9aeaff,
+
+    0 0 90px
+    rgba(
+      80,
+      220,
+      255,
+      1
+    ),
+
+    0 0 170px
+    rgba(
+      50,
+      180,
+      255,
+      .65
+    );
 
 }
 
 
-/* =====================================================
-   깨우는 중
-===================================================== */
+/* =========================================================
+   SLEEP
+========================================================= */
+
+.sleep #core {
+
+  transform:
+    scale(.68);
+
+  opacity:
+    .55;
+
+  box-shadow:
+
+    0 0 12px
+    rgba(
+      30,
+      130,
+      190,
+      .25
+    );
+
+}
+
+
+.sleep .ring {
+
+  opacity:
+    .25;
+
+}
+
+
+/* =========================================================
+   WAKE
+========================================================= */
 
 .waking #core {
 
-    animation:
-        wakePulse
-        1.1s
-        ease-in-out
-        infinite;
+  animation:
+    wakeCore
+    1s
+    ease-in-out
+    infinite;
 
 }
 
 
-.waking .aura {
+@keyframes wakeCore {
 
-    animation:
-        wakeAura
-        1.1s
-        ease-in-out
-        infinite;
+  0% {
 
-}
+    transform:
+      scale(.65);
 
+  }
 
-@keyframes wakePulse {
+  50% {
 
-    0% {
+    transform:
+      scale(1.12);
 
-        transform:
-            scale(.8);
+  }
 
-    }
+  100% {
 
-    50% {
+    transform:
+      scale(.65);
 
-        transform:
-            scale(1.18);
-
-    }
-
-    100% {
-
-        transform:
-            scale(.8);
-
-    }
+  }
 
 }
 
 
-@keyframes wakeAura {
+/* =========================================================
+   SOUND DETECTED
+========================================================= */
 
-    0% {
+#soundDetected {
 
-        transform:
-            scale(1);
+  position:
+    fixed;
 
-        opacity: .5;
+  top:
+    72px;
 
-    }
+  right:
+    30px;
 
-    50% {
+  padding:
+    7px 11px;
 
-        transform:
-            scale(1.9);
+  border:
+    1px solid
+    rgba(
+      70,
+      200,
+      255,
+      .35
+    );
 
-        opacity: .04;
+  border-radius:
+    4px;
 
-    }
+  background:
+    rgba(
+      5,
+      25,
+      40,
+      .72
+    );
 
-    100% {
+  color:
+    rgba(
+      160,
+      230,
+      255,
+      .9
+    );
 
-        transform:
-            scale(1);
+  font-size:
+    10px;
 
-        opacity: .5;
+  letter-spacing:
+    2px;
 
-    }
+  opacity:
+    0;
+
+  transform:
+    translateY(
+      -6px
+    );
+
+  transition:
+    .15s ease;
+
+  pointer-events:
+    none;
+
+  z-index:
+    100;
 
 }
 
 
-/* =====================================================
-   시작 버튼
-   화면에는 사실상 보이지 않음
-===================================================== */
+#soundDetected.show {
+
+  opacity:
+    1;
+
+  transform:
+    translateY(0);
+
+}
+
+
+/* =========================================================
+   BOTTOM HUD
+========================================================= */
+
+#bottom {
+
+  position:
+    absolute;
+
+  bottom:
+    25px;
+
+  left:
+    30px;
+
+  right:
+    30px;
+
+  display:
+    flex;
+
+  justify-content:
+    space-between;
+
+  align-items:
+    center;
+
+  z-index:
+    20;
+
+}
+
+
+.bottomLine {
+
+  width:
+    110px;
+
+  height:
+    1px;
+
+  background:
+    rgba(
+      70,
+      200,
+      255,
+      .25
+    );
+
+}
+
+
+.bottomCenter {
+
+  position:
+    absolute;
+
+  left:
+    50%;
+
+  transform:
+    translateX(
+      -50%
+    );
+
+  width:
+    80px;
+
+  height:
+    2px;
+
+  background:
+    rgba(
+      90,
+      215,
+      255,
+      .45
+    );
+
+  box-shadow:
+    0 0 12px
+    rgba(
+      60,
+      200,
+      255,
+      .45
+    );
+
+}
+
+
+/* =========================================================
+   START
+========================================================= */
 
 #start {
 
-    position: fixed;
+  position:
+    fixed;
 
-    left: 50%;
+  bottom:
+    10px;
 
-    bottom: 20px;
+  left:
+    50%;
 
-    transform:
-        translateX(-50%);
+  transform:
+    translateX(
+      -50%
+    );
 
-    width: 120px;
+  width:
+    100px;
 
-    height: 35px;
+  height:
+    30px;
 
-    opacity: .01;
+  opacity:
+    .01;
 
-    border: 0;
+  background:
+    transparent;
 
-    background: transparent;
+  border:
+    0;
 
-    color: transparent;
+  color:
+    transparent;
 
-    cursor: pointer;
+  cursor:
+    pointer;
+
+  z-index:
+    200;
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (
+  max-width: 700px
+) {
+
+  #center {
+
+    width:
+      330px;
+
+    height:
+      330px;
+
+  }
+
+
+  .ring1 {
+
+    width:
+      200px;
+
+    height:
+      200px;
+
+  }
+
+
+  .ring2 {
+
+    width:
+      250px;
+
+    height:
+      250px;
+
+  }
+
+
+  .ring3 {
+
+    width:
+      300px;
+
+    height:
+      300px;
+
+  }
+
+
+  #left,
+  #right {
+
+    display:
+      none;
+
+  }
+
+
+  .brandText {
+
+    font-size:
+      14px;
+
+  }
 
 }
 
 </style>
-#soundDetected {
 
-    position: fixed;
-
-    top: 18px;
-    right: 20px;
-
-    padding: 6px 10px;
-
-    border-radius: 6px;
-
-    background: rgba(20, 40, 60, .75);
-
-    color: rgba(180, 225, 255, .85);
-
-    font-size: 11px;
-
-    font-family:
-        Arial,
-        sans-serif;
-
-    letter-spacing: .5px;
-
-    opacity: 0;
-
-    transform:
-        translateY(-5px);
-
-    transition:
-        opacity .15s ease,
-        transform .15s ease;
-
-    pointer-events: none;
-
-    z-index: 100;
-
-}
-
-#soundDetected.show {
-
-    opacity: 1;
-
-    transform:
-        translateY(0);
-
-}
 </head>
 
 
 <body>
-<div id="soundDetected">
-    소리 감지됨
-</div>
 
-<div
-    id="screen"
-    class="sleep"
->
 
-    <div
-        id="core"
-    >
+<div id="app">
 
-        <div
-            id="aura1"
-            class="aura"
-        ></div>
 
-        <div
-            id="aura2"
-            class="aura"
-        ></div>
+  <div id="grid"></div>
 
-        <div
-            id="aura3"
-            class="aura"
-        ></div>
+
+  <div id="top">
+
+    <div class="brand">
+
+      <div class="brandDot"></div>
+
+      <div class="brandText">
+        E.B.
+      </div>
 
     </div>
+
+    <div class="status">
+      VOICE CORE
+    </div>
+
+  </div>
+
+
+  <div
+    id="left"
+    class="side"
+  >
+
+    <div class="sideLine"></div>
+    <div class="sideLine"></div>
+    <div class="sideLine"></div>
+
+  </div>
+
+
+  <div
+    id="right"
+    class="side"
+  >
+
+    <div class="sideLine"></div>
+    <div class="sideLine"></div>
+    <div class="sideLine"></div>
+
+  </div>
+
+
+  <div
+    id="center"
+    class="sleep"
+  >
+
+    <div class="ring ring1"></div>
+
+    <div class="ring ring2"></div>
+
+    <div class="ring ring3"></div>
+
+
+    <div
+      id="aura1"
+      class="aura"
+    ></div>
+
+    <div
+      id="aura2"
+      class="aura"
+    ></div>
+
+    <div
+      id="aura3"
+      class="aura"
+    ></div>
+
+
+    <div id="core"></div>
+
+  </div>
+
+
+  <div
+    id="soundDetected"
+  >
+    소리 감지됨
+  </div>
+
+
+  <div id="bottom">
+
+    <div class="bottomLine"></div>
+
+    <div class="bottomCenter"></div>
+
+    <div class="bottomLine"></div>
+
+  </div>
+
 
 </div>
 
 
 <button
-    id="start"
-    onclick="startAssistant()"
+  id="start"
+  onclick="startAssistant()"
 >
-start
+시작
 </button>
 
 
 <script>
 
-/* =====================================================
-   상태
-===================================================== */
+/* =========================================================
+   STATE
+========================================================= */
 
 let running =
-    false;
+  false;
 
 let awake =
-    false;
+  false;
 
 let speaking =
-    false;
+  false;
 
 let processing =
-    false;
+  false;
 
 let recognition =
-    null;
+  null;
 
 let recognitionStarting =
-    false;
+  false;
 
 let restartTimer =
-    null;
+  null;
 
 let microphoneStream =
-    null;
+  null;
 
 let audioContext =
-    null;
+  null;
 
 let analyser =
-    null;
+  null;
 
-let visualData =
-    null;
+let audioData =
+  null;
+
+let frequencyData =
+  null;
 
 let clapCount =
-    0;
+  0;
 
 let lastClap =
-    0;
+  0;
 
 let clapResetTimer =
-    null;
+  null;
 
 let currentAudio =
-    null;
+  null;
 
 
-/* =====================================================
-   요소
-===================================================== */
+/* =========================================================
+   ELEMENTS
+========================================================= */
 
-const screen =
-    document.getElementById(
-        "screen"
-    );
+const app =
+  document.getElementById(
+    "app"
+  );
+
+const center =
+  document.getElementById(
+    "center"
+  );
 
 const core =
-    document.getElementById(
-        "core"
-    );
+  document.getElementById(
+    "core"
+  );
 
 const aura1 =
-    document.getElementById(
-        "aura1"
-    );
+  document.getElementById(
+    "aura1"
+  );
 
 const aura2 =
-    document.getElementById(
-        "aura2"
-    );
+  document.getElementById(
+    "aura2"
+  );
 
 const aura3 =
-    document.getElementById(
-        "aura3"
-    );
+  document.getElementById(
+    "aura3"
+  );
+
+const soundDetected =
+  document.getElementById(
+    "soundDetected"
+  );
 
 
-/* =====================================================
-   마이크 시작
-===================================================== */
+/* =========================================================
+   START
+========================================================= */
 
 async function startAssistant() {
 
-    if (running) {
+  if (running) {
 
-        return;
+    return;
 
-    }
-
-
-    try {
-
-        microphoneStream =
-            await navigator.mediaDevices
-                .getUserMedia({
-
-                    audio: {
-
-                        echoCancellation:
-                            true,
-
-                        noiseSuppression:
-                            true,
-
-                        autoGainControl:
-                            true
-
-                    }
-
-                });
+  }
 
 
-    } catch {
+  try {
 
-        return;
+    microphoneStream =
+      await navigator
+        .mediaDevices
+        .getUserMedia({
 
-    }
+          audio: {
+
+            echoCancellation:
+              false,
+
+            noiseSuppression:
+              false,
+
+            autoGainControl:
+              false
+
+          }
+
+        });
 
 
-    running =
-        true;
+  } catch (error) {
 
-    awake =
-        false;
+    console.error(
+      "MIC ERROR:",
+      error
+    );
+
+    return;
+
+  }
 
 
-    setupAudio();
+  running =
+    true;
 
-    setupRecognition();
+  awake =
+    false;
 
-    startClapDetection();
 
-    startVisualizer();
+  center.classList.remove(
+    "listening",
+    "speaking",
+    "waking"
+  );
+
+  center.classList.add(
+    "sleep"
+  );
+
+
+  setupAudio();
+
+  setupRecognition();
+
+  startVisualizer();
+
+  startClapDetection();
 
 }
 
 
-/* =====================================================
-   오디오 분석
-===================================================== */
+/* =========================================================
+   AUDIO
+========================================================= */
 
 function setupAudio() {
 
-    try {
+  try {
 
-        audioContext =
-            new (
-                window.AudioContext ||
-                window.webkitAudioContext
-            )();
-
-
-        const source =
-            audioContext
-                .createMediaStreamSource(
-                    microphoneStream
-                );
+    audioContext =
+      new (
+        window.AudioContext ||
+        window.webkitAudioContext
+      )();
 
 
-        analyser =
-            audioContext
-                .createAnalyser();
-
-
-        analyser.fftSize =
-            1024;
-
-
-        analyser.smoothingTimeConstant =
-            .06;
-
-
-        source.connect(
-            analyser
+    const source =
+      audioContext
+        .createMediaStreamSource(
+          microphoneStream
         );
 
 
-        visualData =
-            new Uint8Array(
-                analyser.fftSize
-            );
+    analyser =
+      audioContext
+        .createAnalyser();
 
 
-    } catch {}
+    analyser.fftSize =
+      1024;
+
+
+    analyser.smoothingTimeConstant =
+      .05;
+
+
+    source.connect(
+      analyser
+    );
+
+
+    audioData =
+      new Uint8Array(
+        analyser.fftSize
+      );
+
+
+    frequencyData =
+      new Uint8Array(
+        analyser.frequencyBinCount
+      );
+
+
+  } catch (error) {
+
+    console.error(
+      "AUDIO ERROR:",
+      error
+    );
+
+  }
 
 }
 
 
-/* =====================================================
-   아우라 애니메이션
-===================================================== */
+/* =========================================================
+   VISUALIZER
+========================================================= */
 
 function startVisualizer() {
 
-    if (!analyser) {
+  if (!analyser) {
 
-        return;
+    return;
 
-    }
+  }
 
 
-    function animate() {
-
-        if (!running) {
-
-            return;
-
-        }
-
-
-        analyser
-            .getByteTimeDomainData(
-                visualData
-            );
-
-
-        let sum =
-            0;
-
-        let peak =
-            0;
-
-
-        for (
-            let i = 0;
-            i < visualData.length;
-            i++
-        ) {
-
-            const value =
-                Math.abs(
-                    visualData[i] -
-                    128
-                ) / 128;
-
-
-            sum +=
-                value *
-                value;
-
-
-            peak =
-                Math.max(
-                    peak,
-                    value
-                );
-
-        }
-
-
-        const rms =
-            Math.sqrt(
-                sum /
-                visualData.length
-            );
-
-
-        let strength =
-            Math.min(
-                1,
-                rms * 8
-            );
-
-
-        if (speaking) {
-
-            strength =
-                Math.max(
-                    strength,
-                    .18
-                );
-
-        }
-
-
-        const coreScale =
-            1 +
-            strength *
-            .25;
-
-
-        const s1 =
-            1 +
-            strength *
-            1.1;
-
-
-        const s2 =
-            1 +
-            strength *
-            1.9;
-
-
-        const s3 =
-            1 +
-            strength *
-            2.8;
-
-
-        core.style.transform =
-            `scale(${coreScale})`;
-
-
-        aura1.style.transform =
-            `scale(${s1})`;
-
-
-        aura2.style.transform =
-            `scale(${s2})`;
-
-
-        aura3.style.transform =
-            `scale(${s3})`;
-
-
-        aura1.style.opacity =
-            .18 +
-            strength *
-            .65;
-
-
-        aura2.style.opacity =
-            .08 +
-            strength *
-            .45;
-
-
-        aura3.style.opacity =
-            .04 +
-            strength *
-            .30;
-
-
-        requestAnimationFrame(
-            animate
-        );
-
-    }
-
-
-    animate();
-
-}
-
-
-/* =====================================================
-   음성 인식
-===================================================== */
-
-function setupRecognition() {
-
-    const SpeechRecognition =
-        window.SpeechRecognition ||
-        window.webkitSpeechRecognition;
-
-
-    if (!SpeechRecognition) {
-
-        return;
-
-    }
-
-
-    recognition =
-        new SpeechRecognition();
-
-
-    recognition.lang =
-        "ko-KR";
-
-
-    recognition.continuous =
-        true;
-
-
-    recognition.interimResults =
-        true;
-
-
-    recognition.maxAlternatives =
-        10;
-
-
-    recognition.onstart =
-        () => {
-
-            recognitionStarting =
-                false;
-
-        };
-
-
-    recognition.onresult =
-        handleSpeech;
-
-
-    recognition.onerror =
-        event => {
-
-            recognitionStarting =
-                false;
-
-
-            if (
-                event.error ===
-                "not-allowed"
-            ) {
-
-                running =
-                    false;
-
-                return;
-
-            }
-
-
-            scheduleRecognition();
-
-        };
-
-
-    recognition.onend =
-        () => {
-
-            recognitionStarting =
-                false;
-
-            scheduleRecognition();
-
-        };
-
-
-    startRecognition();
-
-}
-
-
-/* =====================================================
-   음성 인식 시작
-===================================================== */
-
-function startRecognition() {
+  function draw() {
 
     if (!running) {
 
-        return;
+      return;
 
     }
 
 
-    if (!recognition) {
-
-        return;
-
-    }
-
-
-    if (speaking) {
-
-        return;
-
-    }
+    analyser
+      .getByteTimeDomainData(
+        audioData
+      );
 
 
-    if (recognitionStarting) {
-
-        return;
-
-    }
-
-
-    recognitionStarting =
-        true;
-
-
-    try {
-
-        recognition.start();
-
-    } catch {
-
-        recognitionStarting =
-            false;
-
-    }
-
-}
-
-
-/* =====================================================
-   재시작
-===================================================== */
-
-function scheduleRecognition() {
-
-    if (!running) {
-
-        return;
-
-    }
-
-
-    if (speaking) {
-
-        return;
-
-    }
-
-
-    clearTimeout(
-        restartTimer
-    );
-
-
-    restartTimer =
-        setTimeout(
-            () => {
-
-                startRecognition();
-
-            },
-            400
-        );
-
-}
-
-
-/* =====================================================
-   음성 결과
-===================================================== */
-
-function handleSpeech(event) {
-
-    if (!awake) {
-
-        return;
-
-    }
-
-
-    if (speaking) {
-
-        return;
-
-    }
-
-
-    let finalText =
-        "";
+    let sum =
+      0;
 
 
     for (
-        let i =
-            event.resultIndex;
-        i <
-            event.results.length;
-        i++
+      let i = 0;
+      i < audioData.length;
+      i++
     ) {
 
-        const result =
-            event.results[i];
+      const value =
+        Math.abs(
+          audioData[i] -
+          128
+        ) / 128;
 
 
-        if (
-            result.isFinal
-        ) {
-
-            finalText +=
-                result[0]
-                    .transcript;
-
-        }
+      sum +=
+        value *
+        value;
 
     }
+
+
+    const rms =
+      Math.sqrt(
+        sum /
+        audioData.length
+      );
+
+
+    let strength =
+      Math.min(
+        1,
+        rms * 8
+      );
+
+
+    if (speaking) {
+
+      strength =
+        Math.max(
+          strength,
+          .18
+        );
+
+    }
+
+
+    const coreScale =
+      1 +
+      strength *
+      .28;
+
+
+    const s1 =
+      1 +
+      strength *
+      1.0;
+
+
+    const s2 =
+      1 +
+      strength *
+      1.8;
+
+
+    const s3 =
+      1 +
+      strength *
+      2.6;
 
 
     if (
-        !finalText.trim()
-    ) {
-
-        return;
-
-    }
-
-
-    processCommand(
-        finalText.trim()
-    );
-
-}
-
-
-/* =====================================================
-   명령
-===================================================== */
-
-async function processCommand(
-    rawText
-) {
-
-    if (processing) {
-
-        return;
-
-    }
-
-
-    processing =
-        true;
-
-
-    let text =
-        normalize(
-            rawText
-        );
-
-
-    text =
-        removeWakeWord(
-            text
-        );
-
-
-    if (!text) {
-
-        processing =
-            false;
-
-        speak(
-            "네. 말씀하세요."
-        );
-
-        return;
-
-    }
-
-
-    /* 휴면 */
-
-    if (
-        text.includes("쉬어") ||
-        text.includes("휴면") ||
-        text.includes("잠자") ||
-        text === "자"
-    ) {
-
-        processing =
-            false;
-
-        sleepAssistant();
-
-        return;
-
-    }
-
-
-    /* 인사 */
-
-    if (
-        text.includes("안녕") ||
-        text.includes("하이") ||
-        text.includes("헬로")
-    ) {
-
-        await respond(
-            "안녕하세요."
-        );
-
-        return;
-
-    }
-
-
-    /* 이름 */
-
-    if (
-        text.includes("이름") &&
-        (
-            text.includes("뭐") ||
-            text.includes("무엇")
-        )
-    ) {
-
-        await respond(
-            "제 이름은 이비입니다."
-        );
-
-        return;
-
-    }
-
-
-    /* 시간 */
-
-    if (
-        text.includes("몇 시") ||
-        text.includes("시간") ||
-        text.includes("현재 시각")
-    ) {
-
-        const now =
-            new Date();
-
-
-        await respond(
-            `현재 시간은 ${now.getHours()}시 ${now.getMinutes()}분입니다.`
-        );
-
-        return;
-
-    }
-
-
-    /* 날짜 */
-
-    if (
-        (
-            text.includes("오늘") ||
-            text.includes("현재")
-        ) &&
-        (
-            text.includes("날짜") ||
-            text.includes("며칠")
-        )
-    ) {
-
-        const now =
-            new Date();
-
-
-        await respond(
-            `오늘은 ${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일입니다.`
-        );
-
-        return;
-
-    }
-
-
-    /* 날씨 */
-
-    if (
-        text.includes("날씨") ||
-        text.includes("기온") ||
-        text.includes("온도") ||
-        text.includes("비 와")
-    ) {
-
-        await weather(
-            text
-        );
-
-        return;
-
-    }
-
-
-    /* 유튜브 */
-
-    if (
-        text.includes("유튜브")
-    ) {
-
-        await respond(
-            "유튜브를 열겠습니다."
-        );
-
-
-        openSite(
-            "https://www.youtube.com"
-        );
-
-
-        return;
-
-    }
-
-
-    /* 네이버 */
-
-    if (
-        text.includes("네이버")
-    ) {
-
-        await respond(
-            "네이버를 열겠습니다."
-        );
-
-
-        openSite(
-            "https://www.naver.com"
-        );
-
-
-        return;
-
-    }
-
-
-    /* 구글 */
-
-    if (
-        text.includes("구글")
-    ) {
-
-        await respond(
-            "구글을 열겠습니다."
-        );
-
-
-        openSite(
-            "https://www.google.com"
-        );
-
-
-        return;
-
-    }
-
-
-    /* 검색 */
-
-    if (
-        text.startsWith("검색") ||
-        text.startsWith("검색해") ||
-        text.startsWith("찾아")
-    ) {
-
-        let query =
-            text
-                .replace(
-                    /^검색해/,
-                    ""
-                )
-                .replace(
-                    /^검색/,
-                    ""
-                )
-                .replace(
-                    /^찾아줘/,
-                    ""
-                )
-                .replace(
-                    /^찾아/,
-                    ""
-                )
-                .trim();
-
-
-        if (!query) {
-
-            processing =
-                false;
-
-            speak(
-                "무엇을 검색할까요?"
-            );
-
-            return;
-
-        }
-
-
-        await respond(
-            `${query}를 검색하겠습니다.`
-        );
-
-
-        openSite(
-            "https://www.google.com/search?q=" +
-            encodeURIComponent(
-                query
-            )
-        );
-
-
-        return;
-
-    }
-
-
-    /* 계산 */
-
-    if (
-        text.includes("계산") ||
-        text.includes("더하기") ||
-        text.includes("빼기") ||
-        text.includes("곱하기") ||
-        text.includes("나누기")
-    ) {
-
-        const result =
-            calculate(
-                text
-            );
-
-
-        if (result !== null) {
-
-            await respond(
-                `계산 결과는 ${result}입니다.`
-            );
-
-        } else {
-
-            await respond(
-                "계산식을 정확하게 이해하지 못했습니다."
-            );
-
-        }
-
-        return;
-
-    }
-
-
-    /* 감사 */
-
-    if (
-        text.includes("고마워") ||
-        text.includes("감사해") ||
-        text.includes("감사합니다")
-    ) {
-
-        await respond(
-            "천만에요."
-        );
-
-        return;
-
-    }
-
-
-    /* 도움 */
-
-    if (
-        text.includes("뭐 할 수 있어") ||
-        text.includes("무엇을 할 수 있어") ||
-        text.includes("기능")
-    ) {
-
-        await respond(
-            "시간, 날짜, 날씨, 검색, 웹사이트 열기와 계산 등을 할 수 있습니다."
-        );
-
-        return;
-
-    }
-
-
-    /* 기본 */
-
-    await respond(
-        "네. 말씀하신 내용을 들었습니다."
-    );
-
-}
-
-
-/* =====================================================
-   응답
-===================================================== */
-
-function respond(text) {
-
-    processing =
-        false;
-
-    return new Promise(
-        resolve => {
-
-            speak(
-                text,
-                resolve
-            );
-
-        }
-    );
-
-}
-
-
-/* =====================================================
-   TTS
-===================================================== */
-
-async function speak(
-    text,
-    done
-) {
-
-    speaking =
-        true;
-
-
-    screen.classList.remove(
-        "listening",
-        "waking"
-    );
-
-
-    screen.classList.add(
-        "speaking"
-    );
-
-
-    if (recognition) {
-
-        try {
-
-            recognition.stop();
-
-        } catch {}
-
-    }
-
-
-    /*
-       서버 TTS 우선
-    */
-
-    try {
-
-        const response =
-            await fetch(
-                "/api/tts",
-                {
-
-                    method:
-                        "POST",
-
-                    headers: {
-
-                        "Content-Type":
-                            "application/json"
-
-                    },
-
-                    body:
-                        JSON.stringify({
-                            text
-                        })
-
-                }
-            );
-
-
-        if (response.ok) {
-
-            const blob =
-                await response.blob();
-
-
-            const url =
-                URL.createObjectURL(
-                    blob
-                );
-
-
-            const audio =
-                new Audio(url);
-
-
-            currentAudio =
-                audio;
-
-
-            audio.volume =
-                1;
-
-
-            audio.onended =
-                () => {
-
-                    URL.revokeObjectURL(
-                        url
-                    );
-
-                    currentAudio =
-                        null;
-
-                    finishSpeaking(
-                        done
-                    );
-
-                };
-
-
-            audio.onerror =
-                () => {
-
-                    URL.revokeObjectURL(
-                        url
-                    );
-
-                    currentAudio =
-                        null;
-
-                    browserSpeak(
-                        text,
-                        done
-                    );
-
-                };
-
-
-            await audio.play();
-
-
-            return;
-
-        }
-
-    } catch {}
-
-
-    /*
-       서버 TTS 실패 시
-       브라우저 TTS 사용
-    */
-
-    browserSpeak(
-        text,
-        done
-    );
-
-}
-
-
-/* =====================================================
-   브라우저 TTS fallback
-===================================================== */
-
-function browserSpeak(
-    text,
-    done
-) {
-
-    try {
-
-        speechSynthesis.cancel();
-
-
-        const utterance =
-            new SpeechSynthesisUtterance(
-                text
-            );
-
-
-        utterance.lang =
-            "ko-KR";
-
-
-        utterance.rate =
-            .90;
-
-
-        utterance.pitch =
-            .82;
-
-
-        utterance.volume =
-            1;
-
-
-        utterance.onend =
-            () => {
-
-                finishSpeaking(
-                    done
-                );
-
-            };
-
-
-        utterance.onerror =
-            () => {
-
-                finishSpeaking(
-                    done
-                );
-
-            };
-
-
-        speechSynthesis.speak(
-            utterance
-        );
-
-
-    } catch {
-
-        finishSpeaking(
-            done
-        );
-
-    }
-
-}
-
-
-/* =====================================================
-   음성 종료
-===================================================== */
-
-function finishSpeaking(
-    done
-) {
-
-    speaking =
-        false;
-
-
-    screen.classList.remove(
-        "speaking"
-    );
-
-
-    if (awake) {
-
-        screen.classList.add(
-            "listening"
-        );
-
-    }
-
-
-    if (done) {
-
-        done();
-
-    }
-
-
-    scheduleRecognition();
-
-}
-
-
-/* =====================================================
-   깨우기
-===================================================== */
-
-function wakeUp() {
-
-    if (!running) {
-
-        return;
-
-    }
-
-
-    if (awake) {
-
-        return;
-
-    }
-
-
-    awake =
-        true;
-
-
-    clapCount =
-        0;
-
-
-    clearTimeout(
-        clapResetTimer
-    );
-
-
-    screen.classList.remove(
+      !center.classList.contains(
         "sleep"
+      )
+    ) {
+
+      core.style.transform =
+        `scale(${coreScale})`;
+
+    }
+
+
+    aura1.style.transform =
+      `translate(-50%, -50%) scale(${s1})`;
+
+    aura2.style.transform =
+      `translate(-50%, -50%) scale(${s2})`;
+
+    aura3.style.transform =
+      `translate(-50%, -50%) scale(${s3})`;
+
+
+    aura1.style.opacity =
+      .18 +
+      strength *
+      .55;
+
+
+    aura2.style.opacity =
+      .08 +
+      strength *
+      .35;
+
+
+    aura3.style.opacity =
+      .04 +
+      strength *
+      .22;
+
+
+    requestAnimationFrame(
+      draw
     );
 
-
-    screen.classList.add(
-        "waking"
-    );
+  }
 
 
-    setTimeout(
-        () => {
-
-            screen.classList.remove(
-                "waking"
-            );
-
-            screen.classList.add(
-                "listening"
-            );
-
-        },
-        1000
-    );
-
-
-    speak(
-        "안녕하세요. 오늘은 무엇을 도와드릴까요?"
-    );
+  draw();
 
 }
 
 
-/* =====================================================
-   휴면
-===================================================== */
+/* =========================================================
+   SPEECH RECOGNITION
+========================================================= */
 
-function sleepAssistant() {
+function setupRecognition() {
 
-    awake =
+  const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+
+  if (!SpeechRecognition) {
+
+    console.warn(
+      "SpeechRecognition unsupported"
+    );
+
+    return;
+
+  }
+
+
+  recognition =
+    new SpeechRecognition();
+
+
+  recognition.lang =
+    "ko-KR";
+
+
+  recognition.continuous =
+    true;
+
+
+  recognition.interimResults =
+    true;
+
+
+  recognition.maxAlternatives =
+    10;
+
+
+  recognition.onstart =
+    () => {
+
+      recognitionStarting =
         false;
-
-
-    clapCount =
-        0;
-
-
-    clearTimeout(
-        clapResetTimer
-    );
-
-
-    screen.classList.remove(
-        "listening",
-        "waking"
-    );
-
-
-    screen.classList.add(
-        "sleep"
-    );
-
-
-    speak(
-        "휴면 상태에 돌입합니다."
-    );
-
-}
-
-
-/* =====================================================
-   박수 감지
-===================================================== */
-
-startClapDetection
-/* =====================================================
-   날씨
-===================================================== */
-
-async function weather(
-    text
-) {
-
-    let city =
-        "서울";
-
-
-    if (
-        text.includes("수원")
-    ) {
-
-        city =
-            "수원";
-
-    } else if (
-        text.includes("용인")
-    ) {
-
-        city =
-            "용인";
-
-    } else if (
-        text.includes("인천")
-    ) {
-
-        city =
-            "인천";
-
-    } else if (
-        text.includes("부산")
-    ) {
-
-        city =
-            "부산";
-
-    } else if (
-        text.includes("대전")
-    ) {
-
-        city =
-            "대전";
-
-    } else if (
-        text.includes("대구")
-    ) {
-
-        city =
-            "대구";
-
-    }
-
-
-    await respond(
-        `${city}의 날씨를 확인하겠습니다.`
-    );
-
-
-    try {
-
-        const response =
-            await fetch(
-                "/api/weather?city=" +
-                encodeURIComponent(
-                    city
-                )
-            );
-
-
-        if (!response.ok) {
-
-            throw new Error();
-
-        }
-
-
-        const data =
-            await response.json();
-
-
-        const c =
-            data.current;
-
-
-        const weatherName =
-            weatherText(
-                c.weather_code
-            );
-
-
-        await respond(
-            `${city}의 현재 날씨는 ${weatherName}이고 기온은 ${c.temperature_2m}도입니다. 체감온도는 ${c.apparent_temperature}도입니다.`
-        );
-
-
-    } catch {
-
-        await respond(
-            "날씨 정보를 가져오지 못했습니다."
-        );
-
-    }
-
-}
-
-
-/* =====================================================
-   날씨 코드
-===================================================== */
-
-function weatherText(
-    code
-) {
-
-    const map = {
-
-        0: "맑음",
-
-        1: "대체로 맑음",
-
-        2: "부분적으로 흐림",
-
-        3: "흐림",
-
-        45: "안개",
-
-        48: "안개",
-
-        51: "이슬비",
-
-        53: "이슬비",
-
-        55: "강한 이슬비",
-
-        61: "비",
-
-        63: "비",
-
-        65: "강한 비",
-
-        71: "눈",
-
-        73: "눈",
-
-        75: "강한 눈",
-
-        80: "소나기",
-
-        81: "소나기",
-
-        82: "강한 소나기",
-
-        95: "천둥번개",
-
-        96: "우박을 동반한 천둥번개",
-
-        99: "강한 우박을 동반한 천둥번개"
 
     };
 
 
-    return (
-        map[code] ||
-        "확인할 수 없는 날씨"
+  recognition.onresult =
+    handleSpeech;
+
+
+  recognition.onerror =
+    event => {
+
+      recognitionStarting =
+        false;
+
+
+      console.warn(
+        "SPEECH ERROR:",
+        event.error
+      );
+
+
+      if (
+        event.error ===
+        "not-allowed"
+      ) {
+
+        running =
+          false;
+
+        return;
+
+      }
+
+
+      scheduleRecognition();
+
+    };
+
+
+  recognition.onend =
+    () => {
+
+      recognitionStarting =
+        false;
+
+      scheduleRecognition();
+
+    };
+
+
+  startRecognition();
+
+}
+
+
+/* =========================================================
+   RECOGNITION START
+========================================================= */
+
+function startRecognition() {
+
+  if (
+    !running ||
+    !recognition ||
+    speaking ||
+    recognitionStarting
+  ) {
+
+    return;
+
+  }
+
+
+  recognitionStarting =
+    true;
+
+
+  try {
+
+    recognition.start();
+
+  } catch {
+
+    recognitionStarting =
+      false;
+
+  }
+
+}
+
+
+/* =========================================================
+   RECOGNITION RESTART
+========================================================= */
+
+function scheduleRecognition() {
+
+  if (
+    !running ||
+    speaking
+  ) {
+
+    return;
+
+  }
+
+
+  clearTimeout(
+    restartTimer
+  );
+
+
+  restartTimer =
+    setTimeout(
+      () => {
+
+        startRecognition();
+
+      },
+      500
     );
 
 }
 
 
-/* =====================================================
-   계산
-===================================================== */
+/* =========================================================
+   SPEECH RESULT
+========================================================= */
 
-function calculate(
-    text
+function handleSpeech(
+  event
 ) {
 
-    let expression =
-        text
-            .replace(
-                /계산/g,
-                ""
-            )
-            .replace(
-                /더하기/g,
-                "+"
-            )
-            .replace(
-                /빼기/g,
-                "-"
-            )
-            .replace(
-                /곱하기/g,
-                "*"
-            )
-            .replace(
-                /나누기/g,
-                "/"
-            )
-            .replace(
-                /곱해/g,
-                "*"
-            )
-            .replace(
-                /더해/g,
-                "+"
-            )
-            .replace(
-                /빼/g,
-                "-"
-            )
-            .replace(
-                /나눠/g,
-                "/"
-            )
-            .replace(
-                /[^0-9+\-*/().]/g,
-                ""
-            );
+  if (
+    !awake ||
+    speaking
+  ) {
+
+    return;
+
+  }
 
 
-    if (!expression) {
+  let finalText =
+    "";
 
-        return null;
+
+  for (
+    let i =
+      event.resultIndex;
+
+    i <
+      event.results.length;
+
+    i++
+  ) {
+
+    if (
+      event.results[i].isFinal
+    ) {
+
+      finalText +=
+        event.results[i][0]
+          .transcript;
 
     }
+
+  }
+
+
+  if (
+    !finalText.trim()
+  ) {
+
+    return;
+
+  }
+
+
+  console.log(
+    "USER:",
+    finalText
+  );
+
+
+  processCommand(
+    finalText.trim()
+  );
+
+}
+
+
+/* =========================================================
+   COMMAND
+========================================================= */
+
+async function processCommand(
+  raw
+) {
+
+  if (processing) {
+
+    return;
+
+  }
+
+
+  processing =
+    true;
+
+
+  let text =
+    normalize(
+      raw
+    );
+
+
+  text =
+    removeWakeWord(
+      text
+    );
+
+
+  if (!text) {
+
+    processing =
+      false;
+
+    speak(
+      "네. 말씀하세요."
+    );
+
+    return;
+
+  }
+
+
+  /* 휴면 */
+
+  if (
+    text.includes("쉬어") ||
+    text.includes("휴면") ||
+    text.includes("잠자") ||
+    text.includes("절전") ||
+    text === "자"
+  ) {
+
+    processing =
+      false;
+
+    sleepAssistant();
+
+    return;
+
+  }
+
+
+  /* 인사 */
+
+  if (
+    text.includes("안녕") ||
+    text.includes("하이") ||
+    text.includes("헬로")
+  ) {
+
+    await respond(
+      "안녕하세요."
+    );
+
+    return;
+
+  }
+
+
+  /* 이름 */
+
+  if (
+    text.includes("이름") &&
+    (
+      text.includes("뭐") ||
+      text.includes("무엇")
+    )
+  ) {
+
+    await respond(
+      "제 이름은 이비입니다."
+    );
+
+    return;
+
+  }
+
+
+  /* 시간 */
+
+  if (
+    text.includes("몇 시") ||
+    text.includes("시간") ||
+    text.includes("현재 시각")
+  ) {
+
+    const now =
+      new Date();
+
+
+    const hour =
+      now.getHours();
+
+
+    const minute =
+      now.getMinutes();
+
+
+    await respond(
+      `현재 시간은 ${hour}시 ${minute}분입니다.`
+    );
+
+    return;
+
+  }
+
+
+  /* 날짜 */
+
+  if (
+    text.includes("오늘") &&
+    (
+      text.includes("날짜") ||
+      text.includes("며칠") ||
+      text.includes("몇일")
+    )
+  ) {
+
+    const now =
+      new Date();
+
+
+    await respond(
+      `오늘은 ${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일입니다.`
+    );
+
+    return;
+
+  }
+
+
+  /* 날씨 */
+
+  if (
+    text.includes("날씨") ||
+    text.includes("기온") ||
+    text.includes("온도") ||
+    text.includes("비 와") ||
+    text.includes("비와")
+  ) {
+
+    await weather(
+      text
+    );
+
+    return;
+
+  }
+
+
+  /* 유튜브 */
+
+  if (
+    text.includes("유튜브")
+  ) {
+
+    await respond(
+      "유튜브를 열겠습니다."
+    );
+
+
+    openSite(
+      "https://www.youtube.com"
+    );
+
+
+    return;
+
+  }
+
+
+  /* 네이버 */
+
+  if (
+    text.includes("네이버")
+  ) {
+
+    await respond(
+      "네이버를 열겠습니다."
+    );
+
+
+    openSite(
+      "https://www.naver.com"
+    );
+
+
+    return;
+
+  }
+
+
+  /* 구글 */
+
+  if (
+    text.includes("구글")
+  ) {
+
+    await respond(
+      "구글을 열겠습니다."
+    );
+
+
+    openSite(
+      "https://www.google.com"
+    );
+
+
+    return;
+
+  }
+
+
+  /* 검색 */
+
+  if (
+    text.startsWith("검색") ||
+    text.startsWith("검색해") ||
+    text.startsWith("찾아") ||
+    text.startsWith("찾아줘")
+  ) {
+
+    let query =
+      text
+        .replace(
+          /^검색해/,
+          ""
+        )
+        .replace(
+          /^검색/,
+          ""
+        )
+        .replace(
+          /^찾아줘/,
+          ""
+        )
+        .replace(
+          /^찾아/,
+          ""
+        )
+        .trim();
+
+
+    if (!query) {
+
+      processing =
+        false;
+
+      speak(
+        "무엇을 검색할까요?"
+      );
+
+      return;
+
+    }
+
+
+    await respond(
+      `${query}를 검색하겠습니다.`
+    );
+
+
+    openSite(
+      "https://www.google.com/search?q=" +
+      encodeURIComponent(
+        query
+      )
+    );
+
+
+    return;
+
+  }
+
+
+  /* 계산 */
+
+  if (
+    text.includes("계산") ||
+    text.includes("더하기") ||
+    text.includes("빼기") ||
+    text.includes("곱하기") ||
+    text.includes("나누기") ||
+    text.includes("곱해") ||
+    text.includes("더해")
+  ) {
+
+    const result =
+      calculate(
+        text
+      );
 
 
     if (
-        !/^[0-9+\-*/().\s]+$/.test(
-            expression
-        )
+      result !== null
     ) {
 
-        return null;
+      await respond(
+        `계산 결과는 ${result}입니다.`
+      );
+
+    } else {
+
+      await respond(
+        "계산식을 정확하게 이해하지 못했습니다."
+      );
 
     }
 
 
-    try {
+    return;
 
-        const result =
-            Function(
-                '"use strict";return(' +
-                expression +
-                ")"
-            )();
+  }
 
 
-        if (
-            typeof result !==
-                "number" ||
-            !Number.isFinite(
-                result
-            )
-        ) {
+  /* 기능 */
 
-            return null;
+  if (
+    text.includes("뭐 할 수 있어") ||
+    text.includes("무엇을 할 수 있어") ||
+    text.includes("기능")
+  ) {
 
-        }
+    await respond(
+      "시간, 날짜, 날씨, 검색, 웹사이트 열기와 계산 등을 할 수 있습니다."
+    );
+
+    return;
+
+  }
 
 
-        return Math.round(
-            result * 100000
-        ) / 100000;
+  /* 감사 */
 
-    } catch {
+  if (
+    text.includes("고마워") ||
+    text.includes("감사해") ||
+    text.includes("감사합니다")
+  ) {
 
-        return null;
+    await respond(
+      "천만에요."
+    );
 
-    }
+    return;
+
+  }
+
+
+  /* 기본 응답 */
+
+  await respond(
+    "네. 말씀하신 내용을 들었습니다."
+  );
 
 }
 
 
-/* =====================================================
-   사이트 열기
-===================================================== */
+/* =========================================================
+   RESPOND
+========================================================= */
 
-function openSite(
-    url
+function respond(
+  text
 ) {
 
-    setTimeout(
+  processing =
+    false;
+
+
+  return new Promise(
+    resolve => {
+
+      speak(
+        text,
+        resolve
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   SPEAK
+========================================================= */
+
+async function speak(
+  text,
+  done
+) {
+
+  speaking =
+    true;
+
+
+  center.classList.remove(
+    "listening",
+    "waking"
+  );
+
+
+  center.classList.add(
+    "speaking"
+  );
+
+
+  if (recognition) {
+
+    try {
+
+      recognition.stop();
+
+    } catch {}
+
+  }
+
+
+  /*
+    서버 TTS
+  */
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/tts",
+        {
+
+          method:
+            "POST",
+
+          headers: {
+
+            "Content-Type":
+              "application/json"
+
+          },
+
+          body:
+            JSON.stringify({
+              text
+            })
+
+        }
+      );
+
+
+    if (response.ok) {
+
+      const blob =
+        await response.blob();
+
+
+      const url =
+        URL.createObjectURL(
+          blob
+        );
+
+
+      const audio =
+        new Audio(
+          url
+        );
+
+
+      currentAudio =
+        audio;
+
+
+      audio.volume =
+        1;
+
+
+      audio.onended =
         () => {
 
-            window.open(
-                url,
-                "_blank"
-            );
+          URL.revokeObjectURL(
+            url
+          );
 
-        },
-        700
+
+          currentAudio =
+            null;
+
+
+          finishSpeaking(
+            done
+          );
+
+        };
+
+
+      audio.onerror =
+        () => {
+
+          URL.revokeObjectURL(
+            url
+          );
+
+
+          currentAudio =
+            null;
+
+
+          browserSpeak(
+            text,
+            done
+          );
+
+        };
+
+
+      await audio.play();
+
+
+      return;
+
+    }
+
+  } catch (error) {
+
+    console.warn(
+      "SERVER TTS FAILED",
+      error
+    );
+
+  }
+
+
+  /*
+    Browser fallback
+  */
+
+  browserSpeak(
+    text,
+    done
+  );
+
+}
+
+
+/* =========================================================
+   BROWSER TTS
+========================================================= */
+
+function browserSpeak(
+  text,
+  done
+) {
+
+  try {
+
+    speechSynthesis.cancel();
+
+
+    const voices =
+      speechSynthesis
+        .getVoices();
+
+
+    let voice =
+      voices.find(
+        v =>
+          v.lang ===
+          "ko-KR" &&
+          /female|여성|woman/i
+            .test(
+              v.name
+            )
+      );
+
+
+    if (!voice) {
+
+      voice =
+        voices.find(
+          v =>
+            v.lang ===
+            "ko-KR"
+        );
+
+    }
+
+
+    const utterance =
+      new SpeechSynthesisUtterance(
+        text
+      );
+
+
+    utterance.lang =
+      "ko-KR";
+
+
+    if (voice) {
+
+      utterance.voice =
+        voice;
+
+    }
+
+
+    utterance.rate =
+      .88;
+
+
+    utterance.pitch =
+      .82;
+
+
+    utterance.volume =
+      1;
+
+
+    utterance.onend =
+      () => {
+
+        finishSpeaking(
+          done
+        );
+
+      };
+
+
+    utterance.onerror =
+      () => {
+
+        finishSpeaking(
+          done
+        );
+
+      };
+
+
+    speechSynthesis.speak(
+      utterance
+    );
+
+
+  } catch {
+
+    finishSpeaking(
+      done
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   FINISH SPEAKING
+========================================================= */
+
+function finishSpeaking(
+  done
+) {
+
+  speaking =
+    false;
+
+
+  center.classList.remove(
+    "speaking"
+  );
+
+
+  if (awake) {
+
+    center.classList.add(
+      "listening"
+    );
+
+  }
+
+
+  if (done) {
+
+    done();
+
+  }
+
+
+  scheduleRecognition();
+
+}
+
+
+/* =========================================================
+   WAKE
+========================================================= */
+
+function wakeUp() {
+
+  if (
+    !running ||
+    awake
+  ) {
+
+    return;
+
+  }
+
+
+  awake =
+    true;
+
+
+  clapCount =
+    0;
+
+
+  clearTimeout(
+    clapResetTimer
+  );
+
+
+  center.classList.remove(
+    "sleep"
+  );
+
+
+  center.classList.add(
+    "waking"
+  );
+
+
+  setTimeout(
+    () => {
+
+      center.classList.remove(
+        "waking"
+      );
+
+      center.classList.add(
+        "listening"
+      );
+
+    },
+    1000
+  );
+
+
+  speak(
+    "안녕하세요. 오늘은 무엇을 도와드릴까요?"
+  );
+
+}
+
+
+/* =========================================================
+   SLEEP
+========================================================= */
+
+function sleepAssistant() {
+
+  awake =
+    false;
+
+
+  processing =
+    false;
+
+
+  clapCount =
+    0;
+
+
+  clearTimeout(
+    clapResetTimer
+  );
+
+
+  center.classList.remove(
+    "listening",
+    "waking"
+  );
+
+
+  center.classList.add(
+    "sleep"
+  );
+
+
+  speak(
+    "휴면 상태에 돌입합니다."
+  );
+
+}
+
+
+/* =========================================================
+   CLAP DETECTION
+========================================================= */
+
+function startClapDetection() {
+
+  if (!analyser) {
+
+    return;
+
+  }
+
+
+  const timeData =
+    new Float32Array(
+      analyser.fftSize
+    );
+
+
+  let previousRms =
+    0;
+
+
+  let lastClapTime =
+    0;
+
+
+  function detect() {
+
+    if (!running) {
+
+      return;
+
+    }
+
+
+    analyser
+      .getFloatTimeDomainData(
+        timeData
+      );
+
+
+    let sum =
+      0;
+
+    let peak =
+      0;
+
+
+    for (
+      let i = 0;
+      i < timeData.length;
+      i++
+    ) {
+
+      const value =
+        Math.abs(
+          timeData[i]
+        );
+
+
+      peak =
+        Math.max(
+          peak,
+          value
+        );
+
+
+      sum +=
+        value *
+        value;
+
+    }
+
+
+    const rms =
+      Math.sqrt(
+        sum /
+        timeData.length
+      );
+
+
+    analyser
+      .getByteFrequencyData(
+        frequencyData
+      );
+
+
+    let total =
+      0;
+
+    let high =
+      0;
+
+
+    for (
+      let i = 0;
+      i < frequencyData.length;
+      i++
+    ) {
+
+      const value =
+        frequencyData[i];
+
+
+      total +=
+        value;
+
+
+      if (
+        i >
+        frequencyData.length *
+        .20
+      ) {
+
+        high +=
+          value;
+
+      }
+
+    }
+
+
+    const highRatio =
+      total > 0
+        ? high / total
+        : 0;
+
+
+    const sudden =
+      previousRms > .003
+        ? rms /
+          previousRms
+        : 0;
+
+
+    previousRms =
+      previousRms * .70 +
+      rms * .30;
+
+
+    const now =
+      performance.now();
+
+
+    /*
+      박수 조건
+
+      너무 약한 소리는 무시
+      짧고 갑작스러운 소리를 감지
+    */
+
+    const clap =
+      !awake &&
+      !speaking &&
+      peak > .30 &&
+      rms > .018 &&
+      (
+        sudden > 1.25 ||
+        (
+          peak > .50 &&
+          highRatio > .12
+        )
+      ) &&
+      now - lastClapTime >
+        300;
+
+
+    if (clap) {
+
+      lastClapTime =
+        now;
+
+
+      showSoundDetected();
+
+
+      clapCount++;
+
+
+      clearTimeout(
+        clapResetTimer
+      );
+
+
+      clapResetTimer =
+        setTimeout(
+          () => {
+
+            clapCount =
+              0;
+
+          },
+          1800
+        );
+
+
+      if (
+        clapCount >= 2
+      ) {
+
+        clapCount =
+          0;
+
+
+        clearTimeout(
+          clapResetTimer
+        );
+
+
+        wakeUp();
+
+      }
+
+    }
+
+
+    requestAnimationFrame(
+      detect
+    );
+
+  }
+
+
+  detect();
+
+}
+
+
+/* =========================================================
+   SOUND INDICATOR
+========================================================= */
+
+function showSoundDetected() {
+
+  soundDetected
+    .classList
+    .add(
+      "show"
+    );
+
+
+  clearTimeout(
+    soundDetected._timer
+  );
+
+
+  soundDetected._timer =
+    setTimeout(
+      () => {
+
+        soundDetected
+          .classList
+          .remove(
+            "show"
+          );
+
+      },
+      700
     );
 
 }
 
 
-/* =====================================================
-   호출어
-===================================================== */
+/* =========================================================
+   WEATHER
+========================================================= */
+
+async function weather(
+  text
+) {
+
+  let city =
+    "서울";
+
+
+  if (
+    text.includes("수원")
+  ) {
+
+    city =
+      "수원";
+
+  } else if (
+    text.includes("용인")
+  ) {
+
+    city =
+      "용인";
+
+  } else if (
+    text.includes("인천")
+  ) {
+
+    city =
+      "인천";
+
+  } else if (
+    text.includes("부산")
+  ) {
+
+    city =
+      "부산";
+
+  } else if (
+    text.includes("대전")
+  ) {
+
+    city =
+      "대전";
+
+  } else if (
+    text.includes("대구")
+  ) {
+
+    city =
+      "대구";
+
+  }
+
+
+  await respond(
+    `${city}의 날씨를 확인하겠습니다.`
+  );
+
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/weather?city=" +
+        encodeURIComponent(
+          city
+        )
+      );
+
+
+    if (!response.ok) {
+
+      throw new Error();
+
+    }
+
+
+    const data =
+      await response.json();
+
+
+    const current =
+      data.current;
+
+
+    const condition =
+      weatherText(
+        current.weather_code
+      );
+
+
+    await respond(
+      `${city}의 현재 날씨는 ${condition}이고 기온은 ${current.temperature_2m}도입니다. 체감온도는 ${current.apparent_temperature}도입니다.`
+    );
+
+
+  } catch {
+
+    await respond(
+      "날씨 정보를 가져오지 못했습니다."
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   WEATHER TEXT
+========================================================= */
+
+function weatherText(
+  code
+) {
+
+  const map = {
+
+    0:
+      "맑음",
+
+    1:
+      "대체로 맑음",
+
+    2:
+      "부분적으로 흐림",
+
+    3:
+      "흐림",
+
+    45:
+      "안개",
+
+    48:
+      "안개",
+
+    51:
+      "이슬비",
+
+    53:
+      "이슬비",
+
+    55:
+      "강한 이슬비",
+
+    61:
+      "비",
+
+    63:
+      "비",
+
+    65:
+      "강한 비",
+
+    71:
+      "눈",
+
+    73:
+      "눈",
+
+    75:
+      "강한 눈",
+
+    80:
+      "소나기",
+
+    81:
+      "소나기",
+
+    82:
+      "강한 소나기",
+
+    95:
+      "천둥번개",
+
+    96:
+      "우박을 동반한 천둥번개",
+
+    99:
+      "강한 우박을 동반한 천둥번개"
+
+  };
+
+
+  return (
+    map[code] ||
+    "알 수 없는 날씨"
+  );
+
+}
+
+
+/* =========================================================
+   CALCULATOR
+========================================================= */
+
+function calculate(
+  text
+) {
+
+  let expression =
+    text
+      .replace(
+        /계산/g,
+        ""
+      )
+      .replace(
+        /더하기/g,
+        "+"
+      )
+      .replace(
+        /빼기/g,
+        "-"
+      )
+      .replace(
+        /곱하기/g,
+        "*"
+      )
+      .replace(
+        /나누기/g,
+        "/"
+      )
+      .replace(
+        /곱해/g,
+        "*"
+      )
+      .replace(
+        /더해/g,
+        "+"
+      )
+      .replace(
+        /빼/g,
+        "-"
+      )
+      .replace(
+        /나눠/g,
+        "/"
+      )
+      .replace(
+        /[^0-9+\-*/().]/g,
+        ""
+      );
+
+
+  if (!expression) {
+
+    return null;
+
+  }
+
+
+  if (
+    !/^[0-9+\-*/().\s]+$/.test(
+      expression
+    )
+  ) {
+
+    return null;
+
+  }
+
+
+  try {
+
+    const result =
+      Function(
+        '"use strict";return(' +
+        expression +
+        ")"
+      )();
+
+
+    if (
+      typeof result !==
+        "number" ||
+      !Number.isFinite(
+        result
+      )
+    ) {
+
+      return null;
+
+    }
+
+
+    return (
+      Math.round(
+        result *
+        100000
+      ) / 100000
+    );
+
+  } catch {
+
+    return null;
+
+  }
+
+}
+
+
+/* =========================================================
+   OPEN SITE
+========================================================= */
+
+function openSite(
+  url
+) {
+
+  setTimeout(
+    () => {
+
+      window.open(
+        url,
+        "_blank"
+      );
+
+    },
+    500
+  );
+
+}
+
+
+/* =========================================================
+   WAKE WORD
+========================================================= */
 
 function removeWakeWord(
-    text
+  text
 ) {
 
-    return text
-        .replace(
-            /^(이비야|이비|에비야|에비|이피야|이피)\s*/i,
-            ""
-        )
-        .trim();
+  return text
+    .replace(
+      /^(이비야|이비|에비야|에비|이피야|이피)\s*/i,
+      ""
+    )
+    .trim();
 
 }
 
 
-/* =====================================================
-   정규화
-===================================================== */
+/* =========================================================
+   NORMALIZE
+========================================================= */
 
 function normalize(
-    text
+  text
 ) {
 
-    return String(
-        text || ""
+  return String(
+    text || ""
+  )
+    .toLowerCase()
+    .replace(
+      /[.,!?~。！？]/g,
+      " "
     )
-        .toLowerCase()
-        .replace(
-            /[.,!?~。！？]/g,
-            " "
-        )
-        .replace(
-            /\s+/g,
-            " "
-        )
-        .trim();
+    .replace(
+      /\s+/g,
+      " "
+    )
+    .trim();
 
 }
 
 
-/* =====================================================
-   초기 상태
-===================================================== */
+/* =========================================================
+   INITIAL
+========================================================= */
 
-screen.classList.add(
-    "sleep"
+center.classList.add(
+  "sleep"
 );
+
+
+/*
+  모바일/브라우저에서
+  음성 목록이 늦게 로드되는 문제 대응
+*/
+
+if (
+  "speechSynthesis" in window
+) {
+
+  speechSynthesis
+    .getVoices();
+
+  speechSynthesis
+    .onvoiceschanged =
+    () => {
+
+      speechSynthesis
+        .getVoices();
+
+    };
+
+}
 
 </script>
 
