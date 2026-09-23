@@ -1897,7 +1897,26 @@ function startClapDetection() {
             rms > 0.055 &&
             now > clapCooldown
         ) {
+const indicator =
+    document.getElementById(
+        "soundDetected"
+    );
 
+indicator.classList.add("show");
+
+clearTimeout(
+    indicator._timer
+);
+
+indicator._timer =
+    setTimeout(
+        () => {
+            indicator.classList.remove(
+                "show"
+            );
+        },
+        700
+    );
             clapCooldown =
                 now + 350;
 
