@@ -1543,7 +1543,66 @@ function normalizeVoiceText(text) {
   return t.trim();
 
 }
+function startRecognition() {
 
+  if (!running) {
+    return;
+  }
+
+  if (!recognition) {
+    console.warn(
+      "음성 인식 객체가 없습니다."
+    );
+    return;
+  }
+
+  if (recognitionStarting) {
+    return;
+  }
+
+  recognitionStarting = true;
+
+  try {
+
+    recognition.start();
+
+    console.log(
+      "E.B. 음성 인식 시작 요청"
+    );
+
+  } catch (error) {
+
+    recognitionStarting = false;
+
+    console.warn(
+      "음성 인식 시작 실패:",
+      error
+    );
+
+    // 이미 실행 중인 경우 무시
+    if (
+      error.name ===
+      "InvalidStateError"
+    ) {
+      return;
+    }
+
+    // 잠시 후 재시도
+    clearTimeout(
+      recognitionRestartTimer
+    );
+
+    recognitionRestartTimer =
+      setTimeout(
+        () => {
+          if (running) {
+            startRecognition();
+          }
+        },
+        1000
+      );
+  }
+}
 
 /* =========================================================
    YOUTUBE API
