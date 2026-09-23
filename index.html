@@ -3,21 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>JARVIS Voice Assistant</title>
+<title>EVI Voice Assistant</title>
 <style>
 *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 35%,#12395b,#071624 35%,#02070c 75%);color:#dff9ff;font-family:Arial,"Noto Sans KR",sans-serif}body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.12;background-image:linear-gradient(#61d9ff 1px,transparent 1px),linear-gradient(90deg,#61d9ff 1px,transparent 1px);background-size:50px 50px}.app{width:min(1000px,94vw);margin:auto;padding:28px 0 50px}.top{display:flex;justify-content:space-between;align-items:center}.logo{font-size:25px;font-weight:800;letter-spacing:7px}.status{color:#73e8ff;font-size:13px}.hud{margin-top:28px;display:grid;grid-template-columns:1fr 250px 1fr;gap:18px;align-items:center}.side,.console{border:1px solid #1c6075;background:#06131ddd;box-shadow:0 0 30px #00b7ff18 inset;padding:20px}.side{min-height:190px}.side h3,.label{margin:0 0 14px;color:#6fe9ff;font-size:12px;letter-spacing:2px}.data{font-size:14px;line-height:2;color:#b9d9e3}.core{width:230px;height:230px;margin:auto;border-radius:50%;border:2px solid #59e4ff;position:relative;display:flex;align-items:center;justify-content:center;box-shadow:0 0 18px #36dfff,0 0 60px #00aaff44,inset 0 0 40px #00aaff22}.core:before,.core:after{content:"";position:absolute;border-radius:50%;border:1px solid #3bcff4}.core:before{inset:18px;animation:spin 7s linear infinite}.core:after{inset:42px;border-style:dashed;animation:spin 4s linear infinite reverse}.orb{width:72px;height:72px;border-radius:50%;background:#bdf7ff;box-shadow:0 0 15px #fff,0 0 50px #00d9ff;animation:pulse 1.8s ease-in-out infinite}.controls{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:28px 0}button{border:1px solid #42d9ff;background:#06202d;color:#cfffff;border-radius:10px;padding:12px 18px;font-weight:700;cursor:pointer}button:hover{background:#0a3547}button.main{border-radius:50%;width:120px;height:120px;font-size:15px;box-shadow:0 0 35px #00d9ff55}button.active{background:#0c4e61;box-shadow:0 0 40px #00d9ff88}.console{min-height:150px}.label{font-size:11px}#message{font-size:21px;line-height:1.5;margin-top:8px}.input{display:flex;gap:10px;margin-top:14px}input{flex:1;background:#06131c;border:1px solid #235a6b;color:#fff;padding:12px;border-radius:8px;outline:0}.list{max-height:140px;overflow:auto;font-size:12px}.item{padding:7px 0;border-bottom:1px solid #123746}.help{margin-top:18px;color:#7399a6;font-size:12px;line-height:1.7}@keyframes pulse{50%{transform:scale(1.13);opacity:.72}}@keyframes spin{to{transform:rotate(360deg)}}@media(max-width:760px){.hud{grid-template-columns:1fr}.core{grid-row:1}.side{min-height:130px}}
 </style>
 </head>
 <body>
 <div class="app">
-<div class="top"><div class="logo">JARVIS</div><div id="status" class="status">대기 중</div></div>
+<div class="top"><div class="logo">EVI</div><div id="status" class="status">대기 중</div></div>
 <div class="hud">
 <section class="side"><h3>SYSTEM</h3><div class="data">마이크: <span id="mic">확인 중</span><br>음성 인식: <span id="speech">대기</span><br>모드: <span id="mode">SLEEP</span><br>박수 감지: <span id="clap">대기</span></div></section>
 <div class="core"><div class="orb"></div></div>
 <section class="side"><h3>COMMAND LOG</h3><div id="history" class="list"></div></section>
 </div>
 <div class="controls"><button id="startBtn" class="main">마이크<br>시작</button><button id="sleepBtn">휴면</button><button id="testBtn">음성 테스트</button></div>
-<div class="console"><div class="label">JARVIS OUTPUT</div><div id="message">마이크 시작을 누르면 준비합니다.</div><div class="input"><input id="manual" placeholder="마이크가 안 될 때 직접 명령 입력"><button id="send">실행</button></div></div>
+<div class="console"><div class="label">EVI OUTPUT</div><div id="message">마이크 시작을 누르면 준비합니다.</div><div class="input"><input id="manual" placeholder="마이크가 안 될 때 직접 명령 입력"><button id="send">실행</button></div></div>
 <div class="help">마이크를 시작한 뒤 <b>👏 박수를 빠르게 2번</b> 치세요. 활성화되면 음성 명령을 받습니다.<br>예: "현재 시간", "서울 날씨", "마인크래프트 검색해줘", "쉬어"</div>
 </div>
 <script>
@@ -25,7 +25,7 @@ const $ = id => document.getElementById(id);
 let recognition=null, recognitionAvailable=false, listening=false, running=false;
 let awake=false, micStream=null, audioContext=null, analyser=null;
 let history=[]; let wakeBuffer=""; let wakeTimer=null; let speaking=false;
-const WAKE_WORDS=["이비","이비야","에이비","j비스","자비스","jarvis"];
+const WAKE_WORDS=["이비","이비야","에이비","j비스","자비스","EVI"];
 
 function say(text){
   $("message").textContent=text;
