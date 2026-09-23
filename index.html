@@ -4616,7 +4616,10 @@ function closeYouTube() {
 async function searchYouTube(
   query,
   autoPlayFirst = false
-) {
+) console.log(
+  "YOUTUBE RESULTS:",
+  youtubeResults
+); {
 
   query =
     String(query || "").trim();
@@ -4701,9 +4704,10 @@ async function searchYouTube(
 
     if (autoPlayFirst) {
 
-      await playYouTubeResult(
-        0
-      );
+     youtubePlayer.loadVideoById({
+  videoId: video.videoId,
+  startSeconds: 0
+});
 
     }
 
