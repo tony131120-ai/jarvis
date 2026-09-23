@@ -4571,7 +4571,7 @@ let youtubeCurrentQuery = "";
    YOUTUBE API READY
 ========================================================= */
 
-window.onYouTubeIframeAPIReady = function () {
+window.onYouTubeIframeAPIReady = function () 
 
   youtubePlayer = new YT.Player(
     "youtubePlayer",
@@ -4613,7 +4613,7 @@ window.onYouTubeIframeAPIReady = function () {
           console.warn(
             "YouTube 자동재생이 브라우저에 의해 차단되었습니다."
           );
-
+        
         }
 
       }
@@ -4621,15 +4621,6 @@ window.onYouTubeIframeAPIReady = function () {
     }
   );
 
-};
-
-    console.warn(
-      "YouTube 자동재생이 브라우저에 의해 차단되었습니다."
-    );
-
-    speak(
-      "브라우저에서 자동재생을 차단했습니다. 영상의 재생 버튼을 한 번 눌러주세요."
-    );
 
   
 
@@ -4765,21 +4756,6 @@ async function searchYouTube(
 
   
 
- 300); {
-
-  query =
-    String(query || "").trim();
-
-
-  if (!query) {
-
-    await respond(
-      "유튜브에서 무엇을 검색할까요?"
-    );
-
-    return;
-
-  }
 
 
   openYouTubePanel();
