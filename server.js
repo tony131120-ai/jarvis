@@ -33,9 +33,9 @@ app.use(
 );
 
 
-/* =====================================================
-   메인 페이지
-===================================================== */
+/* =========================================================
+   MAIN
+========================================================= */
 
 app.get("/", (req, res) => {
 
@@ -49,56 +49,59 @@ app.get("/", (req, res) => {
 });
 
 
-/* =====================================================
-   시간
-===================================================== */
+/* =========================================================
+   TIME
+========================================================= */
 
-app.get("/api/time", (req, res) => {
+app.get(
+  "/api/time",
+  (req, res) => {
 
-  try {
+    try {
 
-    const korean =
-      new Intl.DateTimeFormat(
-        "ko-KR",
-        {
-          timeZone:
-            "Asia/Seoul",
+      const now =
+        new Intl.DateTimeFormat(
+          "ko-KR",
+          {
+            timeZone:
+              "Asia/Seoul",
 
-          dateStyle:
-            "full",
+            dateStyle:
+              "full",
 
-          timeStyle:
-            "short"
-        }
-      ).format(
-        new Date()
+            timeStyle:
+              "short"
+          }
+        ).format(
+          new Date()
+        );
+
+
+      res.json({
+        korean: now
+      });
+
+    } catch (error) {
+
+      console.error(
+        "TIME ERROR:",
+        error
       );
 
+      res.status(500).json({
+        error:
+          "시간 정보를 가져오지 못했습니다."
+      });
 
-    res.json({
-      korean
-    });
-
-  } catch (error) {
-
-    console.error(
-      "TIME ERROR:",
-      error
-    );
-
-    res.status(500).json({
-      error:
-        "시간 정보를 가져오지 못했습니다."
-    });
+    }
 
   }
+);
 
-});
 
-
-/* =====================================================
-   날씨
-===================================================== */
+/* =========================================================
+   WEATHER
+========================================================= */
 
 app.get(
   "/api/weather",
@@ -127,7 +130,7 @@ app.get(
       if (!geocodeResponse.ok) {
 
         throw new Error(
-          "geocoding request failed"
+          "Geocoding failed"
         );
 
       }
@@ -181,7 +184,7 @@ app.get(
       if (!weatherResponse.ok) {
 
         throw new Error(
-          "weather request failed"
+          "Weather failed"
         );
 
       }
@@ -198,12 +201,6 @@ app.get(
 
         country:
           place.country,
-
-        latitude:
-          place.latitude,
-
-        longitude:
-          place.longitude,
 
         current:
           weather.current
@@ -232,9 +229,9 @@ app.get(
 );
 
 
-/* =====================================================
-   검색
-===================================================== */
+/* =========================================================
+   GOOGLE SEARCH
+========================================================= */
 
 app.get(
   "/api/search",
@@ -282,7 +279,7 @@ app.get(
         await response.text();
 
 
-      const text =
+      const preview =
         html
           .replace(
             /<script[\s\S]*?<\/script>/gi,
@@ -320,7 +317,7 @@ app.get(
         query,
 
         preview:
-          text.slice(
+          preview.slice(
             0,
             1200
           ),
@@ -355,9 +352,9 @@ app.get(
 );
 
 
-/* =====================================================
-   자연스러운 TTS
-===================================================== */
+/* =========================================================
+   ELEVENLABS TTS
+========================================================= */
 
 app.post(
   "/api/tts",
@@ -375,15 +372,15 @@ app.post(
         .status(400)
         .json({
           error:
-            "음성으로 변환할 문장이 없습니다."
+            "텍스트가 없습니다."
         });
 
     }
 
 
     /*
-       API 키가 없는 경우
-       프론트엔드가 브라우저 TTS로 fallback한다.
+      ElevenLabs 설정이 없으면
+      프론트엔드가 브라우저 TTS로 fallback
     */
 
     if (
@@ -395,7 +392,7 @@ app.post(
         .status(503)
         .json({
           error:
-            "서버 TTS가 설정되지 않았습니다."
+            "ElevenLabs TTS가 설정되지 않았습니다."
         });
 
     }
@@ -474,13 +471,13 @@ app.post(
           .status(502)
           .json({
             error:
-              "TTS 서버에서 음성을 만들지 못했습니다."
+              "ElevenLabs 음성 생성 실패"
           });
 
       }
 
 
-      const audioBuffer =
+      const audio =
         await response.arrayBuffer();
 
 
@@ -498,7 +495,7 @@ app.post(
 
       res.send(
         Buffer.from(
-          audioBuffer
+          audio
         )
       );
 
@@ -524,9 +521,9 @@ app.post(
 );
 
 
-/* =====================================================
-   서버 시작
-===================================================== */
+/* =========================================================
+   SERVER
+========================================================= */
 
 app.listen(
   PORT,
@@ -534,15 +531,15 @@ app.listen(
   () => {
 
     console.log(
-      `E.B. server running on port ${PORT}`
+      `E.B. running on port ${PORT}`
     );
 
     console.log(
-      "Server TTS:",
+      "TTS:",
       ELEVENLABS_API_KEY &&
       ELEVENLABS_VOICE_ID
-        ? "enabled"
-        : "browser fallback"
+        ? "ElevenLabs"
+        : "Browser fallback"
     );
 
   }
