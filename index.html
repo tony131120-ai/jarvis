@@ -380,12 +380,59 @@ body {
 }
 
 </style>
+#soundDetected {
 
+    position: fixed;
+
+    top: 18px;
+    right: 20px;
+
+    padding: 6px 10px;
+
+    border-radius: 6px;
+
+    background: rgba(20, 40, 60, .75);
+
+    color: rgba(180, 225, 255, .85);
+
+    font-size: 11px;
+
+    font-family:
+        Arial,
+        sans-serif;
+
+    letter-spacing: .5px;
+
+    opacity: 0;
+
+    transform:
+        translateY(-5px);
+
+    transition:
+        opacity .15s ease,
+        transform .15s ease;
+
+    pointer-events: none;
+
+    z-index: 100;
+
+}
+
+#soundDetected.show {
+
+    opacity: 1;
+
+    transform:
+        translateY(0);
+
+}
 </head>
 
 
 <body>
-
+<div id="soundDetected">
+    소리 감지됨
+</div>
 
 <div
     id="screen"
