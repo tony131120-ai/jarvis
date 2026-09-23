@@ -4567,28 +4567,61 @@ let youtubeCurrentQuery = "";
 /* =========================================================
    YOUTUBE API READY
 ========================================================= */
-events: {
+/* =========================================================
+   YOUTUBE API READY
+========================================================= */
 
-  onReady: function () {
+window.onYouTubeIframeAPIReady = function () {
 
-    youtubeReady = true;
+  youtubePlayer = new YT.Player(
+    "youtubePlayer",
+    {
+      width: "100%",
+      height: "100%",
+      videoId: "",
 
-    console.log(
-      "YouTube Player 준비 완료"
-    );
+      playerVars: {
+        autoplay: 0,
+        controls: 1,
+        rel: 0,
+        playsinline: 1
+      },
 
-  },
+      events: {
 
-  onStateChange: function (event) {
+        onReady: function () {
 
-    console.log(
-      "YouTube 상태:",
-      event.data
-    );
+          youtubeReady = true;
 
-  },
+          console.log(
+            "YouTube Player 준비 완료"
+          );
 
-  onAutoplayBlocked: function () {
+        },
+
+        onStateChange: function (event) {
+
+          console.log(
+            "YouTube 상태:",
+            event.data
+          );
+
+        },
+
+        onAutoplayBlocked: function () {
+
+          console.warn(
+            "YouTube 자동재생이 브라우저에 의해 차단되었습니다."
+          );
+
+        }
+
+      }
+
+    }
+  );
+
+};
 
     console.warn(
       "YouTube 자동재생이 브라우저에 의해 차단되었습니다."
