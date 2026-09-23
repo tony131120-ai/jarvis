@@ -559,7 +559,140 @@ app.post(
 /* =========================================================
    SERVER
 ========================================================= */
+/* =========================================================
+   YOUTUBE SEARCH
+========================================================= */
 
+app.get("/api/youtube/search", async (req, res) => {
+
+  try {
+
+    const query =
+      String(req.query.q || "").trim();
+
+    if (!query) {
+
+      return res.status(400).json({
+        error: "검색어가 없습니다."
+      });
+
+    }
+
+
+    const apiKey =
+      process.env.YOUTUBE_API_KEY;
+
+    if (!apiKey) {
+
+      return res.status(500).json({
+        error:
+          "YOUTUBE_API_KEY가 Render 환경변수에 없습니다."
+      });
+
+    }
+
+
+    const url =
+      "https://www.googleapis.com/youtube/v3/search?" +
+      new URLSearchParams({
+
+        part: "snippet",
+
+        q: query,
+
+        type: "video",
+
+        maxResults: "10",
+
+        regionCode: "KR",
+
+        relevanceLanguage: "ko",
+
+        key: apiKey
+
+      }).toString();
+
+
+    const response =
+      await fetch(url);
+
+
+    const data =
+      await response.json();
+
+
+    if (!response.ok) {
+
+      console.error(
+        "YouTube API ERROR:",
+        data
+      );
+
+
+      return res.status(
+        response.status
+      ).json({
+        error:
+          data?.error?.message ||
+          "YouTube 검색 실패"
+      });
+
+    }
+
+
+    const videos =
+      (data.items || [])
+        .filter(
+          item =>
+            item.id &&
+            item.id.videoId
+        )
+        .map(
+          item => ({
+
+            videoId:
+              item.id.videoId,
+
+            title:
+              item.snippet?.title ||
+              "제목 없음",
+
+            channel:
+              item.snippet?.channelTitle ||
+              "",
+
+            thumbnail:
+              item.snippet?.thumbnails?.medium?.url ||
+              item.snippet?.thumbnails?.default?.url ||
+              ""
+
+          })
+        );
+
+
+    res.json({
+      query,
+      videos
+    });
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "YouTube 검색 오류:",
+      error
+    );
+
+
+    res.status(500).json({
+      error:
+        "YouTube 검색 중 오류가 발생했습니다."
+    });
+
+  }
+
+});
 app.listen(
   PORT,
   "0.0.0.0",
