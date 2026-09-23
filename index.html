@@ -4571,9 +4571,51 @@ let youtubeCurrentQuery = "";
    YOUTUBE API READY
 ========================================================= */
 
-window.onYouTubeIframeAPIReady = function () 
+window.onYouTubeIframeAPIReady = function () {
 
-  youtubePlayer = new YT.Player( {
+  youtubePlayer = new YT.Player(
+    "youtubePlayer",
+    {
+      width: "100%",
+      height: "100%",
+      videoId: "",
+
+      playerVars: {
+        autoplay: 0,
+        controls: 1,
+        rel: 0,
+        playsinline: 1
+      },
+
+      events: {
+
+        onReady: function () {
+          youtubeReady = true;
+
+          console.log(
+            "YouTube Player 준비 완료"
+          );
+        },
+
+        onStateChange: function (event) {
+          console.log(
+            "YouTube 상태:",
+            event.data
+          );
+        },
+
+        onAutoplayBlocked: function () {
+          console.warn(
+            "YouTube 자동재생이 브라우저에 의해 차단되었습니다."
+          );
+        }
+
+      }
+
+    }
+  );
+
+}; {
     "youtubePlayer",
     {
       width: "100%",
