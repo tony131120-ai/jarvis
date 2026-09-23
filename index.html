@@ -1445,77 +1445,91 @@ const soundDetected =
 ========================================================= */
 
 async function startAssistant() {
-
-  if (running) {
-
-    return;
-
-  }
-
-
   try {
+    console.log("E.B. 마이크 시작");
+
+    if (!navigator.mediaDevices) {
+      throw new Error("이 브라우저에서는 마이크 기능을 사용할 수 없습니다.");
+    }
+
+    if (!navigator.mediaDevices.getUserMedia) {
+      throw new Error("getUserMedia를 사용할 수 없습니다.");
+    }
 
     microphoneStream =
-      await navigator
-        .mediaDevices
-        .getUserMedia({
+      await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false
+        }
+      });
 
-          audio: {
+    console.log("마이크 권한 획득 성공");
 
-            echoCancellation:
-              false,
+    audioContext =
+      new (
+        window.AudioContext ||
+        window.webkitAudioContext
+      )();
 
-            noiseSuppression:
-              false,
+    if (audioContext.state === "suspended") {
+      await audioContext.resume();
+    }
 
-            autoGainControl:
-              false
+    analyser =
+      audioContext.createAnalyser();
 
-          }
+    analyser.fftSize = 2048;
+    analyser.smoothingTimeConstant = 0.15;
 
-        });
+    microphoneSource =
+      audioContext.createMediaStreamSource(
+        microphoneStream
+      );
 
+    microphoneSource.connect(analyser);
+
+    frequencyData =
+      new Uint8Array(
+        analyser.frequencyBinCount
+      );
+
+    running = true;
+
+    console.log("오디오 분석 시작");
+
+    startVisualizer();
+    startClapDetection();
+
+    if (recognition) {
+      try {
+        recognition.start();
+      } catch (e) {
+        console.log(
+          "음성 인식 시작:",
+          e.message
+        );
+      }
+    }
+
+    setState("sleep");
 
   } catch (error) {
-
     console.error(
-      "MIC ERROR:",
+      "마이크 실행 실패:",
       error
     );
 
-    return;
-
+    alert(
+      "마이크를 실행할 수 없습니다.\n\n" +
+      "1. 브라우저의 마이크 권한을 허용했는지 확인하세요.\n" +
+      "2. 다른 프로그램이 마이크를 사용하고 있지 않은지 확인하세요.\n\n" +
+      "오류: " +
+      error.message
+    );
   }
-
-
-  running =
-    true;
-
-  awake =
-    false;
-
-
-  center.classList.remove(
-    "listening",
-    "speaking",
-    "waking"
-  );
-
-  center.classList.add(
-    "sleep"
-  );
-
-
-  setupAudio();
-
-  setupRecognition();
-
-  startVisualizer();
-
-  startClapDetection();
-
 }
-
 
 /* =========================================================
    AUDIO
