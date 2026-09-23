@@ -5596,22 +5596,7 @@ async function processYouTubeCommand(text) {
      "유튜브에서 마인크래프트 찾아줘"
   ===================================================== */
 
-async function processYouTubeCommand(text) {
 
-  text = String(text || "")
-    .trim()
-    .replace(/\s+/g, " ");
-
-  console.log(
-    "YOUTUBE COMMAND:",
-    text
-  );
-
-  if (
-    !text.includes("유튜브")
-  ) {
-    return false;
-  }
 
 
   // 첫 번째 영상 재생
