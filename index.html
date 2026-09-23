@@ -1412,7 +1412,7 @@ body {
 }
 
 </style>
-
+<script src="https://www.youtube.com/iframe_api"></script>
 </head>
 
 
@@ -4484,7 +4484,1133 @@ if (
     };
 
 }
+/* =========================================================
+   YOUTUBE ENGINE
+========================================================= */
 
+let youtubePlayer = null;
+
+let youtubeReady = false;
+
+let youtubeResults = [];
+
+let youtubeCurrentIndex = -1;
+
+let youtubeCurrentQuery = "";
+
+
+/* =========================================================
+   YOUTUBE API READY
+========================================================= */
+
+window.onYouTubeIframeAPIReady =
+  function () {
+
+    youtubePlayer =
+      new YT.Player(
+        "youtubePlayer",
+        {
+
+          width: "100%",
+
+          height: "100%",
+
+          videoId: "",
+
+          playerVars: {
+
+            autoplay: 0,
+
+            controls: 1,
+
+            rel: 0,
+
+            playsinline: 1
+
+          },
+
+          events: {
+
+            onReady:
+              () => {
+
+                youtubeReady =
+                  true;
+
+                console.log(
+                  "YouTube Player 준비 완료"
+                );
+
+              },
+
+            onStateChange:
+              event => {
+
+                console.log(
+                  "YouTube 상태:",
+                  event.data
+                );
+
+              }
+
+          }
+
+        }
+      );
+
+  };
+
+
+/* =========================================================
+   OPEN YOUTUBE
+========================================================= */
+
+function openYouTubePanel() {
+
+  const panel =
+    document.getElementById(
+      "youtubePanel"
+    );
+
+
+  if (!panel) {
+    return;
+  }
+
+
+  panel.classList.add(
+    "show"
+  );
+
+}
+
+
+/* =========================================================
+   CLOSE YOUTUBE
+========================================================= */
+
+function closeYouTube() {
+
+  const panel =
+    document.getElementById(
+      "youtubePanel"
+    );
+
+
+  if (!panel) {
+    return;
+  }
+
+
+  panel.classList.remove(
+    "show"
+  );
+
+}
+
+
+/* =========================================================
+   SEARCH YOUTUBE
+========================================================= */
+
+async function searchYouTube(
+  query,
+  autoPlayFirst = false
+) {
+
+  query =
+    String(query || "").trim();
+
+
+  if (!query) {
+
+    await respond(
+      "유튜브에서 무엇을 검색할까요?"
+    );
+
+    return;
+
+  }
+
+
+  openYouTubePanel();
+
+
+  youtubeCurrentQuery =
+    query;
+
+
+  rememberAction(
+    "youtube-search",
+    {
+      search: query,
+      website: "youtube"
+    }
+  );
+
+
+  await respond(
+    `유튜브에서 ${query}를 검색하겠습니다.`
+  );
+
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/youtube/search?q=" +
+        encodeURIComponent(
+          query
+        )
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        data.error ||
+        `HTTP ${response.status}`
+      );
+
+    }
+
+
+    youtubeResults =
+      data.videos || [];
+
+
+    renderYouTubeResults();
+
+
+    if (
+      youtubeResults.length === 0
+    ) {
+
+      await respond(
+        "검색 결과를 찾지 못했습니다."
+      );
+
+      return;
+
+    }
+
+
+    if (autoPlayFirst) {
+
+      await playYouTubeResult(
+        0
+      );
+
+    }
+
+    else {
+
+      await respond(
+        `검색 결과 ${youtubeResults.length}개를 찾았습니다. 원하는 영상 번호를 말씀해주세요.`
+      );
+
+    }
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "YouTube 검색 실패:",
+      error
+    );
+
+
+    await respond(
+      "유튜브 검색에 실패했습니다."
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   RENDER SEARCH RESULTS
+========================================================= */
+
+function renderYouTubeResults() {
+
+  const container =
+    document.getElementById(
+      "youtubeResults"
+    );
+
+
+  if (!container) {
+    return;
+  }
+
+
+  container.innerHTML =
+    "";
+
+
+  if (
+    youtubeResults.length === 0
+  ) {
+
+    container.style.display =
+      "none";
+
+    return;
+
+  }
+
+
+  container.style.display =
+    "block";
+
+
+  youtubeResults.forEach(
+    (video, index) => {
+
+      const item =
+        document.createElement(
+          "div"
+        );
+
+
+      item.className =
+        "youtubeResult";
+
+
+      item.innerHTML = `
+
+        <img
+          src="${escapeHtml(video.thumbnail)}"
+          alt=""
+        >
+
+        <div>
+
+          <div class="youtubeResultTitle">
+            ${index + 1}. ${escapeHtml(video.title)}
+          </div>
+
+          <div class="youtubeResultChannel">
+            ${escapeHtml(video.channel)}
+          </div>
+
+        </div>
+
+      `;
+
+
+      item.onclick =
+        () => {
+
+          playYouTubeResult(
+            index
+          );
+
+        };
+
+
+      container.appendChild(
+        item
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHtml(value) {
+
+  return String(
+    value || ""
+  )
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
+
+}
+
+
+/* =========================================================
+   PLAY RESULT
+========================================================= */
+
+async function playYouTubeResult(
+  index
+) {
+
+  if (
+    !youtubeReady ||
+    !youtubePlayer
+  ) {
+
+    await respond(
+      "유튜브 플레이어가 아직 준비되지 않았습니다."
+    );
+
+    return;
+
+  }
+
+
+  const video =
+    youtubeResults[index];
+
+
+  if (!video) {
+
+    await respond(
+      "그 번호의 영상을 찾지 못했습니다."
+    );
+
+    return;
+
+  }
+
+
+  youtubeCurrentIndex =
+    index;
+
+
+  rememberAction(
+    "youtube-playing",
+    {
+      search:
+        youtubeCurrentQuery,
+
+      website:
+        "youtube",
+
+      topic:
+        video.title
+    }
+  );
+
+
+  youtubePlayer.loadVideoById(
+    video.videoId
+  );
+
+
+  await respond(
+    `${index + 1}번 영상, ${video.title}을 재생합니다.`
+  );
+
+}
+
+
+/* =========================================================
+   PLAY
+========================================================= */
+
+async function youtubePlay() {
+
+  if (!youtubeReady) {
+
+    await respond(
+      "유튜브 플레이어가 준비되지 않았습니다."
+    );
+
+    return;
+
+  }
+
+
+  youtubePlayer.playVideo();
+
+
+  await respond(
+    "재생합니다."
+  );
+
+}
+
+
+/* =========================================================
+   PAUSE
+========================================================= */
+
+async function youtubePause() {
+
+  if (!youtubeReady) {
+
+    await respond(
+      "현재 유튜브 영상이 없습니다."
+    );
+
+    return;
+
+  }
+
+
+  youtubePlayer.pauseVideo();
+
+
+  await respond(
+    "일시정지합니다."
+  );
+
+}
+
+
+/* =========================================================
+   STOP
+========================================================= */
+
+async function youtubeStop() {
+
+  if (!youtubeReady) {
+    return;
+  }
+
+
+  youtubePlayer.stopVideo();
+
+
+  await respond(
+    "영상을 정지했습니다."
+  );
+
+}
+
+
+/* =========================================================
+   VOLUME UP
+========================================================= */
+
+async function youtubeVolumeUp() {
+
+  if (!youtubeReady) {
+    return;
+  }
+
+
+  let volume =
+    youtubePlayer.getVolume();
+
+
+  volume =
+    Math.min(
+      100,
+      volume + 10
+    );
+
+
+  youtubePlayer.setVolume(
+    volume
+  );
+
+
+  await respond(
+    `볼륨을 ${volume}퍼센트로 높였습니다.`
+  );
+
+}
+
+
+/* =========================================================
+   VOLUME DOWN
+========================================================= */
+
+async function youtubeVolumeDown() {
+
+  if (!youtubeReady) {
+    return;
+  }
+
+
+  let volume =
+    youtubePlayer.getVolume();
+
+
+  volume =
+    Math.max(
+      0,
+      volume - 10
+    );
+
+
+  youtubePlayer.setVolume(
+    volume
+  );
+
+
+  await respond(
+    `볼륨을 ${volume}퍼센트로 낮췄습니다.`
+  );
+
+}
+
+
+/* =========================================================
+   SET VOLUME
+========================================================= */
+
+async function youtubeSetVolume(
+  value
+) {
+
+  if (!youtubeReady) {
+    return;
+  }
+
+
+  value =
+    Math.max(
+      0,
+      Math.min(
+        100,
+        Number(value)
+      )
+    );
+
+
+  youtubePlayer.setVolume(
+    value
+  );
+
+
+  await respond(
+    `볼륨을 ${value}퍼센트로 설정했습니다.`
+  );
+
+}
+
+
+/* =========================================================
+   MUTE
+========================================================= */
+
+async function youtubeMute() {
+
+  if (!youtubeReady) {
+    return;
+  }
+
+
+  youtubePlayer.mute();
+
+
+  await respond(
+    "음소거했습니다."
+  );
+
+}
+
+
+/* =========================================================
+   UNMUTE
+========================================================= */
+
+async function youtubeUnmute() {
+
+  if (!youtubeReady) {
+    return;
+  }
+
+
+  youtubePlayer.unMute();
+
+
+  await respond(
+    "음소거를 해제했습니다."
+  );
+
+}
+
+
+/* =========================================================
+   SEEK
+========================================================= */
+
+async function youtubeSeek(
+  seconds
+) {
+
+  if (!youtubeReady) {
+    return;
+  }
+
+
+  const current =
+    youtubePlayer.getCurrentTime();
+
+
+  const duration =
+    youtubePlayer.getDuration();
+
+
+  const target =
+    Math.max(
+      0,
+      Math.min(
+        duration,
+        current + seconds
+      )
+    );
+
+
+  youtubePlayer.seekTo(
+    target,
+    true
+  );
+
+
+  if (seconds > 0) {
+
+    await respond(
+      `${seconds}초 앞으로 이동합니다.`
+    );
+
+  }
+
+  else {
+
+    await respond(
+      `${Math.abs(seconds)}초 뒤로 이동합니다.`
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   NEXT VIDEO
+========================================================= */
+
+async function youtubeNext() {
+
+  if (
+    youtubeCurrentIndex <
+    youtubeResults.length - 1
+  ) {
+
+    await playYouTubeResult(
+      youtubeCurrentIndex + 1
+    );
+
+    return;
+
+  }
+
+
+  await respond(
+    "다음 검색 결과가 없습니다."
+  );
+
+}
+
+
+/* =========================================================
+   PREVIOUS VIDEO
+========================================================= */
+
+async function youtubePrevious() {
+
+  if (
+    youtubeCurrentIndex > 0
+  ) {
+
+    await playYouTubeResult(
+      youtubeCurrentIndex - 1
+    );
+
+    return;
+
+  }
+
+
+  await respond(
+    "이전 검색 결과가 없습니다."
+  );
+
+}
+
+
+/* =========================================================
+   COMMAND INTERCEPTOR
+========================================================= */
+
+async function processYouTubeCommand(
+  text
+) {
+
+  /*
+    유튜브 검색
+  */
+
+  if (
+    text.includes("유튜브") &&
+    (
+      text.includes("검색") ||
+      text.includes("찾아")
+    )
+  ) {
+
+    let query =
+      text
+        .replace(
+          /유튜브/g,
+          ""
+        )
+        .replace(
+          /검색해줘/g,
+          ""
+        )
+        .replace(
+          /검색해/g,
+          ""
+        )
+        .replace(
+          /검색/g,
+          ""
+        )
+        .replace(
+          /찾아줘/g,
+          ""
+        )
+        .replace(
+          /찾아/g,
+          ""
+        )
+        .trim();
+
+
+    if (!query) {
+
+      processing = false;
+
+      await speak(
+        "유튜브에서 무엇을 검색할까요?"
+      );
+
+      return true;
+
+    }
+
+
+    await searchYouTube(
+      query,
+      false
+    );
+
+
+    return true;
+
+  }
+
+
+  /*
+    첫 번째, 두 번째...
+  */
+
+  const numberMatch =
+    text.match(
+      /(\d+)\s*번/
+    );
+
+
+  if (
+    numberMatch &&
+    youtubeResults.length > 0
+  ) {
+
+    const index =
+      Number(
+        numberMatch[1]
+      ) - 1;
+
+
+    if (
+      index >= 0 &&
+      index < youtubeResults.length
+    ) {
+
+      await playYouTubeResult(
+        index
+      );
+
+      return true;
+
+    }
+
+  }
+
+
+  /*
+    첫 번째 영상
+  */
+
+  if (
+    (
+      text.includes("첫 번째") ||
+      text.includes("첫번째") ||
+      text.includes("첫 영상")
+    ) &&
+    youtubeResults.length > 0
+  ) {
+
+    await playYouTubeResult(
+      0
+    );
+
+    return true;
+
+  }
+
+
+  /*
+    재생
+  */
+
+  if (
+    text === "재생해" ||
+    text === "재생" ||
+    text.includes("다시 재생") ||
+    text.includes("영상 재생")
+  ) {
+
+    await youtubePlay();
+
+    return true;
+
+  }
+
+
+  /*
+    일시정지
+  */
+
+  if (
+    text.includes("일시정지") ||
+    text.includes("멈춰") ||
+    text.includes("멈춰줘") ||
+    text.includes("잠깐 멈춰")
+  ) {
+
+    await youtubePause();
+
+    return true;
+
+  }
+
+
+  /*
+    정지
+  */
+
+  if (
+    text.includes("영상 꺼") ||
+    text.includes("영상 종료")
+  ) {
+
+    await youtubeStop();
+
+    return true;
+
+  }
+
+
+  /*
+    볼륨 크게
+  */
+
+  if (
+    text.includes("소리 키워") ||
+    text.includes("소리 크게") ||
+    text.includes("볼륨 키워") ||
+    text.includes("볼륨 높여")
+  ) {
+
+    await youtubeVolumeUp();
+
+    return true;
+
+  }
+
+
+  /*
+    볼륨 작게
+  */
+
+  if (
+    text.includes("소리 줄여") ||
+    text.includes("소리 작게") ||
+    text.includes("볼륨 줄여") ||
+    text.includes("볼륨 낮춰")
+  ) {
+
+    await youtubeVolumeDown();
+
+    return true;
+
+  }
+
+
+  /*
+    음소거
+  */
+
+  if (
+    text.includes("음소거")
+  ) {
+
+    if (
+      text.includes("해제") ||
+      text.includes("풀어")
+    ) {
+
+      await youtubeUnmute();
+
+    }
+
+    else {
+
+      await youtubeMute();
+
+    }
+
+
+    return true;
+
+  }
+
+
+  /*
+    볼륨 숫자
+  */
+
+  const volumeMatch =
+    text.match(
+      /(?:볼륨|소리)\s*(\d+)\s*(?:퍼센트|프로|%)?/
+    );
+
+
+  if (volumeMatch) {
+
+    await youtubeSetVolume(
+      Number(
+        volumeMatch[1]
+      )
+    );
+
+    return true;
+
+  }
+
+
+  /*
+    앞으로
+  */
+
+  const forwardMatch =
+    text.match(
+      /(\d+)\s*초\s*(?:앞|앞으로)/
+    );
+
+
+  if (forwardMatch) {
+
+    await youtubeSeek(
+      Number(
+        forwardMatch[1]
+      )
+    );
+
+    return true;
+
+  }
+
+
+  /*
+    뒤로
+  */
+
+  const backwardMatch =
+    text.match(
+      /(\d+)\s*초\s*(?:뒤|뒤로)/
+    );
+
+
+  if (backwardMatch) {
+
+    await youtubeSeek(
+      -Number(
+        backwardMatch[1]
+      )
+    );
+
+    return true;
+
+  }
+
+
+  /*
+    다음 영상
+  */
+
+  if (
+    text.includes("다음 영상") ||
+    text.includes("다음 거") ||
+    text === "다음"
+  ) {
+
+    await youtubeNext();
+
+    return true;
+
+  }
+
+
+  /*
+    이전 영상
+  */
+
+  if (
+    text.includes("이전 영상") ||
+    text.includes("이전 거") ||
+    text === "이전"
+  ) {
+
+    await youtubePrevious();
+
+    return true;
+
+  }
+
+
+  return false;
+
+}
 </script>
   <div id="youtubePanel">
 
