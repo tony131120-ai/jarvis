@@ -1,22 +1,505 @@
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
-<script src="https://www.youtube.com/iframe_api"></script>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E.B. Voice Core</title>
 
-<meta
-  name="viewport"
-  content="width=device-width, initial-scale=1.0"
->
-
-<title>이비</title>
-
+<script src="https://www.youtube.com/iframe_api"></script>
 
 <style>
-/* =========================================================
-   YOUTUBE CONTROL PANEL
-========================================================= */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #020816;
+  color: #dff7ff;
+  font-family: Arial, "Noto Sans KR", sans-serif;
+}
+
+body {
+  position: relative;
+}
+
+/* =========================
+   BACKGROUND
+========================= */
+
+#background {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at center, rgba(0,180,255,.12), transparent 35%),
+    linear-gradient(rgba(0,150,255,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,150,255,.035) 1px, transparent 1px),
+    #020816;
+  background-size: auto, 45px 45px, 45px 45px;
+}
+
+.scan {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: rgba(0,220,255,.18);
+  animation: scan 5s linear infinite;
+}
+
+@keyframes scan {
+  from {
+    top: -10%;
+  }
+  to {
+    top: 110%;
+  }
+}
+
+/* =========================
+   TOP
+========================= */
+
+#topBar {
+  position: fixed;
+  top: 20px;
+  left: 25px;
+  right: 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 20;
+}
+
+#logo {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 6px;
+  color: #7cecff;
+  text-shadow: 0 0 15px rgba(0,220,255,.8);
+}
+
+#status {
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: #70dfff;
+}
+
+#status.awake {
+  color: #fff;
+  text-shadow: 0 0 15px #00d9ff;
+}
+
+/* =========================
+   SIDE HUD
+========================= */
+
+.hud {
+  position: fixed;
+  top: 90px;
+  width: 220px;
+  z-index: 5;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+
+#leftHud {
+  left: 25px;
+}
+
+#rightHud {
+  right: 25px;
+}
+
+.panel {
+  border: 1px solid rgba(0,190,255,.28);
+  background: rgba(0,20,45,.35);
+  padding: 14px;
+  margin-bottom: 12px;
+  box-shadow:
+    inset 0 0 25px rgba(0,150,255,.04),
+    0 0 20px rgba(0,100,255,.04);
+}
+
+.panelTitle {
+  color: #52dfff;
+  margin-bottom: 8px;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+.panelValue {
+  color: #dffaff;
+  line-height: 1.7;
+}
+
+/* =========================
+   CENTER CORE
+========================= */
+
+#coreArea {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#core {
+  position: relative;
+  width: 330px;
+  height: 330px;
+}
+
+.ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border: 1px solid rgba(0,220,255,.55);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.ring1 {
+  width: 310px;
+  height: 310px;
+  animation: rotate1 14s linear infinite;
+}
+
+.ring2 {
+  width: 245px;
+  height: 245px;
+  border-style: dashed;
+  animation: rotate2 9s linear infinite;
+}
+
+.ring3 {
+  width: 180px;
+  height: 180px;
+  animation: rotate1 6s linear infinite reverse;
+}
+
+@keyframes rotate1 {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes rotate2 {
+  from {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+}
+
+#aura1,
+#aura2,
+#aura3 {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+}
+
+#aura1 {
+  width: 145px;
+  height: 145px;
+  background: rgba(0,190,255,.05);
+  box-shadow: 0 0 80px rgba(0,200,255,.25);
+}
+
+#aura2 {
+  width: 115px;
+  height: 115px;
+  background: rgba(0,180,255,.08);
+  box-shadow: 0 0 50px rgba(0,200,255,.4);
+}
+
+#aura3 {
+  width: 80px;
+  height: 80px;
+  background: rgba(100,230,255,.15);
+  box-shadow: 0 0 35px rgba(0,220,255,.8);
+}
+
+#coreText {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 4;
+  text-align: center;
+}
+
+#coreName {
+  font-size: 30px;
+  font-weight: bold;
+  letter-spacing: 8px;
+}
+
+#coreState {
+  margin-top: 8px;
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: #62ddff;
+}
+
+/* =========================
+   SOUND DETECTED
+========================= */
+
+#soundDetected {
+  position: fixed;
+  left: 50%;
+  bottom: 80px;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  border: 1px solid rgba(0,220,255,.55);
+  background: rgba(0,30,60,.7);
+  color: #9ceeff;
+  letter-spacing: 2px;
+  opacity: 0;
+  transition: opacity .15s ease;
+  z-index: 50;
+  pointer-events: none;
+}
+
+#soundDetected.show {
+  opacity: 1;
+}
+
+/* =========================
+   COMMAND DISPLAY
+========================= */
+
+#commandDisplay {
+  position: fixed;
+  left: 50%;
+  bottom: 25px;
+  transform: translateX(-50%);
+  width: min(800px, 80vw);
+  text-align: center;
+  font-size: 14px;
+  color: #8eeaff;
+  min-height: 20px;
+  z-index: 10;
+}
+
+/* =========================
+   START BUTTON
+========================= */
+
+#start {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 30px;
+  height: 30px;
+  transform: translate(-50%, -50%);
+  opacity: 0.02;
+  cursor: pointer;
+  z-index: 100;
+}
+
+/* =========================
+   YOUTUBE
+========================= */
+
+#youtubePanel {
+  position: fixed;
+  right: 25px;
+  bottom: 25px;
+  width: 420px;
+  height: 470px;
+  display: none;
+  background: rgba(2,10,25,.96);
+  border: 1px solid rgba(0,220,255,.45);
+  box-shadow: 0 0 40px rgba(0,160,255,.15);
+  z-index: 80;
+}
+
+#youtubePanel.show {
+  display: block;
+}
+
+#youtubeHeader {
+  height: 45px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 12px;
+  color: #6fe6ff;
+  border-bottom: 1px solid rgba(0,220,255,.2);
+}
+
+#youtubeClose {
+  background: none;
+  border: none;
+  color: #8deaff;
+  font-size: 25px;
+  cursor: pointer;
+}
+
+#youtubePlayer {
+  width: 100%;
+  height: 235px;
+}
+
+#youtubeResults {
+  height: 190px;
+  overflow-y: auto;
+}
+
+.youtubeResult {
+  display: flex;
+  gap: 9px;
+  padding: 8px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(0,180,255,.1);
+}
+
+.youtubeResult:hover {
+  background: rgba(0,180,255,.1);
+}
+
+.youtubeResult img {
+  width: 100px;
+  height: 58px;
+  object-fit: cover;
+}
+
+.youtubeResultTitle {
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.youtubeResultChannel {
+  color: #6aadc0;
+  font-size: 10px;
+  margin-top: 5px;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 800px) {
+  .hud {
+    display: none;
+  }
+
+  #youtubePanel {
+    left: 5%;
+    right: 5%;
+    width: 90%;
+  }
+
+  #core {
+    transform: scale(.8);
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div id="background">
+  <div class="scan"></div>
+</div>
+
+<div id="topBar">
+  <div id="logo">E.B.</div>
+  <div id="status">VOICE CORE / SLEEP</div>
+</div>
+
+<div id="leftHud" class="hud">
+
+  <div class="panel">
+    <div class="panelTitle">SYSTEM</div>
+    <div id="systemValue" class="panelValue">
+      STANDBY
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panelTitle">MIC INPUT</div>
+    <div id="micValue" class="panelValue">
+      OFF
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panelTitle">MEMORY</div>
+    <div id="memoryValue" class="panelValue">
+      READY
+    </div>
+  </div>
+
+</div>
+
+<div id="rightHud" class="hud">
+
+  <div class="panel">
+    <div class="panelTitle">VOICE</div>
+    <div id="voiceValue" class="panelValue">
+      KO-KR
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panelTitle">STATE</div>
+    <div id="stateValue" class="panelValue">
+      SLEEP
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panelTitle">AUDIO GAIN</div>
+    <div class="panelValue">
+      x5
+    </div>
+  </div>
+
+</div>
+
+<div id="coreArea">
+  <div id="core">
+
+    <div class="ring ring1"></div>
+    <div class="ring ring2"></div>
+    <div class="ring ring3"></div>
+
+    <div id="aura1"></div>
+    <div id="aura2"></div>
+    <div id="aura3"></div>
+
+    <div id="coreText">
+      <div id="coreName">E.B.</div>
+      <div id="coreState">SLEEP MODE</div>
+    </div>
+
+  </div>
+</div>
+
+<div id="soundDetected">
+  소리가 감지됐습니다
+</div>
+
+<div id="commandDisplay"></div>
+
+<button id="start" onclick="startAssistant()"></button>
+
 <div id="youtubePanel">
 
   <div id="youtubeHeader">
@@ -29,1780 +512,340 @@
   <div id="youtubeResults"></div>
 
 </div>
-#youtubePanel {
 
-  position: fixed;
+<script>
+(() => {
 
-  left: 50%;
+"use strict";
 
-  top: 50%;
+/* =========================================================
+   STATE
+========================================================= */
 
-  transform:
-    translate(-50%, -50%);
+let running = false;
+let awake = false;
+let speaking = false;
+let processing = false;
 
-  width: min(900px, 90vw);
+let recognition = null;
+let recognitionStarting = false;
+let recognitionRestartTimer = null;
 
-  height: min(560px, 80vh);
+let microphoneStream = null;
+let audioContext = null;
+let microphoneSource = null;
+let inputGain = null;
+let analyser = null;
 
-  background:
-    rgba(2, 10, 18, .96);
+let clapCount = 0;
+let clapResetTimer = null;
+let lastClapTime = 0;
 
-  border:
-    1px solid
-    rgba(70, 200, 255, .35);
+let currentAudio = null;
 
-  box-shadow:
-    0 0 60px
-    rgba(20, 150, 255, .18);
-
-  border-radius: 14px;
-
-  overflow: hidden;
-
-  z-index: 150;
-
-  display: none;
-
-}
-
-
-#youtubePanel.show {
-
-  display: block;
-
-}
-
-
-#youtubeHeader {
-
-  height: 45px;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: space-between;
-
-  padding:
-    0 16px;
-
-  border-bottom:
-    1px solid
-    rgba(80, 200, 255, .15);
-
-  color:
-    #bdeeff;
-
-  font-size: 12px;
-
-  letter-spacing: 2px;
-
-}
-
-
-#youtubeClose {
-
-  border: 0;
-
-  background: transparent;
-
-  color: #8bdfff;
-
-  cursor: pointer;
-
-  font-size: 18px;
-
-}
-
-
-#youtubePlayer {
-
-  width: 100%;
-
-  height: calc(
-    100% - 45px
-  );
-
-}
-
-
-#youtubeResults {
-
-  position: absolute;
-
-  left: 15px;
-
-  right: 15px;
-
-  bottom: 15px;
-
-  max-height: 180px;
-
-  overflow-y: auto;
-
-  background:
-    rgba(0, 8, 15, .92);
-
-  border:
-    1px solid
-    rgba(80, 200, 255, .18);
-
-  border-radius: 8px;
-
-  display: none;
-
-}
-
-
-.youtubeResult {
-
-  display: flex;
-
-  gap: 10px;
-
-  padding: 8px;
-
-  cursor: pointer;
-
-  border-bottom:
-    1px solid
-    rgba(80, 200, 255, .08);
-
-}
-
-
-.youtubeResult:hover {
-
-  background:
-    rgba(60, 180, 255, .12);
-
-}
-
-
-.youtubeResult img {
-
-  width: 120px;
-
-  height: 68px;
-
-  object-fit: cover;
-
-  border-radius: 5px;
-
-}
-
-
-.youtubeResultTitle {
-
-  color: #d5f5ff;
-
-  font-size: 12px;
-
-}
-
-
-.youtubeResultChannel {
-
-  color:
-    rgba(180, 230, 255, .5);
-
-  font-size: 10px;
-
-  margin-top: 6px;
-
-}
-* {
-
-  box-sizing:
-    border-box;
-
-}
-
-
-html,
-body {
-
-  width:
-    100%;
-
-  height:
-    100%;
-
-  margin:
-    0;
-
-  overflow:
-    hidden;
-
-  background:
-    #02070d;
-
-  font-family:
-    Arial,
-    sans-serif;
-
-}
-
-
-body {
-
-  color:
-    #bdeeff;
-
-}
-
-
-#app {
-
-  position:
-    fixed;
-
-  inset:
-    0;
-
-  overflow:
-    hidden;
-
-  background:
-
-    radial-gradient(
-      circle at 50% 50%,
-      rgba(
-        0,
-        120,
-        190,
-        .15
-      ),
-      transparent 32%
-    ),
-
-    radial-gradient(
-      circle at 50% 50%,
-      #06131f 0%,
-      #02070d 55%,
-      #000 100%
-    );
-
-}
+let youtubePlayer = null;
+let youtubeReady = false;
+let youtubeResults = [];
+let youtubeCurrentIndex = -1;
+let youtubeCurrentQuery = "";
 
 
 /* =========================================================
-   HUD GRID
+   MEMORY
 ========================================================= */
 
-#grid {
+const MEMORY_KEY = "EB_CONVERSATION_MEMORY";
 
-  position:
-    absolute;
+let conversationMemory = {
+  lastUserText: "",
+  lastAssistantText: "",
+  lastAction: "",
+  lastWebsite: "",
+  lastCity: "",
+  lastSearch: "",
+  lastTopic: "",
+  history: []
+};
 
-  inset:
-    0;
+function loadMemory() {
 
-  opacity:
-    .20;
+  try {
 
-  background-image:
+    const saved =
+      localStorage.getItem(MEMORY_KEY);
 
-    linear-gradient(
-      rgba(
-        70,
-        190,
-        255,
-        .08
-      ) 1px,
-      transparent 1px
-    ),
+    if (!saved) return;
 
-    linear-gradient(
-      90deg,
-      rgba(
-        70,
-        190,
-        255,
-        .08
-      ) 1px,
-      transparent 1px
+    const data =
+      JSON.parse(saved);
+
+    conversationMemory = {
+      ...conversationMemory,
+      ...data
+    };
+
+  } catch (error) {
+
+    console.warn(
+      "메모리 불러오기 실패:",
+      error
     );
-
-  background-size:
-    70px 70px;
-
-  mask-image:
-    radial-gradient(
-      circle,
-      black 0%,
-      transparent 75%
-    );
-
-}
-
-
-/* =========================================================
-   TOP HUD
-========================================================= */
-
-#top {
-
-  position:
-    absolute;
-
-  top:
-    24px;
-
-  left:
-    30px;
-
-  right:
-    30px;
-
-  display:
-    flex;
-
-  justify-content:
-    space-between;
-
-  align-items:
-    center;
-
-  z-index:
-    20;
-
-}
-
-
-.brand {
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  gap:
-    10px;
-
-}
-
-
-.brandDot {
-
-  width:
-    9px;
-
-  height:
-    9px;
-
-  border-radius:
-    50%;
-
-  background:
-    #55d9ff;
-
-  box-shadow:
-    0 0 15px
-    #36c8ff;
-
-}
-
-
-.brandText {
-
-  font-size:
-    18px;
-
-  font-weight:
-    600;
-
-  letter-spacing:
-    5px;
-
-  color:
-    rgba(
-      180,
-      235,
-      255,
-      .9
-    );
-
-}
-
-
-.status {
-
-  font-size:
-    10px;
-
-  letter-spacing:
-    3px;
-
-  color:
-    rgba(
-      120,
-      210,
-      255,
-      .55
-    );
-
-}
-
-
-/* =========================================================
-   SIDE HUD
-========================================================= */
-
-.side {
-
-  position:
-    absolute;
-
-  top:
-    50%;
-
-  transform:
-    translateY(-50%);
-
-  width:
-    170px;
-
-  height:
-    270px;
-
-  opacity:
-    .38;
-
-}
-
-
-#left {
-
-  left:
-    25px;
-
-}
-
-
-#right {
-
-  right:
-    25px;
-
-}
-
-
-.side::before {
-
-  content:
-    "";
-
-  position:
-    absolute;
-
-  inset:
-    0;
-
-  border-top:
-    1px solid
-    rgba(
-      80,
-      200,
-      255,
-      .18
-    );
-
-  border-bottom:
-    1px solid
-    rgba(
-      80,
-      200,
-      255,
-      .18
-    );
-
-}
-
-
-.sideLine {
-
-  position:
-    absolute;
-
-  width:
-    100%;
-
-  height:
-    1px;
-
-  background:
-    rgba(
-      80,
-      200,
-      255,
-      .15
-    );
-
-}
-
-
-.sideLine:nth-child(1) {
-
-  top:
-    25%;
-
-}
-
-
-.sideLine:nth-child(2) {
-
-  top:
-    50%;
-
-}
-
-
-.sideLine:nth-child(3) {
-
-  top:
-    75%;
-
-}
-
-
-/* =========================================================
-   CENTRAL CORE
-========================================================= */
-
-#center {
-
-  position:
-    absolute;
-
-  left:
-    50%;
-
-  top:
-    50%;
-
-  width:
-    430px;
-
-  height:
-    430px;
-
-  transform:
-    translate(
-      -50%,
-      -50%
-    );
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  justify-content:
-    center;
-
-}
-
-
-/* =========================================================
-   ROTATING RINGS
-========================================================= */
-
-.ring {
-
-  position:
-    absolute;
-
-  left:
-    50%;
-
-  top:
-    50%;
-
-  border-radius:
-    50%;
-
-  transform:
-    translate(
-      -50%,
-      -50%
-    );
-
-  border:
-    1px solid
-    rgba(
-      50,
-      190,
-      255,
-      .25
-    );
-
-}
-
-
-.ring1 {
-
-  width:
-    250px;
-
-  height:
-    250px;
-
-  animation:
-    rotate1
-    18s
-    linear
-    infinite;
-
-}
-
-
-.ring2 {
-
-  width:
-    310px;
-
-  height:
-    310px;
-
-  border-style:
-    dashed;
-
-  border-color:
-    rgba(
-      60,
-      200,
-      255,
-      .18
-    );
-
-  animation:
-    rotate2
-    25s
-    linear
-    infinite;
-
-}
-
-
-.ring3 {
-
-  width:
-    375px;
-
-  height:
-    375px;
-
-  border:
-    1px solid
-    rgba(
-      60,
-      180,
-      255,
-      .10
-    );
-
-  animation:
-    rotate1
-    35s
-    linear
-    infinite;
-
-}
-
-
-@keyframes rotate1 {
-
-  from {
-
-    transform:
-      translate(
-        -50%,
-        -50%
-      )
-      rotate(0deg);
 
   }
 
-  to {
+  updateMemoryUI();
+}
 
-    transform:
-      translate(
-        -50%,
-        -50%
-      )
-      rotate(360deg);
+function saveMemory() {
 
+  try {
+
+    localStorage.setItem(
+      MEMORY_KEY,
+      JSON.stringify(conversationMemory)
+    );
+
+  } catch (error) {
+
+    console.warn(
+      "메모리 저장 실패:",
+      error
+    );
+
+  }
+
+  updateMemoryUI();
+}
+
+function rememberUser(text) {
+
+  conversationMemory.lastUserText =
+    text;
+
+  conversationMemory.history.push({
+    role: "user",
+    text,
+    time: Date.now()
+  });
+
+  if (
+    conversationMemory.history.length > 30
+  ) {
+
+    conversationMemory.history =
+      conversationMemory.history.slice(-30);
+
+  }
+
+  saveMemory();
+}
+
+function rememberAssistant(text) {
+
+  conversationMemory.lastAssistantText =
+    text;
+
+  conversationMemory.history.push({
+    role: "assistant",
+    text,
+    time: Date.now()
+  });
+
+  if (
+    conversationMemory.history.length > 30
+  ) {
+
+    conversationMemory.history =
+      conversationMemory.history.slice(-30);
+
+  }
+
+  saveMemory();
+}
+
+function rememberAction(
+  action,
+  data = {}
+) {
+
+  conversationMemory.lastAction =
+    action;
+
+  if (data.website) {
+    conversationMemory.lastWebsite =
+      data.website;
+  }
+
+  if (data.city) {
+    conversationMemory.lastCity =
+      data.city;
+  }
+
+  if (data.search) {
+    conversationMemory.lastSearch =
+      data.search;
+  }
+
+  if (data.topic) {
+    conversationMemory.lastTopic =
+      data.topic;
+  }
+
+  saveMemory();
+}
+
+function updateMemoryUI() {
+
+  const el =
+    document.getElementById(
+      "memoryValue"
+    );
+
+  if (!el) return;
+
+  if (
+    conversationMemory.lastUserText
+  ) {
+
+    el.textContent =
+      "ACTIVE";
+
+  } else {
+
+    el.textContent =
+      "READY";
+
+  }
+}
+
+
+/* =========================================================
+   UI
+========================================================= */
+
+function setCommand(text) {
+
+  const el =
+    document.getElementById(
+      "commandDisplay"
+    );
+
+  if (el) {
+    el.textContent = text || "";
   }
 
 }
 
+function updateStateUI() {
 
-@keyframes rotate2 {
+  const status =
+    document.getElementById(
+      "status"
+    );
 
-  from {
+  const system =
+    document.getElementById(
+      "systemValue"
+    );
 
-    transform:
-      translate(
-        -50%,
-        -50%
-      )
-      rotate(360deg);
+  const mic =
+    document.getElementById(
+      "micValue"
+    );
+
+  const state =
+    document.getElementById(
+      "stateValue"
+    );
+
+  const coreState =
+    document.getElementById(
+      "coreState"
+    );
+
+  if (awake) {
+
+    if (status) {
+      status.textContent =
+        "VOICE CORE / ACTIVE";
+      status.classList.add(
+        "awake"
+      );
+    }
+
+    if (system) {
+      system.textContent =
+        "ACTIVE";
+    }
+
+    if (state) {
+      state.textContent =
+        "AWAKE";
+    }
+
+    if (coreState) {
+      coreState.textContent =
+        "LISTENING";
+    }
+
+  } else {
+
+    if (status) {
+      status.textContent =
+        "VOICE CORE / SLEEP";
+      status.classList.remove(
+        "awake"
+      );
+    }
+
+    if (system) {
+      system.textContent =
+        running
+          ? "STANDBY"
+          : "OFF";
+    }
+
+    if (state) {
+      state.textContent =
+        "SLEEP";
+    }
+
+    if (coreState) {
+      coreState.textContent =
+        "SLEEP MODE";
+    }
 
   }
 
-  to {
-
-    transform:
-      translate(
-        -50%,
-        -50%
-      )
-      rotate(0deg);
-
+  if (mic) {
+    mic.textContent =
+      running
+        ? "ACTIVE"
+        : "OFF";
   }
 
 }
 
 
 /* =========================================================
-   CORE
-========================================================= */
-
-#core {
-
-  position:
-    relative;
-
-  width:
-    130px;
-
-  height:
-    130px;
-
-  border-radius:
-    50%;
-
-  background:
-
-    radial-gradient(
-      circle at 35% 30%,
-      #d9fbff 0%,
-      #66dfff 8%,
-      #159bdf 25%,
-      #07558b 48%,
-      #021c32 72%,
-      #000 100%
-    );
-
-  box-shadow:
-
-    0 0 20px
-    rgba(
-      50,
-      205,
-      255,
-      .8
-    ),
-
-    0 0 55px
-    rgba(
-      20,
-      160,
-      255,
-      .55
-    ),
-
-    0 0 110px
-    rgba(
-      10,
-      120,
-      220,
-      .35
-    );
-
-  z-index:
-    10;
-
-  transition:
-    transform .08s
-    ease-out;
-
-}
-
-
-/* =========================================================
-   CORE INNER
-========================================================= */
-
-#core::before {
-
-  content:
-    "";
-
-  position:
-    absolute;
-
-  inset:
-    17px;
-
-  border-radius:
-    50%;
-
-  border:
-    1px solid
-    rgba(
-      190,
-      245,
-      255,
-      .55
-    );
-
-  box-shadow:
-    inset
-    0 0 25px
-    rgba(
-      80,
-      210,
-      255,
-      .45
-    );
-
-}
-
-
-#core::after {
-
-  content:
-    "";
-
-  position:
-    absolute;
-
-  inset:
-    38px;
-
-  border-radius:
-    50%;
-
-  background:
-    rgba(
-      210,
-      250,
-      255,
-      .75
-    );
-
-  box-shadow:
-    0 0 25px
-    rgba(
-      150,
-      240,
-      255,
-      .9
-    );
-
-  opacity:
-    .75;
-
-}
-
-
-/* =========================================================
-   AURA
-========================================================= */
-
-.aura {
-
-  position:
-    absolute;
-
-  left:
-    50%;
-
-  top:
-    50%;
-
-  width:
-    140px;
-
-  height:
-    140px;
-
-  transform:
-    translate(
-      -50%,
-      -50%
-    );
-
-  border-radius:
-    50%;
-
-  border:
-    1px solid
-    rgba(
-      60,
-      200,
-      255,
-      .35
-    );
-
-  pointer-events:
-    none;
-
-}
-
-
-#aura1 {
-
-  box-shadow:
-    0 0 40px
-    rgba(
-      30,
-      180,
-      255,
-      .35
-    );
-
-}
-
-
-#aura2 {
-
-  width:
-    190px;
-
-  height:
-    190px;
-
-  opacity:
-    .5;
-
-}
-
-
-#aura3 {
-
-  width:
-    260px;
-
-  height:
-    260px;
-
-  opacity:
-    .25;
-
-}
-
-
-/* =========================================================
-   LISTENING
-========================================================= */
-
-.listening #core {
-
-  box-shadow:
-
-    0 0 25px
-    #36caff,
-
-    0 0 65px
-    rgba(
-      30,
-      190,
-      255,
-      .85
-    ),
-
-    0 0 140px
-    rgba(
-      30,
-      160,
-      255,
-      .45
-    );
-
-}
-
-
-/* =========================================================
-   SPEAKING
+   TTS
 ========================================================= */
 
 async function speak(text) {
+
   if (!text) return;
 
   speaking = true;
 
+  setCommand(
+    "E.B.: " + text
+  );
+
   try {
-    console.log("E.B. 응답:", text);
 
-    // 서버 TTS 시도
-    try {
-      const response = await fetch("/api/tts", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          text: text
-        })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-
-        if (data.audio) {
-          if (currentAudio) {
-            currentAudio.pause();
-            currentAudio = null;
-          }
-
-          currentAudio = new Audio(data.audio);
-
-          await new Promise((resolve) => {
-            currentAudio.onended = resolve;
-            currentAudio.onerror = resolve;
-
-            currentAudio.play().catch(() => {
-              resolve();
-            });
-          });
-
-          return;
-        }
-      }
-    } catch (error) {
-      console.warn("서버 TTS 실패:", error);
-    }
-
-    // 서버 TTS가 실패하면 브라우저 음성으로 대체
-    if ("speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
-
-      await new Promise((resolve) => {
-        const utterance = new SpeechSynthesisUtterance(text);
-
-        utterance.lang = "ko-KR";
-        utterance.rate = 1.0;
-        utterance.pitch = 0.9;
-        utterance.volume = 1.0;
-
-        utterance.onend = resolve;
-        utterance.onerror = resolve;
-
-        window.speechSynthesis.speak(utterance);
-
-        // 혹시 onend가 안 오는 경우
-        setTimeout(resolve, 10000);
-      });
-    }
-  } finally {
-    speaking = false;
-  }
-}
-
-
-/* =========================================================
-   SLEEP
-========================================================= */
-
-.sleep #core {
-
-  transform:
-    scale(.68);
-
-  opacity:
-    .55;
-
-  box-shadow:
-
-    0 0 12px
-    rgba(
-      30,
-      130,
-      190,
-      .25
-    );
-
-}
-
-
-.sleep .ring {
-
-  opacity:
-    .25;
-
-}
-
-
-/* =========================================================
-   WAKE
-========================================================= */
-
-.waking #core {
-
-  animation:
-    wakeCore
-    1s
-    ease-in-out
-    infinite;
-
-}
-
-
-@keyframes wakeCore {
-
-  0% {
-
-    transform:
-      scale(.65);
-
-  }
-
-  50% {
-
-    transform:
-      scale(1.12);
-
-  }
-
-  100% {
-
-    transform:
-      scale(.65);
-
-  }
-
-}
-
-
-/* =========================================================
-   SOUND DETECTED
-========================================================= */
-
-#soundDetected {
-
-  position:
-    fixed;
-
-  top:
-    72px;
-
-  right:
-    30px;
-
-  padding:
-    7px 11px;
-
-  border:
-    1px solid
-    rgba(
-      70,
-      200,
-      255,
-      .35
-    );
-
-  border-radius:
-    4px;
-
-  background:
-    rgba(
-      5,
-      25,
-      40,
-      .72
-    );
-
-  color:
-    rgba(
-      160,
-      230,
-      255,
-      .9
-    );
-
-  font-size:
-    10px;
-
-  letter-spacing:
-    2px;
-
-  opacity:
-    0;
-
-  transform:
-    translateY(
-      -6px
-    );
-
-  transition:
-    .15s ease;
-
-  pointer-events:
-    none;
-
-  z-index:
-    100;
-
-}
-
-
-#soundDetected.show {
-
-  opacity:
-    1;
-
-  transform:
-    translateY(0);
-
-}
-
-
-/* =========================================================
-   BOTTOM HUD
-========================================================= */
-
-#bottom {
-
-  position:
-    absolute;
-
-  bottom:
-    25px;
-
-  left:
-    30px;
-
-  right:
-    30px;
-
-  display:
-    flex;
-
-  justify-content:
-    space-between;
-
-  align-items:
-    center;
-
-  z-index:
-    20;
-
-}
-
-
-.bottomLine {
-
-  width:
-    110px;
-
-  height:
-    1px;
-
-  background:
-    rgba(
-      70,
-      200,
-      255,
-      .25
-    );
-
-}
-
-
-.bottomCenter {
-
-  position:
-    absolute;
-
-  left:
-    50%;
-
-  transform:
-    translateX(
-      -50%
-    );
-
-  width:
-    80px;
-
-  height:
-    2px;
-
-  background:
-    rgba(
-      90,
-      215,
-      255,
-      .45
-    );
-
-  box-shadow:
-    0 0 12px
-    rgba(
-      60,
-      200,
-      255,
-      .45
-    );
-
-}
-
-
-/* =========================================================
-   START
-========================================================= */
-
-#start {
-
-  position:
-    fixed;
-
-  bottom:
-    10px;
-
-  left:
-    50%;
-
-  transform:
-    translateX(
-      -50%
-    );
-
-  width:
-    100px;
-
-  height:
-    30px;
-
-  opacity:
-    .01;
-
-  background:
-    transparent;
-
-  border:
-    0;
-
-  color:
-    transparent;
-
-  cursor:
-    pointer;
-
-  z-index:
-    200;
-
-}
-
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
-@media (
-  max-width: 700px
-) {
-
-  #center {
-
-    width:
-      330px;
-
-    height:
-      330px;
-
-  }
-
-
-  .ring1 {
-
-    width:
-      200px;
-
-    height:
-      200px;
-
-  }
-
-
-  .ring2 {
-
-    width:
-      250px;
-
-    height:
-      250px;
-
-  }
-
-
-  .ring3 {
-
-    width:
-      300px;
-
-    height:
-      300px;
-
-  }
-
-
-  #left,
-  #right {
-
-    display:
-      none;
-
-  }
-
-
-  .brandText {
-
-    font-size:
-      14px;
-
-  }
-
-}
-
-</style>
-<script src="https://www.youtube.com/iframe_api"></script>
-</head>
-
-
-<body>
-
-
-<div id="app">
-
-
-  <div id="grid"></div>
-
-
-  <div id="top">
-
-    <div class="brand">
-
-      <div class="brandDot"></div>
-
-      <div class="brandText">
-        E.B.
-      </div>
-
-    </div>
-
-    <div class="status">
-      VOICE CORE
-    </div>
-
-  </div>
-
-
-  <div
-    id="left"
-    class="side"
-  >
-
-    <div class="sideLine"></div>
-    <div class="sideLine"></div>
-    <div class="sideLine"></div>
-
-  </div>
-
-
-  <div
-    id="right"
-    class="side"
-  >
-
-    <div class="sideLine"></div>
-    <div class="sideLine"></div>
-    <div class="sideLine"></div>
-
-  </div>
-
-
-  <div
-    id="center"
-    class="sleep"
-  >
-
-    <div class="ring ring1"></div>
-
-    <div class="ring ring2"></div>
-
-    <div class="ring ring3"></div>
-
-
-    <div
-      id="aura1"
-      class="aura"
-    ></div>
-
-    <div
-      id="aura2"
-      class="aura"
-    ></div>
-
-    <div
-      id="aura3"
-      class="aura"
-    ></div>
-
-
-    <div id="core"></div>
-
-  </div>
-
-
-  <div
-    id="soundDetected"
-  >
-    소리 감지됨
-  </div>
-
-
-  <div id="bottom">
-
-    <div class="bottomLine"></div>
-
-    <div class="bottomCenter"></div>
-
-    <div class="bottomLine"></div>
-
-  </div>
-
-
-</div>
-
-
-<button
-  id="start"
-  onclick="startAssistant()"
->
-시작
-</button>
-
-
-<script src="https://www.youtube.com/iframe_api"></script>
-
-<script>
-/* =========================================================
-   E.B. CORE
-   모든 JavaScript는 이 하나의 script 안에서 관리
-========================================================= */
-
-(() => {
-
-  "use strict";
-
-
-  /* =======================================================
-     1. 상태
-  ======================================================= */
-
-  let running = false;
-  let awake = false;
-  let speaking = false;
-  let processing = false;
-
-  let recognition = null;
-  let recognitionStarting = false;
-  let restartTimer = null;
-
-  let microphoneStream = null;
-  let audioContext = null;
-  let analyser = null;
-  let microphoneSource = null;
-
-  let clapCount = 0;
-  let clapResetTimer = null;
-
-  let currentAudio = null;
-
-
-  /* =======================================================
-     2. 대화 기억
-  ======================================================= */
-
-  const defaultMemory = {
-    lastUserText: "",
-    lastAssistantText: "",
-    lastAction: "",
-    lastWebsite: "",
-    lastCity: "",
-    lastSearch: "",
-    lastTopic: "",
-    history: []
-  };
-
-  let conversationMemory = {
-    ...defaultMemory
-  };
-
-  const MEMORY_KEY =
-    "EB_CONVERSATION_MEMORY";
-
-
-  function loadMemory() {
-
-    try {
-
-      const saved =
-        localStorage.getItem(
-          MEMORY_KEY
-        );
-
-      if (saved) {
-
-        conversationMemory = {
-          ...defaultMemory,
-          ...JSON.parse(saved)
-        };
-
-      }
-
-    } catch (error) {
-
-      console.error(
-        "Memory load error:",
-        error
-      );
-
-      conversationMemory = {
-        ...defaultMemory
-      };
-
-    }
-
-  }
-
-
-  function saveMemory() {
-
-    try {
-
-      localStorage.setItem(
-        MEMORY_KEY,
-        JSON.stringify(
-          conversationMemory
-        )
-      );
-
-    } catch (error) {
-
-      console.error(
-        "Memory save error:",
-        error
-      );
-
-    }
-
-  }
-
-
-  function rememberUser(text) {
-
-    conversationMemory.lastUserText =
-      text;
-
-    conversationMemory.history.push({
-      role: "user",
-      text,
-      time: Date.now()
-    });
-
-    if (
-      conversationMemory.history.length > 12
-    ) {
-
-      conversationMemory.history =
-        conversationMemory.history.slice(-12);
-
-    }
-
-    saveMemory();
-
-  }
-
-
-  function rememberAssistant(text) {
-
-    conversationMemory.lastAssistantText =
-      text;
-
-    conversationMemory.history.push({
-      role: "assistant",
-      text,
-      time: Date.now()
-    });
-
-    if (
-      conversationMemory.history.length > 12
-    ) {
-
-      conversationMemory.history =
-        conversationMemory.history.slice(-12);
-
-    }
-
-    saveMemory();
-
-  }
-
-
-  function rememberAction(
-    action,
-    data = {}
-  ) {
-
-    conversationMemory.lastAction =
-      action;
-
-    if (data.website) {
-
-      conversationMemory.lastWebsite =
-        data.website;
-
-    }
-
-    if (data.city) {
-
-      conversationMemory.lastCity =
-        data.city;
-
-    }
-
-    if (data.search) {
-
-      conversationMemory.lastSearch =
-        data.search;
-
-    }
-
-    saveMemory();
-
-  }
-
-
-  /* =======================================================
-     3. 기본 음성 출력
-  ======================================================= */
-
-  async function speak(text) {
-
-    if (!text) {
-      return;
-    }
-
-    speaking = true;
-
-    rememberAssistant(text);
+    /*
+      서버 TTS
+    */
 
     try {
 
@@ -1821,145 +864,572 @@ async function speak(text) {
           }
         );
 
-      if (!response.ok) {
-        throw new Error(
-          `TTS HTTP ${response.status}`
-        );
-      }
+      if (response.ok) {
 
-      const blob =
-        await response.blob();
+        const data =
+          await response.json();
 
-      const url =
-        URL.createObjectURL(blob);
+        if (data.audio) {
 
-      if (currentAudio) {
+          if (currentAudio) {
 
-        try {
-          currentAudio.pause();
-        } catch (_) {}
+            try {
+              currentAudio.pause();
+            } catch (_) {}
 
-      }
+          }
 
-      currentAudio =
-        new Audio(url);
+          currentAudio =
+            new Audio(data.audio);
 
-      currentAudio.volume = 1;
+          await new Promise(
+            resolve => {
 
-      await new Promise(
-        resolve => {
+              let finished = false;
 
-          currentAudio.onended =
-            resolve;
+              const done = () => {
 
-          currentAudio.onerror =
-            resolve;
+                if (finished) return;
 
-          currentAudio.play()
-            .catch(resolve);
+                finished = true;
+
+                resolve();
+
+              };
+
+              currentAudio.onended =
+                done;
+
+              currentAudio.onerror =
+                done;
+
+              currentAudio
+                .play()
+                .catch(done);
+
+              setTimeout(
+                done,
+                15000
+              );
+
+            }
+          );
+
+          return;
 
         }
-      );
 
-      URL.revokeObjectURL(url);
+      }
 
     } catch (error) {
 
       console.warn(
-        "Server TTS failed:",
+        "서버 TTS 실패:",
         error
       );
 
-      if (
-        "speechSynthesis" in window
-      ) {
+    }
 
-        await new Promise(
-          resolve => {
+    /*
+      브라우저 TTS fallback
+    */
 
-            const utterance =
-              new SpeechSynthesisUtterance(
-                text
-              );
+    if (
+      "speechSynthesis"
+      in window
+    ) {
 
-            utterance.lang = "ko-KR";
-            utterance.rate = 0.88;
-            utterance.pitch = 0.82;
-            utterance.volume = 1;
+      window.speechSynthesis.cancel();
 
-            utterance.onend =
-              resolve;
+      await new Promise(
+        resolve => {
 
-            utterance.onerror =
-              resolve;
-
-            speechSynthesis.cancel();
-
-            speechSynthesis.speak(
-              utterance
+          const utterance =
+            new SpeechSynthesisUtterance(
+              text
             );
 
-          }
-        );
+          utterance.lang =
+            "ko-KR";
 
-      }
+          utterance.rate =
+            1.0;
+
+          utterance.pitch =
+            0.9;
+
+          utterance.volume =
+            1.0;
+
+          utterance.onend =
+            resolve;
+
+          utterance.onerror =
+            resolve;
+
+          window.speechSynthesis.speak(
+            utterance
+          );
+
+          setTimeout(
+            resolve,
+            10000
+          );
+
+        }
+      );
 
     }
+
+  } finally {
 
     speaking = false;
 
   }
 
+}
 
-  async function respond(text) {
+async function respond(text) {
 
-    await speak(text);
+  rememberAssistant(text);
+
+  await speak(text);
+
+}
+
+
+/* =========================================================
+   WAKE / SLEEP
+========================================================= */
+
+async function wakeUp() {
+
+  if (!running) return;
+
+  if (awake) return;
+
+  awake = true;
+
+  updateStateUI();
+
+  setCommand(
+    "E.B. 활성화"
+  );
+
+  await respond(
+    "안녕하세요. 오늘은 무엇을 도와드릴까요?"
+  );
+
+}
+
+async function sleepAssistant() {
+
+  if (!awake) return;
+
+  awake = false;
+
+  updateStateUI();
+
+  await respond(
+    "휴면 상태에 돌입합니다."
+  );
+
+}
+
+
+/* =========================================================
+   MICROPHONE
+========================================================= */
+
+async function startAudioMonitor() {
+
+  if (!microphoneStream) return;
+
+  if (!audioContext) return;
+
+  microphoneSource =
+    audioContext.createMediaStreamSource(
+      microphoneStream
+    );
+
+  /*
+    음성 입력 5배 증폭
+  */
+
+  inputGain =
+    audioContext.createGain();
+
+  inputGain.gain.value =
+    5.0;
+
+  analyser =
+    audioContext.createAnalyser();
+
+  analyser.fftSize =
+    2048;
+
+  analyser.smoothingTimeConstant =
+    0.35;
+
+  microphoneSource.connect(
+    inputGain
+  );
+
+  inputGain.connect(
+    analyser
+  );
+
+  detectSoundLoop();
+
+}
+
+function detectSoundLoop() {
+
+  if (!running || !analyser) {
+    return;
+  }
+
+  const data =
+    new Uint8Array(
+      analyser.fftSize
+    );
+
+  analyser.getByteTimeDomainData(
+    data
+  );
+
+  let sum = 0;
+
+  for (
+    let i = 0;
+    i < data.length;
+    i++
+  ) {
+
+    const value =
+      (data[i] - 128) / 128;
+
+    sum += value * value;
 
   }
 
+  const rms =
+    Math.sqrt(
+      sum / data.length
+    );
 
-  /* =======================================================
-     4. YouTube 상태
-  ======================================================= */
+  const sound =
+    document.getElementById(
+      "soundDetected"
+    );
 
-  let youtubePlayer = null;
-  let youtubeReady = false;
+  /*
+    소리 표시
+  */
 
-  let youtubeResults = [];
-  let youtubeCurrentIndex = -1;
-  let youtubeCurrentQuery = "";
+  if (rms > 0.025) {
+
+    if (sound) {
+      sound.classList.add(
+        "show"
+      );
+    }
+
+  } else {
+
+    if (sound) {
+      sound.classList.remove(
+        "show"
+      );
+    }
+
+  }
+
+  /*
+    박수 감지
+  */
+
+  detectClap(rms);
+
+  requestAnimationFrame(
+    detectSoundLoop
+  );
+
+}
 
 
-  /* =======================================================
-     5. YouTube API 준비
-  ======================================================= */
+/* =========================================================
+   CLAP DETECTION
+========================================================= */
 
-  window.onYouTubeIframeAPIReady =
-    function () {
+function detectClap(rms) {
 
-      if (
-        typeof YT === "undefined" ||
-        !YT.Player
-      ) {
+  if (!running) return;
 
-        console.error(
-          "YouTube API를 불러오지 못했습니다."
+  /*
+    휴면 상태에서만
+    박수를 깨우기 신호로 사용
+  */
+
+  if (awake) return;
+
+  const now =
+    Date.now();
+
+  /*
+    강한 소리
+  */
+
+  if (rms < 0.18) {
+    return;
+  }
+
+  /*
+    너무 빠른 중복 방지
+  */
+
+  if (
+    now - lastClapTime <
+    180
+  ) {
+    return;
+  }
+
+  lastClapTime =
+    now;
+
+  clapCount++;
+
+  clearTimeout(
+    clapResetTimer
+  );
+
+  clapResetTimer =
+    setTimeout(
+      () => {
+        clapCount = 0;
+      },
+      1000
+    );
+
+  if (clapCount >= 2) {
+
+    clapCount = 0;
+
+    clearTimeout(
+      clapResetTimer
+    );
+
+    wakeUp();
+
+  }
+
+}
+
+
+/* =========================================================
+   SPEECH RECOGNITION
+========================================================= */
+
+function setupRecognition() {
+
+  const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+
+    alert(
+      "이 브라우저는 음성 인식을 지원하지 않습니다. Chrome 사용을 권장합니다."
+    );
+
+    return;
+
+  }
+
+  recognition =
+    new SpeechRecognition();
+
+  recognition.lang =
+    "ko-KR";
+
+  recognition.continuous =
+    true;
+
+  recognition.interimResults =
+    false;
+
+  recognition.maxAlternatives =
+    1;
+
+
+  recognition.onstart =
+    () => {
+
+      recognitionStarting =
+        false;
+
+      console.log(
+        "E.B. 음성 인식 시작"
+      );
+
+    };
+
+
+  recognition.onresult =
+    async event => {
+
+      if (!running) return;
+
+      if (!awake) return;
+
+      if (speaking) return;
+
+      if (processing) return;
+
+      const result =
+        event.results[
+          event.results.length - 1
+        ];
+
+      if (!result || !result.isFinal) {
+        return;
+      }
+
+      const text =
+        result[0].transcript
+          .trim();
+
+      if (!text) return;
+
+      console.log(
+        "인식:",
+        text
+      );
+
+      setCommand(
+        "USER: " + text
+      );
+
+      rememberUser(text);
+
+      processing = true;
+
+      try {
+
+        await processCommand(
+          text
         );
 
-        return;
+      } catch (error) {
+
+        console.error(
+          "명령 처리 오류:",
+          error
+        );
+
+        await respond(
+          "명령을 처리하는 중 오류가 발생했습니다."
+        );
+
+      } finally {
+
+        processing = false;
 
       }
+
+    };
+
+
+  recognition.onerror =
+    event => {
+
+      console.warn(
+        "음성 인식 오류:",
+        event.error
+      );
+
+      recognitionStarting =
+        false;
+
+    };
+
+
+  recognition.onend =
+    () => {
+
+      recognitionStarting =
+        false;
+
+      if (!running) return;
+
+      clearTimeout(
+        recognitionRestartTimer
+      );
+
+      recognitionRestartTimer =
+        setTimeout(
+          startRecognition,
+          500
+        );
+
+    };
+
+}
+
+
+function startRecognition() {
+
+  if (!recognition) {
+    return;
+  }
+
+  if (!running) {
+    return;
+  }
+
+  if (recognitionStarting) {
+    return;
+  }
+
+  try {
+
+    recognitionStarting =
+      true;
+
+    recognition.start();
+
+  } catch (error) {
+
+    recognitionStarting =
+      false;
+
+    console.warn(
+      "recognition.start:",
+      error
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   YOUTUBE API
+========================================================= */
+
+window.onYouTubeIframeAPIReady =
+  function () {
+
+    try {
 
       youtubePlayer =
         new YT.Player(
           "youtubePlayer",
           {
-
             width: "100%",
             height: "100%",
-
             videoId: "",
-
             playerVars: {
               autoplay: 0,
               controls: 1,
@@ -1969,15 +1439,17 @@ async function speak(text) {
 
             events: {
 
-              onReady: function () {
+              onReady:
+                function () {
 
-                youtubeReady = true;
+                  youtubeReady =
+                    true;
 
-                console.log(
-                  "YouTube Player 준비 완료"
-                );
+                  console.log(
+                    "YouTube 준비 완료"
+                  );
 
-              },
+                },
 
               onStateChange:
                 function (event) {
@@ -1987,15 +1459,6 @@ async function speak(text) {
                     event.data
                   );
 
-                },
-
-              onAutoplayBlocked:
-                function () {
-
-                  console.warn(
-                    "YouTube 자동재생이 차단되었습니다."
-                  );
-
                 }
 
             }
@@ -2003,358 +1466,331 @@ async function speak(text) {
           }
         );
 
-    };
-
-
-  /* =======================================================
-     6. YouTube 패널
-  ======================================================= */
-
-  function openYouTubePanel() {
-
-    const panel =
-      document.getElementById(
-        "youtubePanel"
-      );
-
-    if (panel) {
-
-      panel.classList.add(
-        "show"
-      );
-
-    }
-
-  }
-
-
-  function closeYouTube() {
-
-    const panel =
-      document.getElementById(
-        "youtubePanel"
-      );
-
-    if (panel) {
-
-      panel.classList.remove(
-        "show"
-      );
-
-    }
-
-  }
-
-
-  /* =======================================================
-     7. YouTube 검색
-  ======================================================= */
-
-  async function searchYouTube(
-    query,
-    autoPlayFirst = false
-  ) {
-
-    try {
-
-      const cleanQuery =
-        String(query || "")
-          .trim();
-
-      if (!cleanQuery) {
-
-        await respond(
-          "검색어를 말씀해주세요."
-        );
-
-        return;
-
-      }
-
-      youtubeCurrentQuery =
-        cleanQuery;
-
-      rememberAction(
-        "youtube-search",
-        {
-          search: cleanQuery,
-          website: "youtube"
-        }
-      );
-
-      openYouTubePanel();
-
-      await respond(
-        `유튜브에서 ${cleanQuery}를 검색하겠습니다.`
-      );
-
-      const response =
-        await fetch(
-          "/api/youtube/search?q=" +
-          encodeURIComponent(
-            cleanQuery
-          )
-        );
-
-      const data =
-        await response.json();
-
-      if (!response.ok) {
-
-        throw new Error(
-          data.error ||
-          `HTTP ${response.status}`
-        );
-
-      }
-
-      youtubeResults =
-        Array.isArray(data.videos)
-          ? data.videos
-          : [];
-
-      youtubeCurrentIndex = -1;
-
-      console.log(
-        "YOUTUBE RESULTS:",
-        youtubeResults
-      );
-
-      renderYouTubeResults();
-
-      if (
-        youtubeResults.length === 0
-      ) {
-
-        await respond(
-          "검색 결과를 찾지 못했습니다."
-        );
-
-        return;
-
-      }
-
-      if (autoPlayFirst) {
-
-        await playYouTubeResult(0);
-
-      } else {
-
-        await respond(
-          `검색 결과 ${youtubeResults.length}개를 찾았습니다. 원하는 영상 번호를 말씀해주세요.`
-        );
-
-      }
-
     } catch (error) {
 
       console.error(
-        "YouTube 검색 오류:",
+        "YouTube Player 오류:",
         error
       );
 
-      await respond(
-        "유튜브 검색 중 오류가 발생했습니다."
-      );
-
     }
 
-  }
+  };
 
 
-  /* =======================================================
-     8. YouTube 결과 표시
-  ======================================================= */
+function openYouTubePanel() {
 
-  function escapeHtml(value) {
-
-    return String(value || "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-
-  }
-
-
-  function renderYouTubeResults() {
-
-    const container =
-      document.getElementById(
-        "youtubeResults"
-      );
-
-    if (!container) {
-      return;
-    }
-
-    container.innerHTML = "";
-
-    youtubeResults.forEach(
-      (video, index) => {
-
-        const item =
-          document.createElement(
-            "div"
-          );
-
-        item.className =
-          "youtubeResult";
-
-        item.innerHTML = `
-          <img
-            src="${escapeHtml(video.thumbnail)}"
-            alt=""
-          >
-
-          <div>
-            <div class="youtubeResultTitle">
-              ${index + 1}. ${escapeHtml(video.title)}
-            </div>
-
-            <div class="youtubeResultChannel">
-              ${escapeHtml(video.channel)}
-            </div>
-          </div>
-        `;
-
-        item.onclick =
-          function () {
-
-            playYouTubeResult(
-              index
-            );
-
-          };
-
-        container.appendChild(
-          item
-        );
-
-      }
+  const panel =
+    document.getElementById(
+      "youtubePanel"
     );
 
+  if (panel) {
+    panel.classList.add(
+      "show"
+    );
   }
 
+}
 
-  /* =======================================================
-     9. YouTube 영상 재생
-  ======================================================= */
+function closeYouTube() {
 
-  async function playYouTubeResult(
-    index
-  ) {
+  const panel =
+    document.getElementById(
+      "youtubePanel"
+    );
 
-    if (
-      !youtubeResults ||
-      !youtubeResults[index]
-    ) {
+  if (panel) {
+    panel.classList.remove(
+      "show"
+    );
+  }
 
-      await respond(
-        "해당 영상을 찾을 수 없습니다."
+}
+
+function escapeHtml(value) {
+
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+
+}
+
+
+async function searchYouTube(
+  query,
+  autoPlayFirst = false
+) {
+
+  const cleanQuery =
+    String(query || "")
+      .trim();
+
+  if (!cleanQuery) {
+
+    await respond(
+      "검색어를 말씀해주세요."
+    );
+
+    return;
+
+  }
+
+  youtubeCurrentQuery =
+    cleanQuery;
+
+  rememberAction(
+    "youtube-search",
+    {
+      search: cleanQuery,
+      website: "youtube"
+    }
+  );
+
+  openYouTubePanel();
+
+  setCommand(
+    "YouTube 검색: " +
+    cleanQuery
+  );
+
+  try {
+
+    await respond(
+      `유튜브에서 ${cleanQuery}를 검색하겠습니다.`
+    );
+
+    const response =
+      await fetch(
+        "/api/youtube/search?q=" +
+        encodeURIComponent(
+          cleanQuery
+        )
       );
 
-      return;
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+
+      throw new Error(
+        data.error ||
+        "YouTube 검색 실패"
+      );
 
     }
 
-    if (
-      !youtubeReady ||
-      !youtubePlayer
-    ) {
-
-      await respond(
-        "유튜브 플레이어가 아직 준비되지 않았습니다."
-      );
-
-      return;
-
-    }
-
-    const video =
-      youtubeResults[index];
+    youtubeResults =
+      Array.isArray(
+        data.videos
+      )
+        ? data.videos
+        : [];
 
     youtubeCurrentIndex =
-      index;
+      -1;
 
-    youtubePlayer.loadVideoById({
-      videoId: video.videoId,
-      startSeconds: 0
-    });
-
-    rememberAction(
-      "youtube-play",
-      {
-        search:
-          youtubeCurrentQuery,
-        website:
-          "youtube"
-      }
-    );
-
-    console.log(
-      "YOUTUBE PLAY:",
-      video
-    );
-
-  }
-
-
-  /* =======================================================
-     10. YouTube 재생 제어
-  ======================================================= */
-
-  function youtubePlay() {
+    renderYouTubeResults();
 
     if (
-      youtubePlayer &&
-      youtubeReady
+      youtubeResults.length === 0
     ) {
 
-      youtubePlayer.playVideo();
+      await respond(
+        "검색 결과를 찾지 못했습니다."
+      );
 
-    }
-
-  }
-
-
-  function youtubePause() {
-
-    if (
-      youtubePlayer &&
-      youtubeReady
-    ) {
-
-      youtubePlayer.pauseVideo();
-
-    }
-
-  }
-
-
-  function youtubeStop() {
-
-    if (
-      youtubePlayer &&
-      youtubeReady
-    ) {
-
-      youtubePlayer.stopVideo();
-
-    }
-
-  }
-
-
-  function youtubeVolumeUp() {
-
-    if (
-      !youtubePlayer ||
-      !youtubeReady
-    ) {
       return;
+
     }
+
+    if (autoPlayFirst) {
+
+      await playYouTubeResult(
+        0
+      );
+
+      return;
+
+    }
+
+    await respond(
+      `검색 결과 ${youtubeResults.length}개를 찾았습니다. 원하는 영상 번호를 말씀해주세요.`
+    );
+
+  } catch (error) {
+
+    console.error(
+      "YouTube 검색 오류:",
+      error
+    );
+
+    await respond(
+      "YouTube 검색 중 오류가 발생했습니다."
+    );
+
+  }
+
+}
+
+
+function renderYouTubeResults() {
+
+  const container =
+    document.getElementById(
+      "youtubeResults"
+    );
+
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  youtubeResults.forEach(
+    (video, index) => {
+
+      const item =
+        document.createElement(
+          "div"
+        );
+
+      item.className =
+        "youtubeResult";
+
+      item.innerHTML = `
+        <img
+          src="${escapeHtml(video.thumbnail || "")}"
+          alt=""
+        >
+        <div>
+          <div class="youtubeResultTitle">
+            ${index + 1}. ${escapeHtml(video.title)}
+          </div>
+          <div class="youtubeResultChannel">
+            ${escapeHtml(video.channel || "")}
+          </div>
+        </div>
+      `;
+
+      item.onclick =
+        () => playYouTubeResult(
+          index
+        );
+
+      container.appendChild(
+        item
+      );
+
+    }
+  );
+
+}
+
+
+async function playYouTubeResult(
+  index
+) {
+
+  if (
+    !youtubeResults[index]
+  ) {
+
+    await respond(
+      "해당 영상을 찾을 수 없습니다."
+    );
+
+    return;
+
+  }
+
+  if (
+    !youtubeReady ||
+    !youtubePlayer
+  ) {
+
+    await respond(
+      "유튜브 플레이어가 아직 준비되지 않았습니다."
+    );
+
+    return;
+
+  }
+
+  const video =
+    youtubeResults[index];
+
+  youtubeCurrentIndex =
+    index;
+
+  youtubePlayer.loadVideoById(
+    video.videoId
+  );
+
+  rememberAction(
+    "youtube-play",
+    {
+      search:
+        youtubeCurrentQuery,
+      website:
+        "youtube"
+    }
+  );
+
+  setCommand(
+    "재생: " +
+    video.title
+  );
+
+}
+
+
+function youtubePlay() {
+
+  if (
+    youtubePlayer &&
+    youtubeReady
+  ) {
+
+    youtubePlayer.playVideo();
+
+  }
+
+}
+
+function youtubePause() {
+
+  if (
+    youtubePlayer &&
+    youtubeReady
+  ) {
+
+    youtubePlayer.pauseVideo();
+
+  }
+
+}
+
+function youtubeStop() {
+
+  if (
+    youtubePlayer &&
+    youtubeReady
+  ) {
+
+    youtubePlayer.stopVideo();
+
+  }
+
+}
+
+function youtubeVolumeUp() {
+
+  if (
+    youtubePlayer &&
+    youtubeReady
+  ) {
 
     const volume =
       youtubePlayer.getVolume();
@@ -2368,15 +1804,14 @@ async function speak(text) {
 
   }
 
+}
 
-  function youtubeVolumeDown() {
+function youtubeVolumeDown() {
 
-    if (
-      !youtubePlayer ||
-      !youtubeReady
-    ) {
-      return;
-    }
+  if (
+    youtubePlayer &&
+    youtubeReady
+  ) {
 
     const volume =
       youtubePlayer.getVolume();
@@ -2390,413 +1825,759 @@ async function speak(text) {
 
   }
 
+}
 
-  function youtubeMute() {
+function youtubeMute() {
 
-    if (
-      youtubePlayer &&
-      youtubeReady
-    ) {
-
-      youtubePlayer.mute();
-
-    }
-
-  }
-
-
-  function youtubeUnmute() {
-
-    if (
-      youtubePlayer &&
-      youtubeReady
-    ) {
-
-      youtubePlayer.unMute();
-
-    }
-
-  }
-
-
-  function youtubeNext() {
-
-    if (
-      youtubeResults.length === 0
-    ) {
-      return;
-    }
-
-    let nextIndex =
-      youtubeCurrentIndex + 1;
-
-    if (
-      nextIndex >= youtubeResults.length
-    ) {
-
-      nextIndex = 0;
-
-    }
-
-    playYouTubeResult(
-      nextIndex
-    );
-
-  }
-
-
-  function youtubePrevious() {
-
-    if (
-      youtubeResults.length === 0
-    ) {
-      return;
-    }
-
-    let previousIndex =
-      youtubeCurrentIndex - 1;
-
-    if (
-      previousIndex < 0
-    ) {
-
-      previousIndex =
-        youtubeResults.length - 1;
-
-    }
-
-    playYouTubeResult(
-      previousIndex
-    );
-
-  }
-
-
-  /* =======================================================
-     11. YouTube 음성 명령
-  ======================================================= */
-
-  async function processYouTubeCommand(
-    text
+  if (
+    youtubePlayer &&
+    youtubeReady
   ) {
 
-    text =
-      String(text || "")
-        .trim()
-        .replace(/\s+/g, " ");
+    youtubePlayer.mute();
 
-    console.log(
-      "YOUTUBE COMMAND:",
+  }
+
+}
+
+function youtubeUnmute() {
+
+  if (
+    youtubePlayer &&
+    youtubeReady
+  ) {
+
+    youtubePlayer.unMute();
+
+  }
+
+}
+
+function youtubeNext() {
+
+  if (
+    youtubeCurrentIndex <
+    youtubeResults.length - 1
+  ) {
+
+    playYouTubeResult(
+      youtubeCurrentIndex + 1
+    );
+
+  }
+
+}
+
+function youtubePrevious() {
+
+  if (
+    youtubeCurrentIndex > 0
+  ) {
+
+    playYouTubeResult(
+      youtubeCurrentIndex - 1
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   WEBSITE OPEN
+========================================================= */
+
+function openWebsite(url) {
+
+  rememberAction(
+    "open-website",
+    {
+      website: url
+    }
+  );
+
+  /*
+    새 탭 시도
+  */
+
+  const newWindow =
+    window.open(
+      url,
+      "_blank"
+    );
+
+  /*
+    팝업 차단이면
+    현재 탭으로 이동
+  */
+
+  if (
+    !newWindow ||
+    newWindow.closed ||
+    typeof newWindow.closed === "undefined"
+  ) {
+
+    window.location.href =
+      url;
+
+  }
+
+}
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+function googleSearch(query) {
+
+  const clean =
+    String(query || "")
+      .trim();
+
+  if (!clean) return;
+
+  rememberAction(
+    "google-search",
+    {
+      search: clean,
+      website: "google"
+    }
+  );
+
+  openWebsite(
+    "https://www.google.com/search?q=" +
+    encodeURIComponent(clean)
+  );
+
+}
+
+function naverSearch(query) {
+
+  const clean =
+    String(query || "")
+      .trim();
+
+  if (!clean) return;
+
+  rememberAction(
+    "naver-search",
+    {
+      search: clean,
+      website: "naver"
+    }
+  );
+
+  openWebsite(
+    "https://search.naver.com/search.naver?query=" +
+    encodeURIComponent(clean)
+  );
+
+}
+
+
+/* =========================================================
+   WEATHER
+========================================================= */
+
+const knownCities = [
+  "서울",
+  "수원",
+  "용인",
+  "인천",
+  "부산",
+  "대전",
+  "대구",
+  "광주",
+  "울산",
+  "제주",
+  "청주",
+  "전주",
+  "춘천",
+  "강릉",
+  "포항"
+];
+
+
+function findCity(text) {
+
+  for (
+    const city of knownCities
+  ) {
+
+    if (
+      text.includes(city)
+    ) {
+
+      return city;
+
+    }
+
+  }
+
+  return null;
+
+}
+
+
+async function getWeather(city) {
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/weather?city=" +
+        encodeURIComponent(city)
+      );
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+
+      throw new Error(
+        data.error ||
+        "날씨 조회 실패"
+      );
+
+    }
+
+    const actualCity =
+      data.city ||
+      city;
+
+    const temperature =
+      data.temperature;
+
+    const feelsLike =
+      data.feelsLike;
+
+    const humidity =
+      data.humidity;
+
+    const wind =
+      data.windSpeed;
+
+    rememberAction(
+      "weather",
+      {
+        city:
+          actualCity
+      }
+    );
+
+    await respond(
+      `${actualCity}의 현재 기온은 ${temperature}도입니다. 체감온도는 ${feelsLike}도, 습도는 ${humidity}퍼센트, 바람은 시속 ${wind}킬로미터입니다.`
+    );
+
+  } catch (error) {
+
+    console.error(
+      "날씨 오류:",
+      error
+    );
+
+    await respond(
+      "날씨를 가져오는 데 실패했습니다."
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   TIME / DATE
+========================================================= */
+
+async function tellTime() {
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/time"
+      );
+
+    if (!response.ok) {
+      throw new Error(
+        "시간 API 오류"
+      );
+    }
+
+    const data =
+      await response.json();
+
+    if (
+      data.time
+    ) {
+
+      await respond(
+        "현재 시간은 " +
+        data.time +
+        "입니다."
+      );
+
+    } else {
+
+      const now =
+        new Date();
+
+      await respond(
+        "현재 시간은 " +
+        now.toLocaleTimeString(
+          "ko-KR"
+        ) +
+        "입니다."
+      );
+
+    }
+
+  } catch (_) {
+
+    const now =
+      new Date();
+
+    await respond(
+      "현재 시간은 " +
+      now.toLocaleTimeString(
+        "ko-KR"
+      ) +
+      "입니다."
+    );
+
+  }
+
+}
+
+
+async function tellDate() {
+
+  const now =
+    new Date();
+
+  const date =
+    now.toLocaleDateString(
+      "ko-KR",
+      {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        weekday: "long"
+      }
+    );
+
+  await respond(
+    "오늘은 " +
+    date +
+    "입니다."
+  );
+
+}
+
+
+/* =========================================================
+   CALCULATOR
+========================================================= */
+
+function calculateExpression(
+  text
+) {
+
+  let expression =
+    text
+      .replaceAll(
+        "더하기",
+        "+"
+      )
+      .replaceAll(
+        "더해",
+        "+"
+      )
+      .replaceAll(
+        "플러스",
+        "+"
+      )
+      .replaceAll(
+        "빼기",
+        "-"
+      )
+      .replaceAll(
+        "빼",
+        "-"
+      )
+      .replaceAll(
+        "마이너스",
+        "-"
+      )
+      .replaceAll(
+        "곱하기",
+        "*"
+      )
+      .replaceAll(
+        "곱해",
+        "*"
+      )
+      .replaceAll(
+        "곱",
+        "*"
+      )
+      .replaceAll(
+        "플러스",
+        "+"
+      )
+      .replaceAll(
+        "나누기",
+        "/"
+      )
+      .replaceAll(
+        "나눠",
+        "/"
+      )
+      .replaceAll(
+        "나누어",
+        "/"
+      )
+      .replaceAll(
+        " ",
+        ""
+      );
+
+  expression =
+    expression.replace(
+      /[^0-9+\-*/().]/g,
+      ""
+    );
+
+  if (!expression) {
+    return null;
+  }
+
+  /*
+    eval 사용 전
+    허용 문자만 남겼음
+  */
+
+  try {
+
+    const result =
+      Function(
+        '"use strict"; return (' +
+        expression +
+        ')'
+      )();
+
+    if (
+      typeof result !==
+      "number" ||
+      !Number.isFinite(result)
+    ) {
+
+      return null;
+
+    }
+
+    return result;
+
+  } catch (_) {
+
+    return null;
+
+  }
+
+}
+
+
+/* =========================================================
+   YOUTUBE COMMAND
+========================================================= */
+
+async function processYouTubeCommand(
+  text
+) {
+
+  const hasYoutube =
+    text.includes("유튜브");
+
+  const hasVideoCommand =
+    /영상|노래|뮤직|재생|틀어|검색/.test(
       text
     );
 
+  /*
+    "첫번째 영상 틀어줘"
+    같은 명령도 허용
+  */
 
-    if (
-      !text.includes("유튜브")
-    ) {
+  if (
+    !hasYoutube &&
+    !hasVideoCommand &&
+    !youtubeResults.length
+  ) {
 
-      return false;
+    return false;
 
-    }
+  }
 
+  /*
+    번호 선택
+  */
 
-    /* 첫 번째 영상 */
+  const numberMatch =
+    text.match(
+      /(\d+)\s*(번|번째)/
+    );
 
-    if (
-      /첫\s*번째|첫번째|1번/.test(text) &&
-      /영상|비디오|재생|틀어/.test(text)
-    ) {
+  if (
+    numberMatch &&
+    youtubeResults.length
+  ) {
 
-      if (
-        youtubeResults.length === 0
-      ) {
+    const index =
+      Number(
+        numberMatch[1]
+      ) - 1;
 
-        await respond(
-          "먼저 유튜브에서 영상을 검색해주세요."
-        );
+    await playYouTubeResult(
+      index
+    );
 
-        return true;
+    return true;
 
-      }
+  }
 
-      await playYouTubeResult(0);
+  if (
+    /첫\s*번째|첫번째|1번/.test(
+      text
+    ) &&
+    youtubeResults.length
+  ) {
 
-      return true;
+    await playYouTubeResult(
+      0
+    );
 
-    }
+    return true;
 
+  }
 
-    /* 번호 영상 */
+  if (
+    /두\s*번째|두번째|2번/.test(
+      text
+    ) &&
+    youtubeResults.length
+  ) {
 
-    const numberMatch =
-      text.match(
-        /(\d+)\s*번/
-      );
+    await playYouTubeResult(
+      1
+    );
 
-    if (
-      numberMatch &&
-      /영상|비디오|재생|틀어/.test(text)
-    ) {
+    return true;
 
-      const index =
-        Number(
-          numberMatch[1]
-        ) - 1;
+  }
 
-      if (
-        index < 0 ||
-        index >= youtubeResults.length
-      ) {
+  if (
+    /세\s*번째|세번째|3번/.test(
+      text
+    ) &&
+    youtubeResults.length
+  ) {
 
-        await respond(
-          "해당 번호의 영상이 없습니다."
-        );
+    await playYouTubeResult(
+      2
+    );
 
-        return true;
+    return true;
 
-      }
+  }
 
-      await playYouTubeResult(
-        index
-      );
+  if (
+    /네\s*번째|네번째|4번/.test(
+      text
+    ) &&
+    youtubeResults.length
+  ) {
 
-      return true;
+    await playYouTubeResult(
+      3
+    );
 
-    }
+    return true;
 
+  }
 
-    /* 일시정지 */
+  /*
+    재생 / 일시정지
+  */
 
-    if (
-      /일시정지|멈춰|pause/i.test(text)
-    ) {
+  if (
+    /일시정지|잠깐 멈춰|멈춰줘/.test(
+      text
+    )
+  ) {
 
-      youtubePause();
+    youtubePause();
 
-      return true;
+    await respond(
+      "일시정지했습니다."
+    );
 
-    }
+    return true;
 
+  }
 
-    /* 재생 */
+  if (
+    /계속 재생|다시 재생|재생해|틀어줘/.test(
+      text
+    ) &&
+    youtubeCurrentIndex >= 0
+  ) {
 
-    if (
-      /재생|틀어|플레이|다시 재생/.test(text) &&
-      !text.includes("검색")
-    ) {
+    youtubePlay();
 
-      youtubePlay();
+    return true;
 
-      return true;
+  }
 
-    }
+  if (
+    /정지|그만 틀어|꺼줘/.test(
+      text
+    )
+  ) {
 
+    youtubeStop();
 
-    /* 정지 */
+    await respond(
+      "영상을 정지했습니다."
+    );
 
-    if (
-      /정지|그만/.test(text)
-    ) {
+    return true;
 
-      youtubeStop();
+  }
 
-      return true;
+  /*
+    다음 / 이전
+  */
 
-    }
+  if (
+    /다음 영상|다음 곡|다음 노래|다음/.test(
+      text
+    ) &&
+    youtubeResults.length
+  ) {
 
+    youtubeNext();
 
-    /* 볼륨 증가 */
+    return true;
 
-    if (
-      /볼륨.*(올려|높여|키워)/.test(text) ||
-      /소리.*(올려|높여|키워)/.test(text)
-    ) {
+  }
 
-      youtubeVolumeUp();
+  if (
+    /이전 영상|이전 곡|이전 노래|이전/.test(
+      text
+    ) &&
+    youtubeResults.length
+  ) {
 
-      return true;
+    youtubePrevious();
 
-    }
+    return true;
 
+  }
 
-    /* 볼륨 감소 */
+  /*
+    볼륨
+  */
 
-    if (
-      /볼륨.*(내려|낮춰|줄여)/.test(text) ||
-      /소리.*(내려|낮춰|줄여)/.test(text)
-    ) {
+  if (
+    /볼륨.*올려|소리.*올려|크게/.test(
+      text
+    )
+  ) {
 
-      youtubeVolumeDown();
+    youtubeVolumeUp();
 
-      return true;
+    await respond(
+      "볼륨을 높였습니다."
+    );
 
-    }
+    return true;
 
+  }
 
-    /* 음소거 */
+  if (
+    /볼륨.*내려|소리.*내려|작게/.test(
+      text
+    )
+  ) {
 
-    if (
-      /음소거|뮤트|소리 꺼/.test(text)
-    ) {
+    youtubeVolumeDown();
 
-      youtubeMute();
+    await respond(
+      "볼륨을 낮췄습니다."
+    );
 
-      return true;
+    return true;
 
-    }
+  }
 
+  if (
+    /음소거|뮤트/.test(
+      text
+    )
+  ) {
 
-    /* 음소거 해제 */
+    youtubeMute();
 
-    if (
-      /음소거 해제|뮤트 해제|소리 켜/.test(text)
-    ) {
+    await respond(
+      "음소거했습니다."
+    );
 
-      youtubeUnmute();
+    return true;
 
-      return true;
+  }
 
-    }
+  if (
+    /음소거 해제|뮤트 해제/.test(
+      text
+    )
+  ) {
 
+    youtubeUnmute();
 
-    /* 다음 영상 */
+    await respond(
+      "음소거를 해제했습니다."
+    );
 
-    if (
-      /다음 영상|다음거|다음 것|다음곡/.test(text)
-    ) {
+    return true;
 
-      youtubeNext();
+  }
 
-      return true;
+  /*
+    YouTube 검색
+  */
 
-    }
+  if (
+    hasYoutube
+  ) {
 
+    let query =
+      text
+        .replace(
+          /유튜브/g,
+          ""
+        )
+        .replace(
+          /에서/g,
+          ""
+        )
+        .replace(
+          /검색해줘|검색해|검색|찾아줘|찾아|틀어줘|틀어|재생해줘|재생해/g,
+          ""
+        )
+        .trim();
 
-    /* 이전 영상 */
-
-    if (
-      /이전 영상|이전거|이전 것|이전곡/.test(text)
-    ) {
-
-      youtubePrevious();
-
-      return true;
-
-    }
-
-
-    /* 검색 */
-
-    if (
-      text.includes("검색") ||
-      text.includes("찾아")
-    ) {
-
-      let query =
-        text;
-
-      query =
-        query
-          .replace(
-            /유튜브에서/g,
-            ""
-          )
-          .replace(
-            /유튜브에/g,
-            ""
-          )
-          .replace(
-            /유튜브로/g,
-            ""
-          )
-          .replace(
-            /유튜브/g,
-            ""
-          );
-
-      query =
-        query
-          .replace(
-            /이라고\s*검색해줘/g,
-            ""
-          )
-          .replace(
-            /라고\s*검색해줘/g,
-            ""
-          )
-          .replace(
-            /이라고\s*검색해/g,
-            ""
-          )
-          .replace(
-            /라고\s*검색해/g,
-            ""
-          );
-
-      query =
-        query
-          .replace(
-            /검색해주세요/g,
-            ""
-          )
-          .replace(
-            /검색해줘/g,
-            ""
-          )
-          .replace(
-            /검색해/g,
-            ""
-          )
-          .replace(
-            /검색/g,
-            ""
-          );
-
-      query =
-        query
-          .replace(
-            /찾아주세요/g,
-            ""
-          )
-          .replace(
-            /찾아줘/g,
-            ""
-          )
-          .replace(
-            /찾아/g,
-            ""
-          );
-
-      query =
-        query
-          .replace(
-            /\s*이라고\s*$/g,
-            ""
-          )
-          .replace(
-            /\s*라고\s*$/g,
-            ""
-          );
-
-      query =
-        query
-          .replace(
-            /["'“”‘’「」『』]/g,
-            ""
-          )
-          .trim();
-
-
-      if (!query) {
-
-        await respond(
-          "유튜브에서 무엇을 검색할까요?"
-        );
-
-        return true;
-
-      }
-
+    if (query) {
 
       await searchYouTube(
         query,
@@ -2807,829 +2588,633 @@ async function speak(text) {
 
     }
 
-
-    return false;
-
   }
 
+  return false;
 
-  /* =======================================================
-     12. 절전 / 깨우기
-  ======================================================= */
-
-  async function wakeUp() {
-
-    if (!running) {
-      return;
-    }
-
-    if (awake) {
-      return;
-    }
-
-    awake = true;
-
-    await respond(
-      "안녕하세요. 오늘은 무엇을 도와드릴까요?"
-    );
-
-  }
+}
 
 
-  async function sleepAssistant() {
+/* =========================================================
+   FOLLOW-UP COMMAND
+========================================================= */
 
-    if (!awake) {
-      return;
-    }
-
-    awake = false;
-
-    await respond(
-      "휴면 상태에 돌입합니다."
-    );
-
-  }
-
-
-  /* =======================================================
-     13. 박수 감지
-  ======================================================= */
-
- function detectClap() {
+async function processFollowUp(
+  text
+) {
 
   if (
-    !analyser ||
-    !running
+    /그것|그거|다시/.test(text) &&
+    conversationMemory.lastSearch
   ) {
+
+    if (
+      conversationMemory.lastWebsite ===
+      "youtube"
+    ) {
+
+      await searchYouTube(
+        conversationMemory.lastSearch
+      );
+
+      return true;
+
+    }
+
+    googleSearch(
+      conversationMemory.lastSearch
+    );
+
+    return true;
+
+  }
+
+  if (
+    /그럼|거기|거기는/.test(text) &&
+    conversationMemory.lastCity
+  ) {
+
+    await getWeather(
+      conversationMemory.lastCity
+    );
+
+    return true;
+
+  }
+
+  return false;
+
+}
+
+
+/* =========================================================
+   MAIN COMMAND PROCESSOR
+========================================================= */
+
+async function processCommand(
+  originalText
+) {
+
+  const text =
+    String(originalText || "")
+      .trim();
+
+  if (!text) return;
+
+  /*
+    휴면
+  */
+
+  if (
+    /^(쉬어|휴면|잠자|잠들어|쉬어줘|휴면해)$/.test(
+      text
+    )
+  ) {
+
+    await sleepAssistant();
+
     return;
+
   }
 
-  const bufferLength =
-    analyser.fftSize;
+  /*
+    YouTube
+  */
 
-  const data =
-    new Uint8Array(bufferLength);
-
-  analyser.getByteTimeDomainData(data);
-
-  let peak = 0;
-  let sum = 0;
-
-  for (
-    let i = 0;
-    i < data.length;
-    i++
+  if (
+    await processYouTubeCommand(
+      text
+    )
   ) {
 
-    const value =
-      (data[i] - 128) / 128;
+    return;
 
-    const abs =
-      Math.abs(value);
-
-    peak =
-      Math.max(
-        peak,
-        abs
-      );
-
-    sum +=
-      value * value;
   }
 
-  const rms =
-    Math.sqrt(
-      sum / data.length
+  /*
+    후속 명령
+  */
+
+  if (
+    await processFollowUp(
+      text
+    )
+  ) {
+
+    return;
+
+  }
+
+  /*
+    시간
+  */
+
+  if (
+    /몇 시|시간 알려|현재 시간|지금 시간/.test(
+      text
+    )
+  ) {
+
+    await tellTime();
+
+    return;
+
+  }
+
+  /*
+    날짜
+  */
+
+  if (
+    /오늘 날짜|오늘이 며칠|며칠이야|날짜 알려|오늘 무슨 날/.test(
+      text
+    )
+  ) {
+
+    await tellDate();
+
+    return;
+
+  }
+
+  /*
+    날씨
+  */
+
+  if (
+    /날씨|기온|온도|비 와|비가 와/.test(
+      text
+    )
+  ) {
+
+    const city =
+      findCity(text) ||
+      conversationMemory.lastCity ||
+      "서울";
+
+    await getWeather(
+      city
     );
 
+    return;
 
-  /* =========================
-     소리 감지 UI
-  ========================= */
+  }
 
-  const soundDetected =
-    document.getElementById(
-      "soundDetected"
-    );
+  /*
+    Google 검색
+  */
 
-  if (soundDetected) {
+  if (
+    /구글에서|구글 검색|구글로 검색/.test(
+      text
+    )
+  ) {
 
-    if (rms > 0.025) {
+    const query =
+      text
+        .replace(
+          /구글에서|구글 검색|구글로 검색/g,
+          ""
+        )
+        .replace(
+          /검색해줘|검색해|검색해|찾아줘|찾아/g,
+          ""
+        )
+        .trim();
 
-      soundDetected.classList.add(
-        "show"
+    if (!query) {
+
+      await respond(
+        "구글에서 무엇을 검색할까요?"
       );
 
-      soundDetected.textContent =
-        "소리가 감지됐습니다";
+      return;
+
+    }
+
+    googleSearch(
+      query
+    );
+
+    await respond(
+      `${query}를 구글에서 검색합니다.`
+    );
+
+    return;
+
+  }
+
+  /*
+    Google 바로 열기
+  */
+
+  if (
+    /구글 열어|구글 켜|구글 들어가|구글 사이트/.test(
+      text
+    )
+  ) {
+
+    openWebsite(
+      "https://www.google.com/"
+    );
+
+    await respond(
+      "구글을 엽니다."
+    );
+
+    return;
+
+  }
+
+  /*
+    Naver
+  */
+
+  if (
+    /네이버에서|네이버 검색/.test(
+      text
+    )
+  ) {
+
+    const query =
+      text
+        .replace(
+          /네이버에서|네이버 검색/g,
+          ""
+        )
+        .replace(
+          /검색해줘|검색해|찾아줘|찾아/g,
+          ""
+        )
+        .trim();
+
+    if (!query) {
+
+      openWebsite(
+        "https://www.naver.com/"
+      );
+
+      await respond(
+        "네이버를 엽니다."
+      );
+
+      return;
+
+    }
+
+    naverSearch(
+      query
+    );
+
+    await respond(
+      `${query}를 네이버에서 검색합니다.`
+    );
+
+    return;
+
+  }
+
+  /*
+    계산
+  */
+
+  if (
+    /계산해|계산/.test(text) ||
+    /\d+\s*(더하기|빼기|곱하기|나누기)\s*\d+/.test(text)
+  ) {
+
+    const result =
+      calculateExpression(
+        text
+      );
+
+    if (
+      result !== null
+    ) {
+
+      await respond(
+        "계산 결과는 " +
+        result +
+        "입니다."
+      );
+
+      return;
+
+    }
+
+  }
+
+  /*
+    기억
+  */
+
+  if (
+    /내가 뭐라고|방금 뭐라고|마지막으로 뭐라고|기억해/.test(
+      text
+    )
+  ) {
+
+    if (
+      conversationMemory.lastUserText
+    ) {
+
+      await respond(
+        "마지막으로 말씀하신 내용은 " +
+        conversationMemory.lastUserText +
+        "입니다."
+      );
 
     } else {
 
-      soundDetected.classList.remove(
-        "show"
+      await respond(
+        "아직 기억할 대화가 없습니다."
       );
 
     }
 
+    return;
+
   }
 
-
-  /* =========================
-     박수 감지
-  ========================= */
+  /*
+    이름
+  */
 
   if (
-    awake
+    /너 이름|이름이 뭐|누구야|누구니/.test(
+      text
+    )
   ) {
+
+    await respond(
+      "저는 이비입니다."
+    );
+
+    return;
+
+  }
+
+  /*
+    인사
+  */
+
+  if (
+    /안녕|반가워|좋은 아침|좋은 저녁/.test(
+      text
+    )
+  ) {
+
+    await respond(
+      "안녕하세요. 저는 이비입니다."
+    );
+
+    return;
+
+  }
+
+  /*
+    감사
+  */
+
+  if (
+    /고마워|감사해|감사합니다/.test(
+      text
+    )
+  ) {
+
+    await respond(
+      "도움이 되었다면 다행입니다."
+    );
+
+    return;
+
+  }
+
+  /*
+    YouTube 바로가기
+  */
+
+  if (
+    /유튜브 열어|유튜브 켜/.test(
+      text
+    )
+  ) {
+
+    openWebsite(
+      "https://www.youtube.com/"
+    );
+
+    await respond(
+      "유튜브를 엽니다."
+    );
+
+    return;
+
+  }
+
+  /*
+    Google 바로가기
+  */
+
+  if (
+    /인터넷 열어|브라우저 열어/.test(
+      text
+    )
+  ) {
+
+    openWebsite(
+      "https://www.google.com/"
+    );
+
+    await respond(
+      "브라우저 검색 페이지를 엽니다."
+    );
+
+    return;
+
+  }
+
+  /*
+    일반 대화
+  */
+
+  if (
+    text.includes("잘 지내") ||
+    text.includes("뭐해")
+  ) {
+
+    await respond(
+      "현재 대기 중입니다. 필요한 명령을 말씀해주세요."
+    );
+
+    return;
+
+  }
+
+  /*
+    알 수 없는 명령
+  */
+
+  await respond(
+    `"${text}" 명령은 아직 처리 방법을 찾지 못했습니다.`
+  );
+
+}
+
+
+/* =========================================================
+   START
+========================================================= */
+
+async function startAssistant() {
+
+  if (running) {
     return;
   }
 
+  try {
 
-  if (
-    peak > 0.12 &&
-    rms > 0.008
-  ) {
+    /*
+      마이크 권한
+    */
 
-    const now =
-      Date.now();
-
-    clapCount++;
-
-    clearTimeout(
-      clapResetTimer
-    );
-
-    clapResetTimer =
-      setTimeout(
-        () => {
-
-          clapCount = 0;
-
-        },
-        1800
+    microphoneStream =
+      await navigator.mediaDevices.getUserMedia(
+        {
+          audio: {
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false,
+            channelCount: 1,
+            sampleRate: 48000
+          }
+        }
       );
 
+    /*
+      AudioContext
+    */
 
-    console.log(
-      "박수 감지:",
-      clapCount
-    );
+    const AudioContext =
+      window.AudioContext ||
+      window.webkitAudioContext;
 
+    if (!AudioContext) {
 
-    if (
-      clapCount >= 2
-    ) {
-
-      clapCount = 0;
-
-      wakeUp();
+      throw new Error(
+        "AudioContext를 지원하지 않습니다."
+      );
 
     }
+
+    audioContext =
+      new AudioContext();
+
+    await audioContext.resume();
+
+    running = true;
+
+    awake = false;
+
+    loadMemory();
+
+    updateStateUI();
+
+    setupRecognition();
+
+    await startAudioMonitor();
+
+    startRecognition();
+
+    console.log(
+      "E.B. STARTED"
+    );
+
+  } catch (error) {
+
+    console.error(
+      "E.B. 시작 오류:",
+      error
+    );
+
+    running = false;
+
+    alert(
+      "마이크 권한을 허용해야 이비를 시작할 수 있습니다."
+    );
 
   }
 
 }
 
-  /* =======================================================
-     14. 마이크 분석
-  ======================================================= */
 
-  function startAudioMonitor() {
+/* =========================================================
+   GLOBAL EXPORTS
+========================================================= */
 
-    if (!audioContext) {
-      return;
-    }
+window.startAssistant =
+  startAssistant;
 
-    analyser =
-      audioContext.createAnalyser();
+window.wakeUp =
+  wakeUp;
 
-    analyser.fftSize =
-      1024;
+window.sleepAssistant =
+  sleepAssistant;
 
-   microphoneSource = audioContext.createMediaStreamSource(microphoneStream);
+window.searchYouTube =
+  searchYouTube;
 
-const inputGain = audioContext.createGain();
+window.playYouTubeResult =
+  playYouTubeResult;
 
-// 수신 음성 증폭
-inputGain.gain.value = 5.0;
+window.youtubePlay =
+  youtubePlay;
 
-analyser = audioContext.createAnalyser();
+window.youtubePause =
+  youtubePause;
 
-analyser.fftSize = 2048;
-analyser.smoothingTimeConstant = 0.35;
+window.youtubeStop =
+  youtubeStop;
 
-// 마이크 → 증폭 → 분석기
-microphoneSource.connect(inputGain);
-inputGain.connect(analyser);
+window.youtubeVolumeUp =
+  youtubeVolumeUp;
 
-    function loop() {
+window.youtubeVolumeDown =
+  youtubeVolumeDown;
 
-      if (!running) {
-        return;
-      }
+window.youtubeMute =
+  youtubeMute;
 
-      detectClap();
+window.youtubeUnmute =
+  youtubeUnmute;
 
-      requestAnimationFrame(
-        loop
-      );
+window.youtubeNext =
+  youtubeNext;
 
-    }
+window.youtubePrevious =
+  youtubePrevious;
 
-    loop();
+window.openYouTubePanel =
+  openYouTubePanel;
 
-  }
+window.closeYouTube =
+  closeYouTube;
 
 
-  /* =======================================================
-     15. 음성 인식
-  ======================================================= */
+/* =========================================================
+   INIT
+========================================================= */
 
-  function setupRecognition() {
+loadMemory();
 
-    const SpeechRecognition =
-      window.SpeechRecognition ||
-      window.webkitSpeechRecognition;
+updateStateUI();
 
-    if (!SpeechRecognition) {
-
-      console.error(
-        "이 브라우저는 음성 인식을 지원하지 않습니다."
-      );
-
-      return;
-
-    }
-
-    recognition =
-      new SpeechRecognition();
-
-    recognition.lang =
-      "ko-KR";
-
-    recognition.continuous =
-      true;
-
-    recognition.interimResults =
-      false;
-
-
-    recognition.onstart =
-      function () {
-
-        recognitionStarting =
-          false;
-
-      };
-
-
-    recognition.onend =
-      function () {
-
-        recognitionStarting =
-          false;
-
-        if (
-          running &&
-          !recognitionStarting
-        ) {
-
-          clearTimeout(
-            restartTimer
-          );
-
-          restartTimer =
-            setTimeout(
-              startRecognition,
-              300
-            );
-
-        }
-
-      };
-
-
-    recognition.onerror =
-      function (event) {
-
-        recognitionStarting =
-          false;
-
-        console.warn(
-          "Speech recognition:",
-          event.error
-        );
-
-      };
-
-
-    recognition.onresult =
-      async function (event) {
-
-        const result =
-          event.results[
-            event.results.length - 1
-          ];
-
-        if (!result) {
-          return;
-        }
-
-        const text =
-          result[0].transcript
-            .trim();
-
-        if (!text) {
-          return;
-        }
-
-        console.log(
-          "USER:",
-          text
-        );
-
-        if (
-          !awake ||
-          speaking ||
-          processing
-        ) {
-
-          return;
-
-        }
-
-        rememberUser(text);
-
-        processing =
-          true;
-
-        try {
-
-          await processCommand(
-            text
-          );
-
-        } catch (error) {
-
-          console.error(
-            "Command error:",
-            error
-          );
-
-          await respond(
-            "명령을 처리하는 중 오류가 발생했습니다."
-          );
-
-        }
-
-        processing =
-          false;
-
-      };
-
-  }
-
-
-  function startRecognition() {
-
-    if (
-      !recognition ||
-      !running ||
-      recognitionStarting
-    ) {
-
-      return;
-
-    }
-
-    try {
-
-      recognitionStarting =
-        true;
-
-      recognition.start();
-
-    } catch (error) {
-
-      recognitionStarting =
-        false;
-
-    }
-
-  }
-
-
-  /* =======================================================
-     16. 일반 명령 처리
-  ======================================================= */
-
-  async function processCommand(
-    rawText
-  ) {
-
-    const text =
-      String(rawText || "")
-        .trim()
-        .replace(/\s+/g, " ");
-
-
-    /* 휴면 */
-
-    if (
-      /^(쉬어|휴면|잠자|절전|자)$/.test(text)
-    ) {
-
-      await sleepAssistant();
-
-      return;
-
-    }
-
-
-    /* YouTube */
-
-    const youtubeHandled =
-      await processYouTubeCommand(
-        text
-      );
-
-    if (youtubeHandled) {
-      return;
-    }
-
-
-    /* 이름 */
-
-    if (
-      /너 이름|이름이 뭐|누구야/.test(text)
-    ) {
-
-      await respond(
-        "저는 이비입니다."
-      );
-
-      return;
-
-    }
-
-
-    /* 인사 */
-
-    if (
-      /안녕|반가워/.test(text)
-    ) {
-
-      await respond(
-        "안녕하세요."
-      );
-
-      return;
-
-    }
-
-
-    /* 시간 */
-
-    if (
-      /몇 시|현재 시간|지금 시간/.test(text)
-    ) {
-
-      const response =
-        await fetch(
-          "/api/time"
-        );
-
-      const data =
-        await response.json();
-
-      await respond(
-        `현재 시간은 ${data.time}입니다.`
-      );
-
-      return;
-
-    }
-
-
-    /* 날짜 */
-
-    if (
-      /오늘 날짜|며칠|몇 월 며칠/.test(text)
-    ) {
-
-      const now =
-        new Date();
-
-      const date =
-        now.toLocaleDateString(
-          "ko-KR",
-          {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-            weekday: "long"
-          }
-        );
-
-      await respond(
-        `오늘은 ${date}입니다.`
-      );
-
-      return;
-
-    }
-
-
-    /* Google */
-
-    if (
-      /구글 열어|구글 켜/.test(text)
-    ) {
-
-      window.open(
-        "https://www.google.com/",
-        "_blank"
-      );
-
-      await respond(
-        "구글을 열겠습니다."
-      );
-
-      return;
-
-    }
-
-
-    /* Naver */
-
-    if (
-      /네이버 열어|네이버 켜/.test(text)
-    ) {
-
-      window.open(
-        "https://www.naver.com/",
-        "_blank"
-      );
-
-      await respond(
-        "네이버를 열겠습니다."
-      );
-
-      return;
-
-    }
-
-
-    /* 일반 검색 */
-
-    if (
-      text.startsWith("검색 ") ||
-      text.startsWith("검색해 ")
-    ) {
-
-      let query =
-        text
-          .replace(
-            /^검색해?\s*/,
-            ""
-          )
-          .trim();
-
-      if (query) {
-
-        window.open(
-          "https://www.google.com/search?q=" +
-          encodeURIComponent(query),
-          "_blank"
-        );
-
-        rememberAction(
-          "search",
-          {
-            search: query
-          }
-        );
-
-        await respond(
-          `${query}를 검색하겠습니다.`
-        );
-
-      }
-
-      return;
-
-    }
-
-
-    /* 감사 */
-
-    if (
-      /고마워|감사해/.test(text)
-    ) {
-
-      await respond(
-        "천만에요."
-      );
-
-      return;
-
-    }
-
-
-    /* 이전 대화 */
-
-    if (
-      /아까|전에|방금 뭐/.test(text)
-    ) {
-
-      if (
-        conversationMemory.lastUserText
-      ) {
-
-        await respond(
-          `방금 말씀하신 내용은 ${conversationMemory.lastUserText}입니다.`
-        );
-
-      } else {
-
-        await respond(
-          "아직 기억하고 있는 대화가 없습니다."
-        );
-
-      }
-
-      return;
-
-    }
-
-
-    /* 기본 응답 */
-
-    await respond(
-      `"${text}"에 대해 말씀하셨군요. 현재 연결된 기능으로 처리할 수 있는 명령인지 확인해볼게요.`
-    );
-
-  }
-
-
-  /* =======================================================
-     17. 이비 시작
-  ======================================================= */
-
-  async function startAssistant() {
-
-    if (running) {
-      return;
-    }
-
-    try {
-
-     microphoneStream = await navigator.mediaDevices.getUserMedia({
-  audio: {
-    echoCancellation: false,
-    noiseSuppression: false,
-    autoGainControl: false,
-    channelCount: 1,
-    sampleRate: 48000
-  }
-});
-
-
-      audioContext =
-        new (
-          window.AudioContext ||
-          window.webkitAudioContext
-        )();
-
-
-      await audioContext.resume();
-
-
-      running =
-        true;
-
-      awake =
-        false;
-
-
-      loadMemory();
-
-      setupRecognition();
-
-      startAudioMonitor();
-
-      startRecognition();
-
-      console.log(
-        "E.B. STARTED"
-      );
-
-
-    } catch (error) {
-
-      console.error(
-        "E.B. 시작 오류:",
-        error
-      );
-
-      alert(
-        "마이크 권한을 허용해야 이비를 시작할 수 있습니다."
-      );
-
-    }
-
-  }
-
-
-  /* =======================================================
-     18. 전역 함수 연결
-  ======================================================= */
-
-  window.startAssistant =
-    startAssistant;
-
-  window.wakeUp =
-    wakeUp;
-
-  window.sleepAssistant =
-    sleepAssistant;
-
-  window.searchYouTube =
-    searchYouTube;
-
-  window.playYouTubeResult =
-    playYouTubeResult;
-
-  window.youtubePlay =
-    youtubePlay;
-
-  window.youtubePause =
-    youtubePause;
-
-  window.youtubeStop =
-    youtubeStop;
-
-  window.youtubeVolumeUp =
-    youtubeVolumeUp;
-
-  window.youtubeVolumeDown =
-    youtubeVolumeDown;
-
-  window.youtubeMute =
-    youtubeMute;
-
-  window.youtubeUnmute =
-    youtubeUnmute;
-
-  window.youtubeNext =
-    youtubeNext;
-
-  window.youtubePrevious =
-    youtubePrevious;
-
-  window.openYouTubePanel =
-    openYouTubePanel;
-
-  window.closeYouTube =
-    closeYouTube;
-
-
-  /* =======================================================
-     19. 초기화
-  ======================================================= */
-
-  loadMemory();
-
-  console.log(
-    "E.B. CORE READY"
-  );
+console.log(
+  "E.B. Voice Core loaded."
+);
 
 })();
 </script>
-  <div id="youtubePanel">
 
-  <div id="youtubeHeader">
-
-    <span>
-      E.B. / YOUTUBE CORE
-    </span>
-
-    <button
-      id="youtubeClose"
-      onclick="closeYouTube()"
-    >
-      ×
-    </button>
-
-  </div>
-
-
-  <div id="youtubePlayer"></div>
-
-
-  <div id="youtubeResults"></div>
-
-</div>
 </body>
-
 </html>
