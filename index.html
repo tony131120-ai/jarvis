@@ -5481,24 +5481,17 @@ async function processYouTubeCommand(text) {
     .replace(/\s+/g, " ");
 
   console.log("YOUTUBE COMMAND:", text);
-async function processYouTubeCommand(text) {
-
-  text = String(text || "")
-    .trim()
-    .replace(/\s+/g, " ");
-
-  console.log("YOUTUBE COMMAND:", text);
 
   if (!text.includes("유튜브")) {
     return false;
   }
 
-  // 첫 번째 영상 재생
+  // 첫 번째 영상
   if (
     /첫\s*번째|첫번째|1번/.test(text) &&
     /영상|비디오|재생|틀어/.test(text)
   ) {
-    if (!youtubeResults.length) {
+    if (!youtubeResults || youtubeResults.length === 0) {
       await respond(
         "먼저 유튜브에서 영상을 검색해주세요."
       );
@@ -5509,15 +5502,14 @@ async function processYouTubeCommand(text) {
     return true;
   }
 
-  // 특정 번호 영상 재생
-  const numberMatch =
-    text.match(/(\d+)\s*번/);
+  // 번호로 영상 선택
+  const numberMatch = text.match(/(\d+)\s*번/);
 
   if (
     numberMatch &&
     /영상|비디오|재생|틀어/.test(text)
   ) {
-    if (!youtubeResults.length) {
+    if (!youtubeResults || youtubeResults.length === 0) {
       await respond(
         "먼저 유튜브에서 영상을 검색해주세요."
       );
@@ -5541,20 +5533,20 @@ async function processYouTubeCommand(text) {
     return true;
   }
 
-  // 재생
+  // 일시정지
   if (
-    /재생|틀어|플레이/.test(text) &&
-    !/검색/.test(text)
+    /일시정지|멈춰|pause/i.test(text)
   ) {
-    youtubePlay();
+    youtubePause();
     return true;
   }
 
-  // 일시정지
+  // 재생
   if (
-    /일시정지|멈춰|정지|pause/i.test(text)
+    /재생|틀어|플레이|다시 재생/.test(text) &&
+    !/검색/.test(text)
   ) {
-    youtubePause();
+    youtubePlay();
     return true;
   }
 
@@ -5566,7 +5558,7 @@ async function processYouTubeCommand(text) {
     return true;
   }
 
-  // 음량 올리기
+  // 볼륨 증가
   if (
     /볼륨.*(올려|높여|키워)|소리.*(올려|높여|키워)/.test(text)
   ) {
@@ -5574,7 +5566,7 @@ async function processYouTubeCommand(text) {
     return true;
   }
 
-  // 음량 내리기
+  // 볼륨 감소
   if (
     /볼륨.*(내려|낮춰|줄여)|소리.*(내려|낮춰|줄여)/.test(text)
   ) {
@@ -5600,7 +5592,7 @@ async function processYouTubeCommand(text) {
 
   // 다음 영상
   if (
-    /다음 영상|다음거|다음 걸|다음곡/.test(text)
+    /다음 영상|다음거|다음 것|다음곡/.test(text)
   ) {
     youtubeNext();
     return true;
@@ -5608,13 +5600,13 @@ async function processYouTubeCommand(text) {
 
   // 이전 영상
   if (
-    /이전 영상|이전거|이전 걸|이전곡/.test(text)
+    /이전 영상|이전거|이전 것|이전곡/.test(text)
   ) {
     youtubePrevious();
     return true;
   }
 
-  // 검색
+  // 유튜브 검색
   if (
     text.includes("검색") ||
     text.includes("찾아")
@@ -5629,10 +5621,10 @@ async function processYouTubeCommand(text) {
       .replace(/유튜브/g, "");
 
     query = query
-      .replace(/라고\s*검색해줘/g, "")
       .replace(/이라고\s*검색해줘/g, "")
-      .replace(/라고\s*검색해/g, "")
+      .replace(/라고\s*검색해줘/g, "")
       .replace(/이라고\s*검색해/g, "")
+      .replace(/라고\s*검색해/g, "")
       .replace(/검색해주세요/g, "")
       .replace(/검색해줘/g, "")
       .replace(/검색해/g, "")
@@ -5673,7 +5665,6 @@ async function processYouTubeCommand(text) {
 
   return false;
 }
-
   /* =====================================================
      유튜브 검색
      예:
