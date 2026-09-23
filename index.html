@@ -1346,7 +1346,105 @@ body {
 
 
 <script>
+window.startAssistant = async function () {
+  try {
+    console.log("E.B. 마이크 시작");
 
+    if (!navigator.mediaDevices) {
+      throw new Error(
+        "이 브라우저에서는 마이크 기능을 사용할 수 없습니다."
+      );
+    }
+
+    if (!navigator.mediaDevices.getUserMedia) {
+      throw new Error(
+        "getUserMedia를 사용할 수 없습니다."
+      );
+    }
+
+    microphoneStream =
+      await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false
+        }
+      });
+
+    console.log("마이크 권한 획득 성공");
+
+    audioContext =
+      new (
+        window.AudioContext ||
+        window.webkitAudioContext
+      )();
+
+    if (audioContext.state === "suspended") {
+      await audioContext.resume();
+    }
+
+    analyser =
+      audioContext.createAnalyser();
+
+    analyser.fftSize = 2048;
+    analyser.smoothingTimeConstant = 0.15;
+
+    microphoneSource =
+      audioContext.createMediaStreamSource(
+        microphoneStream
+      );
+
+    microphoneSource.connect(analyser);
+
+    frequencyData =
+      new Uint8Array(
+        analyser.frequencyBinCount
+      );
+
+    running = true;
+
+    console.log("오디오 분석 시작");
+
+    if (typeof startVisualizer === "function") {
+      startVisualizer();
+    }
+
+    if (typeof startClapDetection === "function") {
+      startClapDetection();
+    }
+
+    if (
+      typeof recognition !== "undefined" &&
+      recognition
+    ) {
+      try {
+        recognition.start();
+      } catch (e) {
+        console.log(
+          "음성 인식 시작:",
+          e.message
+        );
+      }
+    }
+
+    if (typeof setState === "function") {
+      setState("sleep");
+    }
+
+  } catch (error) {
+    console.error(
+      "마이크 실행 실패:",
+      error
+    );
+
+    alert(
+      "마이크를 실행할 수 없습니다.\n\n" +
+      "브라우저의 마이크 권한을 허용했는지 확인해주세요.\n\n" +
+      "오류: " +
+      error.message
+    );
+  }
+};
 /* =========================================================
    STATE
 ========================================================= */
