@@ -4731,7 +4731,9 @@ async function searchYouTube(
       String(query || "").trim();
 
     if (!cleanQuery) {
-      speak("검색어를 말씀해주세요.");
+      await respond(
+        "검색어를 말씀해주세요."
+      );
       return;
     }
 
@@ -4739,6 +4741,18 @@ async function searchYouTube(
       cleanQuery;
 
     openYouTubePanel();
+
+    rememberAction(
+      "youtube-search",
+      {
+        search: cleanQuery,
+        website: "youtube"
+      }
+    );
+
+    await respond(
+      `유튜브에서 ${cleanQuery}를 검색하겠습니다.`
+    );
 
     const response =
       await fetch(
@@ -4752,7 +4766,7 @@ async function searchYouTube(
     if (!response.ok) {
       throw new Error(
         data.error ||
-        "YouTube 검색에 실패했습니다."
+        `HTTP ${response.status}`
       );
     }
 
@@ -4771,89 +4785,6 @@ async function searchYouTube(
     renderYouTubeResults();
 
     if (
-      autoPlayFirst &&
-      youtubeResults.length > 0
-    ) {
-
-      playYouTubeResult(0);
-
-    }
-
-  }
-
-  catch (error) {
-
-    console.error(
-      "YouTube 검색 오류:",
-      error
-    );
-
-    speak(
-      "YouTube 검색 중 오류가 발생했습니다."
-    );
-
-  }
-
-}
-
-  
-
-
-
-  openYouTubePanel();
-
-
-  youtubeCurrentQuery =
-    query;
-
-
-  rememberAction(
-    "youtube-search",
-    {
-      search: query,
-      website: "youtube"
-    }
-  );
-
-
-  await respond(
-    `유튜브에서 ${query}를 검색하겠습니다.`
-  );
-
-
-  try {
-
-    const response =
-      await fetch(
-        "/api/youtube/search?q=" +
-        encodeURIComponent(
-          query
-        )
-      );
-
-
-    const data =
-      await response.json();
-
-
-    if (!response.ok) {
-
-      throw new Error(
-        data.error ||
-        `HTTP ${response.status}`
-      );
-
-    }
-
-
-    youtubeResults =
-      data.videos || [];
-
-
-    renderYouTubeResults();
-
-
-    if (
       youtubeResults.length === 0
     ) {
 
@@ -4862,20 +4793,13 @@ async function searchYouTube(
       );
 
       return;
-
     }
-
 
     if (autoPlayFirst) {
 
-     youtubePlayer.loadVideoById({
-  videoId: video.videoId,
-  startSeconds: 0
-});
+      await playYouTubeResult(0);
 
-    }
-
-    else {
+    } else {
 
       await respond(
         `검색 결과 ${youtubeResults.length}개를 찾았습니다. 원하는 영상 번호를 말씀해주세요.`
@@ -4892,7 +4816,6 @@ async function searchYouTube(
       error
     );
 
-
     await respond(
       "유튜브 검색에 실패했습니다."
     );
@@ -4900,7 +4823,6 @@ async function searchYouTube(
   }
 
 }
-
 
 /* =========================================================
    RENDER SEARCH RESULTS
