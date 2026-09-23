@@ -102,7 +102,7 @@ app.get(
 /* =========================================================
    WEATHER
 ========================================================= */
-
+const weatherCache = new Map();
 app.get("/api/weather", async (req, res) => {
   try {
     const cityInput = String(req.query.city || "서울").trim();
