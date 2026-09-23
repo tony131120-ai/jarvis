@@ -2425,16 +2425,18 @@ function calculateExpression(
 
 async function processYouTubeCommand(text) {
 
-  const t = String(text || "").trim();
+  const t =
+    String(text || "")
+      .trim();
 
-  // ==========================================
-  // 1. 유튜브 사이트 자체를 열어달라는 명령
-  // 반드시 검색보다 먼저 처리
-  // ==========================================
+
+  /* =====================================================
+     1. 유튜브 사이트 열기
+  ===================================================== */
 
   if (
-    /^유튜브\s*(열어|열어줘|켜|켜줘|들어가|들어가줘|사이트 열어|사이트 열어줘)?$/i.test(t) ||
-    /^(유튜브 사이트)\s*(열어|열어줘|켜|켜줘)?$/i.test(t)
+    /^유튜브\s*(열어|열어줘|켜|켜줘|들어가|들어가줘)?$/i.test(t) ||
+    /^유튜브 사이트\s*(열어|열어줘|켜|켜줘)?$/i.test(t)
   ) {
 
     rememberAction(
@@ -2455,8 +2457,313 @@ async function processYouTubeCommand(text) {
     );
 
     return true;
+
   }
 
+
+  /* =====================================================
+     2. 번호로 영상 재생
+     
+     반드시 검색보다 먼저 확인
+     
+     예:
+     가로에 있는 1번 영상 틀어줘
+     1번 영상 틀어줘
+     2번 틀어줘
+     첫 번째 영상 틀어줘
+  ===================================================== */
+
+  if (
+    youtubeResults &&
+    youtubeResults.length > 0
+  ) {
+
+    let numberMatch =
+      t.match(
+        /(?:가로에\s*있는\s*)?(\d+)\s*(?:번|번째)(?:\s*영상)?/
+      );
+
+
+    /*
+      첫 번째 / 첫번째
+    */
+
+    if (
+      !numberMatch &&
+      /첫\s*번째|첫번째/.test(t)
+    ) {
+
+      numberMatch = ["", "1"];
+
+    }
+
+
+    if (numberMatch) {
+
+      const number =
+        Number(
+          numberMatch[1]
+        );
+
+      const index =
+        number - 1;
+
+
+      if (
+        number >= 1 &&
+        youtubeResults[index]
+      ) {
+
+        const video =
+          youtubeResults[index];
+
+        youtubeCurrentIndex =
+          index;
+
+
+        rememberAction(
+          "youtube-play",
+          {
+            search:
+              youtubeCurrentQuery,
+            website:
+              "youtube"
+          }
+        );
+
+
+        const videoUrl =
+          "https://www.youtube.com/watch?v=" +
+          encodeURIComponent(
+            video.videoId
+          );
+
+
+        /*
+          영상 자체를 새 탭에서 실행
+        */
+
+        window.open(
+          videoUrl,
+          "_blank",
+          "noopener,noreferrer"
+        );
+
+
+        setCommand(
+          "재생: " +
+          video.title
+        );
+
+
+        await respond(
+          `${number}번 영상을 재생합니다.`
+        );
+
+        return true;
+
+      }
+
+
+      await respond(
+        `${number}번 영상은 검색 결과에 없습니다.`
+      );
+
+      return true;
+
+    }
+
+  }
+
+
+  /* =====================================================
+     3. 유튜브 검색
+     
+     예:
+     유튜브에서 포켓몬 검색해줘
+     유튜브로 고양이 검색해줘
+     유튜브 검색 마크
+  ===================================================== */
+
+  if (
+    /^유튜브에서\s+/i.test(t) ||
+    /^유튜브로\s+/i.test(t) ||
+    /^유튜브\s+검색/i.test(t)
+  ) {
+
+    let query =
+      t
+        .replace(
+          /^유튜브에서\s*/i,
+          ""
+        )
+        .replace(
+          /^유튜브로\s*/i,
+          ""
+        )
+        .replace(
+          /^유튜브\s*검색\s*/i,
+          ""
+        )
+        .replace(
+          /검색해줘$/i,
+          ""
+        )
+        .replace(
+          /검색해$/i,
+          ""
+        )
+        .replace(
+          /검색$/i,
+          ""
+        )
+        .trim();
+
+
+    if (!query) {
+
+      await respond(
+        "유튜브에서 무엇을 검색할까요?"
+      );
+
+      return true;
+
+    }
+
+
+    /*
+      검색어 기억
+    */
+
+    youtubeCurrentQuery =
+      query;
+
+    youtubeCurrentIndex =
+      -1;
+
+
+    rememberAction(
+      "youtube-search",
+      {
+        search:
+          query,
+        website:
+          "youtube"
+      }
+    );
+
+
+    setCommand(
+      "YouTube 검색: " +
+      query
+    );
+
+
+    try {
+
+      /*
+        먼저 서버 API에서
+        실제 검색 결과 가져오기
+      */
+
+      const response =
+        await fetch(
+          "/api/youtube/search?q=" +
+          encodeURIComponent(
+            query
+          )
+        );
+
+
+      const data =
+        await response.json();
+
+
+      if (!response.ok) {
+
+        throw new Error(
+          data.error ||
+          "YouTube 검색 실패"
+        );
+
+      }
+
+
+      youtubeResults =
+        Array.isArray(
+          data.videos
+        )
+          ? data.videos
+          : [];
+
+
+      if (
+        youtubeResults.length === 0
+      ) {
+
+        await respond(
+          `${query}의 유튜브 검색 결과를 찾지 못했습니다.`
+        );
+
+        return true;
+
+      }
+
+
+      /*
+        검색 결과를 화면에도 저장
+      */
+
+      renderYouTubeResults();
+
+
+      /*
+        실제 YouTube 검색 페이지도
+        새 탭으로 열기
+      */
+
+      const searchUrl =
+        "https://www.youtube.com/results?search_query=" +
+        encodeURIComponent(
+          query
+        );
+
+
+      window.open(
+        searchUrl,
+        "_blank",
+        "noopener,noreferrer"
+      );
+
+
+      await respond(
+        `${query}를 유튜브에서 검색했습니다. 검색 결과 ${youtubeResults.length}개를 찾았습니다.`
+      );
+
+      return true;
+
+
+    } catch (error) {
+
+      console.error(
+        "YouTube 검색 오류:",
+        error
+      );
+
+      await respond(
+        "유튜브 검색 중 오류가 발생했습니다."
+      );
+
+      return true;
+
+    }
+
+  }
+
+
+  return false;
+
+}
 
   // ==========================================
   // 2. YouTube 검색
