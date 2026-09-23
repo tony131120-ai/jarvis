@@ -1348,7 +1348,7 @@ body {
 <script>
 
 /* =========================================================
-   STATE
+   E.B. CORE STATE
 ========================================================= */
 
 let running = false;
@@ -1375,6 +1375,208 @@ let currentAudio = null;
 
 
 /* =========================================================
+   CONVERSATION MEMORY
+========================================================= */
+
+const defaultMemory = {
+  lastUserText: "",
+  lastAssistantText: "",
+
+  lastAction: "",
+  lastWebsite: "",
+  lastCity: "",
+  lastSearch: "",
+
+  lastTopic: "",
+
+  history: []
+};
+
+
+let conversationMemory = {
+  ...defaultMemory
+};
+
+
+/* =========================================================
+   LOAD MEMORY
+========================================================= */
+
+try {
+
+  const saved =
+    localStorage.getItem(
+      "EB_CONVERSATION_MEMORY"
+    );
+
+  if (saved) {
+
+    const parsed =
+      JSON.parse(saved);
+
+    conversationMemory = {
+      ...defaultMemory,
+      ...parsed
+    };
+
+  }
+
+}
+catch (error) {
+
+  console.warn(
+    "대화 기억 불러오기 실패:",
+    error
+  );
+
+}
+
+
+/* =========================================================
+   SAVE MEMORY
+========================================================= */
+
+function saveMemory() {
+
+  try {
+
+    localStorage.setItem(
+      "EB_CONVERSATION_MEMORY",
+      JSON.stringify(
+        conversationMemory
+      )
+    );
+
+  }
+  catch (error) {
+
+    console.warn(
+      "대화 기억 저장 실패:",
+      error
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   REMEMBER
+========================================================= */
+
+function rememberUser(text) {
+
+  conversationMemory.lastUserText =
+    text;
+
+  conversationMemory.history.push({
+    role: "user",
+    text: text,
+    time: Date.now()
+  });
+
+
+  if (
+    conversationMemory.history.length > 12
+  ) {
+
+    conversationMemory.history =
+      conversationMemory.history.slice(-12);
+
+  }
+
+
+  saveMemory();
+
+}
+
+
+function rememberAssistant(text) {
+
+  conversationMemory.lastAssistantText =
+    text;
+
+  conversationMemory.history.push({
+    role: "assistant",
+    text: text,
+    time: Date.now()
+  });
+
+
+  if (
+    conversationMemory.history.length > 12
+  ) {
+
+    conversationMemory.history =
+      conversationMemory.history.slice(-12);
+
+  }
+
+
+  saveMemory();
+
+}
+
+
+/* =========================================================
+   ACTION MEMORY
+========================================================= */
+
+function rememberAction(
+  action,
+  data = {}
+) {
+
+  conversationMemory.lastAction =
+    action;
+
+
+  if (
+    data.website !== undefined
+  ) {
+
+    conversationMemory.lastWebsite =
+      data.website;
+
+  }
+
+
+  if (
+    data.city !== undefined
+  ) {
+
+    conversationMemory.lastCity =
+      data.city;
+
+  }
+
+
+  if (
+    data.search !== undefined
+  ) {
+
+    conversationMemory.lastSearch =
+      data.search;
+
+  }
+
+
+  if (
+    data.topic !== undefined
+  ) {
+
+    conversationMemory.lastTopic =
+      data.topic;
+
+  }
+
+
+  saveMemory();
+
+}
+
+
+/* =========================================================
    ELEMENTS
 ========================================================= */
 
@@ -1397,23 +1599,34 @@ const aura3 =
   document.getElementById("aura3");
 
 const soundDetected =
-  document.getElementById("soundDetected");
+  document.getElementById(
+    "soundDetected"
+  );
 
 
 /* =========================================================
-   START ASSISTANT
+   START
 ========================================================= */
 
 async function startAssistant() {
 
   if (running) {
-    console.log("E.B. is already running.");
+
+    console.log(
+      "E.B. already running."
+    );
+
     return;
+
   }
+
 
   try {
 
-    console.log("E.B. 마이크 시작");
+    console.log(
+      "E.B. 마이크 시작"
+    );
+
 
     if (
       !navigator.mediaDevices ||
@@ -1456,7 +1669,8 @@ async function startAssistant() {
 
 
     if (
-      audioContext.state === "suspended"
+      audioContext.state ===
+      "suspended"
     ) {
 
       await audioContext.resume();
@@ -1468,9 +1682,12 @@ async function startAssistant() {
       audioContext.createAnalyser();
 
 
-    analyser.fftSize = 2048;
+    analyser.fftSize =
+      2048;
 
-    analyser.smoothingTimeConstant = 0.08;
+
+    analyser.smoothingTimeConstant =
+      0.08;
 
 
     microphoneSource =
@@ -1502,10 +1719,7 @@ async function startAssistant() {
 
     speaking = false;
 
-
-    console.log(
-      "오디오 분석 시작"
-    );
+    processing = false;
 
 
     startVisualizer();
@@ -1515,7 +1729,9 @@ async function startAssistant() {
     setupRecognition();
 
 
-    setState("sleep");
+    setState(
+      "sleep"
+    );
 
 
     console.log(
@@ -1534,7 +1750,7 @@ async function startAssistant() {
 
     alert(
       "마이크를 실행할 수 없습니다.\n\n" +
-      "브라우저의 마이크 권한을 허용했는지 확인해주세요.\n\n" +
+      "브라우저의 마이크 권한을 확인해주세요.\n\n" +
       "오류: " +
       error.message
     );
@@ -1543,10 +1759,6 @@ async function startAssistant() {
 
 }
 
-
-/*
-  HTML onclick에서 반드시 접근 가능하도록 등록
-*/
 
 window.startAssistant =
   startAssistant;
@@ -1648,7 +1860,7 @@ function startVisualizer() {
 
     const s1 =
       1 +
-      strength * 1.0;
+      strength;
 
 
     const s2 =
@@ -1726,7 +1938,7 @@ function setupRecognition() {
   if (!SpeechRecognition) {
 
     console.warn(
-      "이 브라우저는 SpeechRecognition을 지원하지 않습니다."
+      "SpeechRecognition을 지원하지 않는 브라우저입니다."
     );
 
     return;
@@ -1789,10 +2001,6 @@ function setupRecognition() {
         "not-allowed"
       ) {
 
-        console.error(
-          "음성 인식 권한이 거부되었습니다."
-        );
-
         return;
 
       }
@@ -1847,7 +2055,7 @@ function startRecognition() {
 
   }
 
-  catch (error) {
+  catch {
 
     recognitionStarting =
       false;
@@ -1907,7 +2115,8 @@ function handleSpeech(event) {
   }
 
 
-  let finalText = "";
+  let finalText =
+    "";
 
 
   for (
@@ -1929,12 +2138,12 @@ function handleSpeech(event) {
   }
 
 
-  if (
-    !finalText.trim()
-  ) {
+  finalText =
+    finalText.trim();
 
+
+  if (!finalText) {
     return;
-
   }
 
 
@@ -1945,14 +2154,14 @@ function handleSpeech(event) {
 
 
   processCommand(
-    finalText.trim()
+    finalText
   );
 
 }
 
 
 /* =========================================================
-   COMMAND
+   COMMAND PROCESSOR
 ========================================================= */
 
 async function processCommand(raw) {
@@ -1986,7 +2195,14 @@ async function processCommand(raw) {
   }
 
 
-  /* 휴면 */
+  rememberUser(
+    text
+  );
+
+
+  /* =====================================================
+     SLEEP
+  ===================================================== */
 
   if (
     text.includes("쉬어") ||
@@ -1996,8 +2212,6 @@ async function processCommand(raw) {
     text === "자"
   ) {
 
-    processing = false;
-
     sleepAssistant();
 
     return;
@@ -2005,7 +2219,32 @@ async function processCommand(raw) {
   }
 
 
-  /* 인사 */
+  /* =====================================================
+     CONTEXTUAL COMMANDS
+  ===================================================== */
+
+  if (
+    isFollowUpCommand(text)
+  ) {
+
+    const handled =
+      await handleFollowUp(
+        text
+      );
+
+
+    if (handled) {
+
+      return;
+
+    }
+
+  }
+
+
+  /* =====================================================
+     GREETING
+  ===================================================== */
 
   if (
     text.includes("안녕") ||
@@ -2022,7 +2261,9 @@ async function processCommand(raw) {
   }
 
 
-  /* 이름 */
+  /* =====================================================
+     NAME
+  ===================================================== */
 
   if (
     text.includes("이름") &&
@@ -2036,12 +2277,18 @@ async function processCommand(raw) {
       "제 이름은 이비입니다."
     );
 
+    rememberAction(
+      "name"
+    );
+
     return;
 
   }
 
 
-  /* 시간 */
+  /* =====================================================
+     TIME
+  ===================================================== */
 
   if (
     text.includes("몇 시") ||
@@ -2053,8 +2300,17 @@ async function processCommand(raw) {
       new Date();
 
 
+    const result =
+      `현재 시간은 ${now.getHours()}시 ${now.getMinutes()}분입니다.`;
+
+
+    rememberAction(
+      "time"
+    );
+
+
     await respond(
-      `현재 시간은 ${now.getHours()}시 ${now.getMinutes()}분입니다.`
+      result
     );
 
     return;
@@ -2062,10 +2318,15 @@ async function processCommand(raw) {
   }
 
 
-  /* 날짜 */
+  /* =====================================================
+     DATE
+  ===================================================== */
 
   if (
-    text.includes("오늘") &&
+    (
+      text.includes("오늘") ||
+      text.includes("날짜")
+    ) &&
     (
       text.includes("날짜") ||
       text.includes("며칠") ||
@@ -2077,8 +2338,19 @@ async function processCommand(raw) {
       new Date();
 
 
+    const result =
+      `오늘은 ${now.getFullYear()}년 ` +
+      `${now.getMonth() + 1}월 ` +
+      `${now.getDate()}일입니다.`;
+
+
+    rememberAction(
+      "date"
+    );
+
+
     await respond(
-      `오늘은 ${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일입니다.`
+      result
     );
 
     return;
@@ -2097,7 +2369,33 @@ async function processCommand(raw) {
   ) {
 
     let city =
-      getCity(text);
+      getCity(
+        text
+      );
+
+
+    /*
+      도시를 말하지 않았으면
+      이전 도시를 사용
+    */
+
+    if (
+      !hasCity(text) &&
+      conversationMemory.lastCity
+    ) {
+
+      city =
+        conversationMemory.lastCity;
+
+    }
+
+
+    rememberAction(
+      "weather",
+      {
+        city
+      }
+    );
 
 
     await respond(
@@ -2110,7 +2408,9 @@ async function processCommand(raw) {
       const response =
         await fetch(
           "/api/weather?city=" +
-          encodeURIComponent(city)
+          encodeURIComponent(
+            city
+          )
         );
 
 
@@ -2127,27 +2427,23 @@ async function processCommand(raw) {
         await response.json();
 
 
-      /*
-        server.js에서 새 형식으로
-        보내는 경우
-      */
-
       if (
         data.temperature !== undefined
       ) {
 
-        await respond(
-          `${data.city}의 현재 날씨는 ${data.description}입니다. ` +
+        const result =
+          `${data.city}의 현재 날씨는 ` +
+          `${data.description}입니다. ` +
           `현재 기온은 ${data.temperature}도이고 ` +
           `체감 온도는 ${data.feelsLike}도입니다. ` +
-          `습도는 ${data.humidity}퍼센트입니다.`
+          `습도는 ${data.humidity}퍼센트입니다.`;
+
+
+        await respond(
+          result
         );
 
       }
-
-      /*
-        이전 API 형식도 지원
-      */
 
       else if (
         data.current
@@ -2201,11 +2497,25 @@ async function processCommand(raw) {
   }
 
 
-  /* 유튜브 */
+  /* =====================================================
+     YOUTUBE
+  ===================================================== */
 
   if (
     text.includes("유튜브")
   ) {
+
+    const url =
+      "https://www.youtube.com";
+
+
+    rememberAction(
+      "website",
+      {
+        website: "youtube"
+      }
+    );
+
 
     await respond(
       "유튜브를 열겠습니다."
@@ -2213,7 +2523,7 @@ async function processCommand(raw) {
 
 
     openSite(
-      "https://www.youtube.com"
+      url
     );
 
 
@@ -2222,11 +2532,21 @@ async function processCommand(raw) {
   }
 
 
-  /* 네이버 */
+  /* =====================================================
+     NAVER
+  ===================================================== */
 
   if (
     text.includes("네이버")
   ) {
+
+    rememberAction(
+      "website",
+      {
+        website: "naver"
+      }
+    );
+
 
     await respond(
       "네이버를 열겠습니다."
@@ -2243,11 +2563,21 @@ async function processCommand(raw) {
   }
 
 
-  /* 구글 */
+  /* =====================================================
+     GOOGLE
+  ===================================================== */
 
   if (
     text.includes("구글")
   ) {
+
+    rememberAction(
+      "website",
+      {
+        website: "google"
+      }
+    );
+
 
     await respond(
       "구글을 열겠습니다."
@@ -2264,7 +2594,9 @@ async function processCommand(raw) {
   }
 
 
-  /* 검색 */
+  /* =====================================================
+     SEARCH
+  ===================================================== */
 
   if (
     text.startsWith("검색") ||
@@ -2272,12 +2604,9 @@ async function processCommand(raw) {
   ) {
 
     let query =
-      text
-        .replace(/^검색해/, "")
-        .replace(/^검색/, "")
-        .replace(/^찾아줘/, "")
-        .replace(/^찾아/, "")
-        .trim();
+      extractSearchQuery(
+        text
+      );
 
 
     if (!query) {
@@ -2293,14 +2622,19 @@ async function processCommand(raw) {
     }
 
 
-    await respond(
-      `${query}를 검색하겠습니다.`
+    rememberAction(
+      "search",
+      {
+        search: query,
+        website:
+          conversationMemory.lastWebsite ||
+          "google"
+      }
     );
 
 
-    openSite(
-      "https://www.google.com/search?q=" +
-      encodeURIComponent(query)
+    await executeSearch(
+      query
     );
 
 
@@ -2309,7 +2643,9 @@ async function processCommand(raw) {
   }
 
 
-  /* 계산 */
+  /* =====================================================
+     CALCULATOR
+  ===================================================== */
 
   if (
     text.includes("계산") ||
@@ -2318,14 +2654,25 @@ async function processCommand(raw) {
     text.includes("곱하기") ||
     text.includes("나누기") ||
     text.includes("곱해") ||
-    text.includes("더해")
+    text.includes("더해") ||
+    text.includes("빼") ||
+    text.includes("나눠")
   ) {
 
     const result =
-      calculate(text);
+      calculate(
+        text
+      );
 
 
-    if (result !== null) {
+    rememberAction(
+      "calculator"
+    );
+
+
+    if (
+      result !== null
+    ) {
 
       await respond(
         `계산 결과는 ${result}입니다.`
@@ -2347,7 +2694,9 @@ async function processCommand(raw) {
   }
 
 
-  /* 기능 */
+  /* =====================================================
+     FEATURES
+  ===================================================== */
 
   if (
     text.includes("뭐 할 수 있어") ||
@@ -2356,7 +2705,11 @@ async function processCommand(raw) {
   ) {
 
     await respond(
-      "시간, 날짜, 날씨, 검색, 웹사이트 열기와 계산 등을 할 수 있습니다."
+      "시간, 날짜, 날씨, 검색, 유튜브와 웹사이트 열기, 계산 등을 할 수 있습니다. 그리고 앞에서 나눈 말의 맥락도 기억합니다."
+    );
+
+    rememberAction(
+      "features"
     );
 
     return;
@@ -2364,7 +2717,9 @@ async function processCommand(raw) {
   }
 
 
-  /* 감사 */
+  /* =====================================================
+     THANKS
+  ===================================================== */
 
   if (
     text.includes("고마워") ||
@@ -2381,8 +2736,600 @@ async function processCommand(raw) {
   }
 
 
+  /* =====================================================
+     WHAT DID WE TALK ABOUT
+  ===================================================== */
+
+  if (
+    text.includes("아까") ||
+    text.includes("전에") ||
+    text.includes("방금 뭐")
+  ) {
+
+    const last =
+      conversationMemory.lastUserText;
+
+
+    if (last) {
+
+      await respond(
+        `방금 말씀하신 내용은 "${last}"입니다.`
+      );
+
+    }
+
+    else {
+
+      await respond(
+        "아직 기억하고 있는 대화가 없습니다."
+      );
+
+    }
+
+
+    return;
+
+  }
+
+
+  /* =====================================================
+     GENERIC CONTEXT RESPONSE
+  ===================================================== */
+
+  rememberAction(
+    "conversation",
+    {
+      topic: text
+    }
+  );
+
+
   await respond(
-    "네. 말씀하신 내용을 들었습니다."
+    contextualResponse(
+      text
+    )
+  );
+
+}
+
+
+/* =========================================================
+   FOLLOW-UP DETECTION
+========================================================= */
+
+function isFollowUpCommand(text) {
+
+  return (
+
+    text.includes("그럼") ||
+    text.includes("그러면") ||
+    text.includes("거기") ||
+    text.includes("그곳") ||
+    text.includes("거기는") ||
+    text.includes("거기서") ||
+    text.includes("그것도") ||
+    text.includes("그것") ||
+    text.includes("다시") ||
+    text === "내일" ||
+    text === "오늘은" ||
+    text === "그럼?" ||
+    text.length <= 8
+
+  );
+
+}
+
+
+/* =========================================================
+   FOLLOW-UP HANDLER
+========================================================= */
+
+async function handleFollowUp(text) {
+
+  const lastAction =
+    conversationMemory.lastAction;
+
+
+  /* -------------------------------------------------------
+     이전 사이트에서 검색
+  ------------------------------------------------------- */
+
+  if (
+    (
+      text.includes("거기서") ||
+      text.includes("거기") ||
+      text.includes("그 사이트")
+    ) &&
+    (
+      text.includes("검색") ||
+      text.includes("찾아")
+    )
+  ) {
+
+    const query =
+      extractSearchQuery(
+        text
+      );
+
+
+    if (!query) {
+
+      processing = false;
+
+      await speak(
+        "무엇을 검색할까요?"
+      );
+
+      return true;
+
+    }
+
+
+    await executeSearch(
+      query
+    );
+
+
+    return true;
+
+  }
+
+
+  /* -------------------------------------------------------
+     유튜브에서 이어서 검색
+  ------------------------------------------------------- */
+
+  if (
+    (
+      text.includes("검색") ||
+      text.includes("찾아")
+    ) &&
+    conversationMemory.lastWebsite ===
+      "youtube"
+  ) {
+
+    const query =
+      extractSearchQuery(
+        text
+      );
+
+
+    if (query) {
+
+      await executeSearch(
+        query,
+        "youtube"
+      );
+
+      return true;
+
+    }
+
+  }
+
+
+  /* -------------------------------------------------------
+     이전 검색 다시
+  ------------------------------------------------------- */
+
+  if (
+    (
+      text.includes("다시") ||
+      text.includes("또")
+    ) &&
+    conversationMemory.lastSearch
+  ) {
+
+    await executeSearch(
+      conversationMemory.lastSearch
+    );
+
+
+    return true;
+
+  }
+
+
+  /* -------------------------------------------------------
+     이전 지역 기억
+  ------------------------------------------------------- */
+
+  if (
+    (
+      text.includes("거기는") ||
+      text.includes("그럼 거기") ||
+      text.includes("그곳")
+    ) &&
+    conversationMemory.lastCity
+  ) {
+
+    if (
+      lastAction ===
+      "weather"
+    ) {
+
+      const city =
+        conversationMemory.lastCity;
+
+
+      await getWeather(
+        city
+      );
+
+
+      return true;
+
+    }
+
+  }
+
+
+  /* -------------------------------------------------------
+     "그럼?" + 이전 날씨
+  ------------------------------------------------------- */
+
+  if (
+    (
+      text === "그럼" ||
+      text === "그러면" ||
+      text === "그럼?"
+    ) &&
+    lastAction ===
+      "weather"
+  ) {
+
+    await getWeather(
+      conversationMemory.lastCity ||
+      "서울"
+    );
+
+
+    return true;
+
+  }
+
+
+  /* -------------------------------------------------------
+     지역만 말했을 때
+     예: "그럼 용인은?"
+  ------------------------------------------------------- */
+
+  if (
+    lastAction === "weather" &&
+    hasCity(text)
+  ) {
+
+    const city =
+      getCity(text);
+
+
+    await getWeather(
+      city
+    );
+
+
+    return true;
+
+  }
+
+
+  /* -------------------------------------------------------
+     "내일?" 같은 후속 질문
+  ------------------------------------------------------- */
+
+  if (
+    (
+      text === "내일" ||
+      text === "내일은"
+    ) &&
+    lastAction ===
+      "weather"
+  ) {
+
+    await respond(
+      `${conversationMemory.lastCity || "서울"}의 내일 날씨를 확인하려면 내일 예보 기능이 필요합니다. 현재 날씨 기능은 실시간 날씨를 조회합니다.`
+    );
+
+
+    return true;
+
+  }
+
+
+  /* -------------------------------------------------------
+     이전 검색 주제
+  ------------------------------------------------------- */
+
+  if (
+    (
+      text.includes("그것") ||
+      text.includes("그거")
+    ) &&
+    conversationMemory.lastSearch
+  ) {
+
+    await respond(
+      `방금 검색한 "${conversationMemory.lastSearch}"를 기준으로 말씀하시는 것으로 이해했습니다.`
+    );
+
+
+    return true;
+
+  }
+
+
+  return false;
+
+}
+
+
+/* =========================================================
+   WEATHER
+========================================================= */
+
+async function getWeather(city) {
+
+  rememberAction(
+    "weather",
+    {
+      city
+    }
+  );
+
+
+  await respond(
+    `${city}의 날씨를 확인하겠습니다.`
+  );
+
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/weather?city=" +
+        encodeURIComponent(
+          city
+        )
+      );
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        `HTTP ${response.status}`
+      );
+
+    }
+
+
+    const data =
+      await response.json();
+
+
+    if (
+      data.temperature !== undefined
+    ) {
+
+      await respond(
+        `${data.city}의 현재 날씨는 ` +
+        `${data.description}입니다. ` +
+        `현재 기온은 ${data.temperature}도이고 ` +
+        `체감 온도는 ${data.feelsLike}도입니다. ` +
+        `습도는 ${data.humidity}퍼센트입니다.`
+      );
+
+    }
+
+    else if (
+      data.current
+    ) {
+
+      const current =
+        data.current;
+
+
+      await respond(
+        `${city}의 현재 날씨는 ` +
+        `${weatherText(
+          current.weather_code
+        )}이고 ` +
+        `기온은 ${current.temperature_2m}도입니다.`
+      );
+
+    }
+
+    else {
+
+      throw new Error(
+        "날씨 데이터 형식 오류"
+      );
+
+    }
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "날씨 오류:",
+      error
+    );
+
+
+    await respond(
+      "날씨 정보를 가져오지 못했습니다."
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+async function executeSearch(
+  query,
+  forcedWebsite = null
+) {
+
+  query =
+    query.trim();
+
+
+  if (!query) {
+
+    processing = false;
+
+    await speak(
+      "무엇을 검색할까요?"
+    );
+
+    return;
+
+  }
+
+
+  const website =
+    forcedWebsite ||
+    conversationMemory.lastWebsite ||
+    "google";
+
+
+  rememberAction(
+    "search",
+    {
+      search: query,
+      website
+    }
+  );
+
+
+  await respond(
+    `${query}를 검색하겠습니다.`
+  );
+
+
+  let url;
+
+
+  if (
+    website === "youtube"
+  ) {
+
+    url =
+      "https://www.youtube.com/results?search_query=" +
+      encodeURIComponent(
+        query
+      );
+
+  }
+
+  else if (
+    website === "naver"
+  ) {
+
+    url =
+      "https://search.naver.com/search.naver?query=" +
+      encodeURIComponent(
+        query
+      );
+
+  }
+
+  else {
+
+    url =
+      "https://www.google.com/search?q=" +
+      encodeURIComponent(
+        query
+      );
+
+  }
+
+
+  openSite(
+    url
+  );
+
+}
+
+
+/* =========================================================
+   SEARCH QUERY EXTRACTION
+========================================================= */
+
+function extractSearchQuery(text) {
+
+  let query =
+    text
+      .replace(
+        /^(검색해줘|검색해|검색|찾아줘|찾아|거기서|거기)/g,
+        ""
+      )
+      .trim();
+
+
+  query =
+    query
+      .replace(
+        /검색해줘$/g,
+        ""
+      )
+      .trim();
+
+
+  query =
+    query
+      .replace(
+        /검색해$/g,
+        ""
+      )
+      .trim();
+
+
+  return query;
+
+}
+
+
+/* =========================================================
+   CONTEXTUAL RESPONSE
+========================================================= */
+
+function contextualResponse(text) {
+
+  const last =
+    conversationMemory.lastUserText;
+
+
+  if (
+    last &&
+    conversationMemory.lastAction ===
+      "weather"
+  ) {
+
+    return (
+      `${conversationMemory.lastCity || "서울"}에 대해 계속 말씀하시는 것으로 이해했습니다.`
+    );
+
+  }
+
+
+  if (
+    conversationMemory.lastSearch
+  ) {
+
+    return (
+      `"${conversationMemory.lastSearch}"에 이어서 말씀하시는 것으로 이해했습니다.`
+    );
+
+  }
+
+
+  return (
+    `"${text}"라고 말씀하셨습니다. 제가 실행할 수 있는 명령인지 확인해볼게요.`
   );
 
 }
@@ -2392,29 +3339,41 @@ async function processCommand(raw) {
    CITY
 ========================================================= */
 
+const cityList = [
+
+  "서울",
+  "수원",
+  "용인",
+  "인천",
+  "부산",
+  "대전",
+  "대구",
+  "광주",
+  "울산",
+  "제주",
+  "청주",
+  "전주",
+  "춘천",
+  "강릉",
+  "포항"
+
+];
+
+
+function hasCity(text) {
+
+  return cityList.some(
+    city =>
+      text.includes(city)
+  );
+
+}
+
+
 function getCity(text) {
 
-  const cities = [
-    "서울",
-    "수원",
-    "용인",
-    "인천",
-    "부산",
-    "대전",
-    "대구",
-    "광주",
-    "울산",
-    "제주",
-    "청주",
-    "전주",
-    "춘천",
-    "강릉",
-    "포항"
-  ];
-
-
   for (
-    const city of cities
+    const city of cityList
   ) {
 
     if (
@@ -2428,7 +3387,10 @@ function getCity(text) {
   }
 
 
-  return "서울";
+  return (
+    conversationMemory.lastCity ||
+    "서울"
+  );
 
 }
 
@@ -2438,6 +3400,11 @@ function getCity(text) {
 ========================================================= */
 
 function respond(text) {
+
+  rememberAssistant(
+    text
+  );
+
 
   processing = false;
 
@@ -2468,7 +3435,9 @@ async function speak(
   speaking = true;
 
 
-  setState("speaking");
+  setState(
+    "speaking"
+  );
 
 
   if (recognition) {
@@ -2494,8 +3463,10 @@ async function speak(
           method: "POST",
 
           headers: {
+
             "Content-Type":
               "application/json"
+
           },
 
           body:
@@ -2520,14 +3491,17 @@ async function speak(
 
 
       const audio =
-        new Audio(url);
+        new Audio(
+          url
+        );
 
 
       currentAudio =
         audio;
 
 
-      audio.volume = 1;
+      audio.volume =
+        1;
 
 
       audio.onended =
@@ -2542,7 +3516,9 @@ async function speak(
             null;
 
 
-          finishSpeaking(done);
+          finishSpeaking(
+            done
+          );
 
         };
 
@@ -2574,12 +3550,6 @@ async function speak(
 
     }
 
-
-    console.warn(
-      "ElevenLabs TTS HTTP:",
-      response.status
-    );
-
   }
 
   catch (error) {
@@ -2601,7 +3571,7 @@ async function speak(
 
 
 /* =========================================================
-   BROWSER TTS
+   BROWSER SPEECH
 ========================================================= */
 
 function browserSpeak(
@@ -2672,7 +3642,9 @@ function browserSpeak(
     utterance.onend =
       () => {
 
-        finishSpeaking(done);
+        finishSpeaking(
+          done
+        );
 
       };
 
@@ -2680,7 +3652,9 @@ function browserSpeak(
     utterance.onerror =
       () => {
 
-        finishSpeaking(done);
+        finishSpeaking(
+          done
+        );
 
       };
 
@@ -2693,7 +3667,9 @@ function browserSpeak(
 
   catch {
 
-    finishSpeaking(done);
+    finishSpeaking(
+      done
+    );
 
   }
 
@@ -2711,13 +3687,17 @@ function finishSpeaking(done) {
 
   if (awake) {
 
-    setState("listening");
+    setState(
+      "listening"
+    );
 
   }
 
   else {
 
-    setState("sleep");
+    setState(
+      "sleep"
+    );
 
   }
 
@@ -2761,7 +3741,9 @@ function wakeUp() {
   );
 
 
-  setState("waking");
+  setState(
+    "waking"
+  );
 
 
   setTimeout(
@@ -2772,7 +3754,9 @@ function wakeUp() {
       }
 
 
-      setState("listening");
+      setState(
+        "listening"
+      );
 
     },
     1000
@@ -2804,7 +3788,9 @@ function sleepAssistant() {
   );
 
 
-  setState("sleep");
+  setState(
+    "sleep"
+  );
 
 
   speak(
@@ -2880,7 +3866,8 @@ function startClapDetection() {
 
     const rms =
       Math.sqrt(
-        sum / timeData.length
+        sum /
+        timeData.length
       );
 
 
@@ -2904,7 +3891,8 @@ function startClapDetection() {
         frequencyData[i];
 
 
-      total += value;
+      total +=
+        value;
 
 
       if (
@@ -2912,7 +3900,8 @@ function startClapDetection() {
         frequencyData.length * 0.20
       ) {
 
-        high += value;
+        high +=
+          value;
 
       }
 
@@ -2940,11 +3929,6 @@ function startClapDetection() {
       performance.now();
 
 
-    /*
-      휴면 상태에서만
-      박수 감지
-    */
-
     const clap =
       !awake &&
       !speaking &&
@@ -2957,7 +3941,9 @@ function startClapDetection() {
           highRatio > 0.10
         )
       ) &&
-      now - lastClapTime > 300;
+      now -
+      lastClapTime >
+      300;
 
 
     if (clap) {
@@ -2993,7 +3979,8 @@ function startClapDetection() {
         setTimeout(
           () => {
 
-            clapCount = 0;
+            clapCount =
+              0;
 
           },
           1800
@@ -3004,7 +3991,8 @@ function startClapDetection() {
         clapCount >= 2
       ) {
 
-        clapCount = 0;
+        clapCount =
+          0;
 
 
         clearTimeout(
@@ -3070,15 +4058,42 @@ function calculate(text) {
 
   let expression =
     text
-      .replace(/계산/g, "")
-      .replace(/더하기/g, "+")
-      .replace(/빼기/g, "-")
-      .replace(/곱하기/g, "*")
-      .replace(/나누기/g, "/")
-      .replace(/곱해/g, "*")
-      .replace(/더해/g, "+")
-      .replace(/빼/g, "-")
-      .replace(/나눠/g, "/")
+      .replace(
+        /계산/g,
+        ""
+      )
+      .replace(
+        /더하기/g,
+        "+"
+      )
+      .replace(
+        /빼기/g,
+        "-"
+      )
+      .replace(
+        /곱하기/g,
+        "*"
+      )
+      .replace(
+        /나누기/g,
+        "/"
+      )
+      .replace(
+        /곱해/g,
+        "*"
+      )
+      .replace(
+        /더해/g,
+        "+"
+      )
+      .replace(
+        /빼/g,
+        "-"
+      )
+      .replace(
+        /나눠/g,
+        "/"
+      )
       .replace(
         /[^0-9+\-*/().]/g,
         ""
@@ -3112,8 +4127,11 @@ function calculate(text) {
 
 
     if (
-      typeof result !== "number" ||
-      !Number.isFinite(result)
+      typeof result !==
+        "number" ||
+      !Number.isFinite(
+        result
+      )
     ) {
 
       return null;
@@ -3151,7 +4169,7 @@ function openSite(url) {
       );
 
     },
-    500
+    300
   );
 
 }
@@ -3261,7 +4279,9 @@ function weatherText(code) {
    INITIAL
 ========================================================= */
 
-setState("sleep");
+setState(
+  "sleep"
+);
 
 
 if (
