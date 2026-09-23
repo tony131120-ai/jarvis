@@ -2807,97 +2807,140 @@ body {
      13. 박수 감지
   ======================================================= */
 
-  function detectClap() {
+ function detectClap() {
 
-    if (
-      !analyser ||
-      awake ||
-      !running
-    ) {
-      return;
-    }
+  if (
+    !analyser ||
+    !running
+  ) {
+    return;
+  }
 
-    const bufferLength =
-      analyser.fftSize;
+  const bufferLength =
+    analyser.fftSize;
 
-    const data =
-      new Uint8Array(
-        bufferLength
+  const data =
+    new Uint8Array(bufferLength);
+
+  analyser.getByteTimeDomainData(data);
+
+  let peak = 0;
+  let sum = 0;
+
+  for (
+    let i = 0;
+    i < data.length;
+    i++
+  ) {
+
+    const value =
+      (data[i] - 128) / 128;
+
+    const abs =
+      Math.abs(value);
+
+    peak =
+      Math.max(
+        peak,
+        abs
       );
 
-    analyser.getByteTimeDomainData(
-      data
+    sum +=
+      value * value;
+  }
+
+  const rms =
+    Math.sqrt(
+      sum / data.length
     );
 
-    let peak = 0;
-    let sum = 0;
 
-    for (
-      let i = 0;
-      i < data.length;
-      i++
-    ) {
+  /* =========================
+     소리 감지 UI
+  ========================= */
 
-      const value =
-        (data[i] - 128) / 128;
+  const soundDetected =
+    document.getElementById(
+      "soundDetected"
+    );
 
-      const abs =
-        Math.abs(value);
+  if (soundDetected) {
 
-      peak =
-        Math.max(
-          peak,
-          abs
-        );
+    if (rms > 0.025) {
 
-      sum +=
-        value * value;
-
-    }
-
-    const rms =
-      Math.sqrt(
-        sum / data.length
+      soundDetected.classList.add(
+        "show"
       );
 
+      soundDetected.textContent =
+        "소리가 감지됐습니다";
 
-    if (
-      peak > 0.12 &&
-      rms > 0.008
-    ) {
+    } else {
 
-      const now =
-        Date.now();
-
-      clapCount++;
-
-      clearTimeout(
-        clapResetTimer
+      soundDetected.classList.remove(
+        "show"
       );
-
-      clapResetTimer =
-        setTimeout(
-          () => {
-            clapCount = 0;
-          },
-          1800
-        );
-
-
-      if (
-        clapCount >= 2
-      ) {
-
-        clapCount = 0;
-
-        wakeUp();
-
-      }
 
     }
 
   }
 
+
+  /* =========================
+     박수 감지
+  ========================= */
+
+  if (
+    awake
+  ) {
+    return;
+  }
+
+
+  if (
+    peak > 0.12 &&
+    rms > 0.008
+  ) {
+
+    const now =
+      Date.now();
+
+    clapCount++;
+
+    clearTimeout(
+      clapResetTimer
+    );
+
+    clapResetTimer =
+      setTimeout(
+        () => {
+
+          clapCount = 0;
+
+        },
+        1800
+      );
+
+
+    console.log(
+      "박수 감지:",
+      clapCount
+    );
+
+
+    if (
+      clapCount >= 2
+    ) {
+
+      clapCount = 0;
+
+      wakeUp();
+
+    }
+
+  }
+
+}
 
   /* =======================================================
      14. 마이크 분석
