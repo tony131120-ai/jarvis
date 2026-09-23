@@ -5260,13 +5260,23 @@ async function youtubePrevious() {
    COMMAND INTERCEPTOR
 ========================================================= */
 
-async function processYouTubeCommand(
-  text
-) {
+async function processYouTubeCommand(text) {
 
-  /*
-    유튜브 검색
-  */
+  text = String(text || "")
+    .trim()
+    .replace(/\s+/g, " ");
+
+  console.log("YOUTUBE COMMAND:", text);
+
+
+  /* =====================================================
+     유튜브 검색
+     예:
+     "유튜브에서 마크 검색해줘"
+     "유튜브에 마크라고 검색해줘"
+     "유튜브 마크 검색"
+     "유튜브에서 마인크래프트 찾아줘"
+  ===================================================== */
 
   if (
     text.includes("유튜브") &&
@@ -5276,33 +5286,53 @@ async function processYouTubeCommand(
     )
   ) {
 
-    let query =
-      text
-        .replace(
-          /유튜브/g,
-          ""
-        )
-        .replace(
-          /검색해줘/g,
-          ""
-        )
-        .replace(
-          /검색해/g,
-          ""
-        )
-        .replace(
-          /검색/g,
-          ""
-        )
-        .replace(
-          /찾아줘/g,
-          ""
-        )
-        .replace(
-          /찾아/g,
-          ""
-        )
-        .trim();
+    let query = text;
+
+
+    // 유튜브 관련 표현 제거
+    query = query
+      .replace(/유튜브에서/g, "")
+      .replace(/유튜브에/g, "")
+      .replace(/유튜브로/g, "")
+      .replace(/유튜브/g, "");
+
+
+    // "라고 검색해줘" 같은 말투 제거
+    query = query
+      .replace(/라고\s*검색해줘/g, "")
+      .replace(/이라고\s*검색해줘/g, "")
+      .replace(/라고\s*검색해/g, "")
+      .replace(/이라고\s*검색해/g, "");
+
+
+    // 일반적인 검색 표현 제거
+    query = query
+      .replace(/검색해줘/g, "")
+      .replace(/검색해/g, "")
+      .replace(/검색해주세요/g, "")
+      .replace(/검색하라고/g, "")
+      .replace(/검색/g, "");
+
+
+    // 찾아줘 표현 제거
+    query = query
+      .replace(/찾아줘/g, "")
+      .replace(/찾아주세요/g, "")
+      .replace(/찾아/g, "");
+
+
+    // 문장 끝의 "라고" 제거
+    query = query
+      .replace(/\s*이라고\s*$/g, "")
+      .replace(/\s*라고\s*$/g, "");
+
+
+    // 따옴표 제거
+    query = query
+      .replace(/["'“”‘’「」『』]/g, "");
+
+
+    query = query.trim();
 
 
     if (!query) {
@@ -5318,6 +5348,12 @@ async function processYouTubeCommand(
     }
 
 
+    console.log(
+      "YOUTUBE SEARCH QUERY:",
+      query
+    );
+
+
     await searchYouTube(
       query,
       false
@@ -5327,6 +5363,318 @@ async function processYouTubeCommand(
     return true;
 
   }
+
+
+  /* =====================================================
+     첫 번째 영상
+     
+     인식 가능한 표현:
+     "첫 번째 영상 틀어줘"
+     "첫번째 영상 틀어줘"
+     "첫 번째 거 재생해"
+     "첫번째 재생"
+     "1번 틀어줘"
+  ===================================================== */
+
+  if (
+    youtubeResults.length > 0 &&
+    (
+      /첫\s*번째/.test(text) ||
+      /첫\s*번째\s*영상/.test(text) ||
+      /첫\s*영상/.test(text) ||
+      /첫번째/.test(text) ||
+      /1\s*번/.test(text)
+    ) &&
+    (
+      text.includes("틀어") ||
+      text.includes("재생") ||
+      text.includes("실행") ||
+      text.includes("보여")
+    )
+  ) {
+
+    await playYouTubeResult(0);
+
+    return true;
+
+  }
+
+
+  /* =====================================================
+     숫자로 영상 선택
+     
+     "2번 틀어줘"
+     "3번 재생해"
+  ===================================================== */
+
+  const numberMatch =
+    text.match(
+      /(\d+)\s*번/
+    );
+
+
+  if (
+    numberMatch &&
+    youtubeResults.length > 0
+  ) {
+
+    const index =
+      Number(
+        numberMatch[1]
+      ) - 1;
+
+
+    if (
+      index >= 0 &&
+      index < youtubeResults.length
+    ) {
+
+      await playYouTubeResult(
+        index
+      );
+
+      return true;
+
+    }
+
+  }
+
+
+  /* =====================================================
+     재생
+  ===================================================== */
+
+  if (
+    text === "재생" ||
+    text === "재생해" ||
+    text.includes("다시 재생") ||
+    text.includes("영상 재생") ||
+    text.includes("계속 재생") ||
+    text.includes("다시 틀어")
+  ) {
+
+    await youtubePlay();
+
+    return true;
+
+  }
+
+
+  /* =====================================================
+     일시정지
+  ===================================================== */
+
+  if (
+    text.includes("일시정지") ||
+    text.includes("일시 정지") ||
+    text.includes("멈춰") ||
+    text.includes("멈춰줘") ||
+    text.includes("잠깐 멈춰") ||
+    text.includes("잠시 멈춰")
+  ) {
+
+    await youtubePause();
+
+    return true;
+
+  }
+
+
+  /* =====================================================
+     정지
+  ===================================================== */
+
+  if (
+    text.includes("영상 꺼") ||
+    text.includes("영상 종료") ||
+    text.includes("영상 닫아")
+  ) {
+
+    await youtubeStop();
+
+    return true;
+
+  }
+
+
+  /* =====================================================
+     소리 키우기
+  ===================================================== */
+
+  if (
+    text.includes("소리 키워") ||
+    text.includes("소리 크게") ||
+    text.includes("소리를 키워") ||
+    text.includes("볼륨 키워") ||
+    text.includes("볼륨 높여") ||
+    text.includes("소리 올려") ||
+    text.includes("볼륨 올려")
+  ) {
+
+    await youtubeVolumeUp();
+
+    return true;
+
+  }
+
+
+  /* =====================================================
+     소리 줄이기
+  ===================================================== */
+
+  if (
+    text.includes("소리 줄여") ||
+    text.includes("소리 작게") ||
+    text.includes("소리를 줄여") ||
+    text.includes("볼륨 줄여") ||
+    text.includes("볼륨 낮춰") ||
+    text.includes("소리 내려") ||
+    text.includes("볼륨 내려")
+  ) {
+
+    await youtubeVolumeDown();
+
+    return true;
+
+  }
+
+
+  /* =====================================================
+     음소거
+  ===================================================== */
+
+  if (
+    text.includes("음소거")
+  ) {
+
+    if (
+      text.includes("해제") ||
+      text.includes("풀어")
+    ) {
+
+      await youtubeUnmute();
+
+    } else {
+
+      await youtubeMute();
+
+    }
+
+    return true;
+
+  }
+
+
+  /* =====================================================
+     볼륨 숫자
+     
+     "볼륨 50"
+     "소리 30"
+  ===================================================== */
+
+  const volumeMatch =
+    text.match(
+      /(?:볼륨|소리)\s*(\d+)\s*(?:퍼센트|프로|%)?/
+    );
+
+
+  if (volumeMatch) {
+
+    await youtubeSetVolume(
+      Number(
+        volumeMatch[1]
+      )
+    );
+
+    return true;
+
+  }
+
+
+  /* =====================================================
+     앞으로
+  ===================================================== */
+
+  const forwardMatch =
+    text.match(
+      /(\d+)\s*초\s*(?:앞|앞으로)/
+    );
+
+
+  if (forwardMatch) {
+
+    await youtubeSeek(
+      Number(
+        forwardMatch[1]
+      )
+    );
+
+    return true;
+
+  }
+
+
+  /* =====================================================
+     뒤로
+  ===================================================== */
+
+  const backwardMatch =
+    text.match(
+      /(\d+)\s*초\s*(?:뒤|뒤로)/
+    );
+
+
+  if (backwardMatch) {
+
+    await youtubeSeek(
+      -Number(
+        backwardMatch[1]
+      )
+    );
+
+    return true;
+
+  }
+
+
+  /* =====================================================
+     다음 영상
+  ===================================================== */
+
+  if (
+    text.includes("다음 영상") ||
+    text.includes("다음 거") ||
+    text.includes("다음꺼") ||
+    text === "다음"
+  ) {
+
+    await youtubeNext();
+
+    return true;
+
+  }
+
+
+  /* =====================================================
+     이전 영상
+  ===================================================== */
+
+  if (
+    text.includes("이전 영상") ||
+    text.includes("이전 거") ||
+    text.includes("이전꺼") ||
+    text === "이전"
+  ) {
+
+    await youtubePrevious();
+
+    return true;
+
+  }
+
+
+  return false;
+}
 
 
   /*
