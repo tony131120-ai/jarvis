@@ -1778,38 +1778,28 @@ function sleepAssistant() {
 function startClapDetection() {
 
     if (!analyser) {
-
         return;
-
     }
-
 
     const data =
         new Float32Array(
             analyser.fftSize
         );
 
+    let clapCooldown = 0;
 
     function detect() {
 
         if (!running) {
-
             return;
-
         }
-
 
         analyser.getFloatTimeDomainData(
             data
         );
 
-
-        let peak =
-            0;
-
-        let sum =
-            0;
-
+        let peak = 0;
+        let sum = 0;
 
         for (
             let i = 0;
@@ -1818,10 +1808,7 @@ function startClapDetection() {
         ) {
 
             const value =
-                Math.abs(
-                    data[i]
-                );
-
+                Math.abs(data[i]);
 
             peak =
                 Math.max(
@@ -1829,49 +1816,49 @@ function startClapDetection() {
                     value
                 );
 
-
             sum +=
-                value *
-                value;
-
+                value * value;
         }
-
 
         const rms =
             Math.sqrt(
-                sum /
-                data.length
+                sum / data.length
             );
-
 
         const now =
             performance.now();
 
-
         /*
-           휴면 상태에서만
-           박수 감지
+          박수 감지
+
+          기존:
+          peak > 0.70
+          rms > 0.12
+
+          개선:
+          peak > 0.48
+          rms > 0.055
+
+          작은 박수도 인식할 수 있게
+          감도를 높임.
         */
 
         if (
             !awake &&
             !speaking &&
-            peak > .70 &&
-            rms > .12 &&
-            now - lastClap > 500
+            peak > 0.48 &&
+            rms > 0.055 &&
+            now > clapCooldown
         ) {
 
-            lastClap =
-                now;
-
+            clapCooldown =
+                now + 350;
 
             clapCount++;
-
 
             clearTimeout(
                 clapResetTimer
             );
-
 
             clapResetTimer =
                 setTimeout(
@@ -1881,9 +1868,13 @@ function startClapDetection() {
                             0;
 
                     },
-                    1500
+                    1800
                 );
 
+
+            /*
+              두 번의 박수
+            */
 
             if (
                 clapCount >= 2
@@ -1892,6 +1883,9 @@ function startClapDetection() {
                 clapCount =
                     0;
 
+                clearTimeout(
+                    clapResetTimer
+                );
 
                 wakeUp();
 
@@ -1899,18 +1893,14 @@ function startClapDetection() {
 
         }
 
-
         requestAnimationFrame(
             detect
         );
 
     }
 
-
     detect();
-
 }
-
 
 /* =====================================================
    날씨
