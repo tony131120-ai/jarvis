@@ -4687,30 +4687,83 @@ function closeYouTube() {
 /* =========================================================
    SEARCH YOUTUBE
 ========================================================= */
-
 async function searchYouTube(
   query,
   autoPlayFirst = false
-) console.log(
-  "YOUTUBE RESULTS:",
-  youtubeResults
-);
-  setTimeout(() => {
+) {
 
   try {
 
-    youtubePlayer.playVideo();
+    const cleanQuery =
+      String(query || "").trim();
+
+    if (!cleanQuery) {
+      speak("검색어를 말씀해주세요.");
+      return;
+    }
+
+    youtubeCurrentQuery =
+      cleanQuery;
+
+    openYouTubePanel();
+
+    const response =
+      await fetch(
+        "/api/youtube/search?q=" +
+        encodeURIComponent(cleanQuery)
+      );
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        "YouTube 검색에 실패했습니다."
+      );
+    }
+
+    youtubeResults =
+      Array.isArray(data.videos)
+        ? data.videos
+        : [];
+
+    youtubeCurrentIndex = -1;
+
+    console.log(
+      "YOUTUBE RESULTS:",
+      youtubeResults
+    );
+
+    renderYouTubeResults();
+
+    if (
+      autoPlayFirst &&
+      youtubeResults.length > 0
+    ) {
+
+      playYouTubeResult(0);
+
+    }
 
   }
 
   catch (error) {
 
     console.error(
-      "YouTube PLAY ERROR:",
+      "YouTube 검색 오류:",
       error
     );
 
+    speak(
+      "YouTube 검색 중 오류가 발생했습니다."
+    );
+
   }
+
+}
+
+  
 
 }, 300); {
 
