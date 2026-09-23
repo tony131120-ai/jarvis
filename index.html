@@ -1031,29 +1031,77 @@ body {
    SPEAKING
 ========================================================= */
 
-.speaking #core {
+async function speak(text) {
+  if (!text) return;
 
-  box-shadow:
+  speaking = true;
 
-    0 0 35px
-    #9aeaff,
+  try {
+    console.log("E.B. 응답:", text);
 
-    0 0 90px
-    rgba(
-      80,
-      220,
-      255,
-      1
-    ),
+    // 서버 TTS 시도
+    try {
+      const response = await fetch("/api/tts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          text: text
+        })
+      });
 
-    0 0 170px
-    rgba(
-      50,
-      180,
-      255,
-      .65
-    );
+      if (response.ok) {
+        const data = await response.json();
 
+        if (data.audio) {
+          if (currentAudio) {
+            currentAudio.pause();
+            currentAudio = null;
+          }
+
+          currentAudio = new Audio(data.audio);
+
+          await new Promise((resolve) => {
+            currentAudio.onended = resolve;
+            currentAudio.onerror = resolve;
+
+            currentAudio.play().catch(() => {
+              resolve();
+            });
+          });
+
+          return;
+        }
+      }
+    } catch (error) {
+      console.warn("서버 TTS 실패:", error);
+    }
+
+    // 서버 TTS가 실패하면 브라우저 음성으로 대체
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+
+      await new Promise((resolve) => {
+        const utterance = new SpeechSynthesisUtterance(text);
+
+        utterance.lang = "ko-KR";
+        utterance.rate = 1.0;
+        utterance.pitch = 0.9;
+        utterance.volume = 1.0;
+
+        utterance.onend = resolve;
+        utterance.onerror = resolve;
+
+        window.speechSynthesis.speak(utterance);
+
+        // 혹시 onend가 안 오는 경우
+        setTimeout(resolve, 10000);
+      });
+    }
+  } finally {
+    speaking = false;
+  }
 }
 
 
