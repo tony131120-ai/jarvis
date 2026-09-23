@@ -2129,13 +2129,54 @@ async function processCommand(
 
   /* 날씨 */
 
-  if (
-    text.includes("날씨") ||
-    text.includes("기온") ||
-    text.includes("온도") ||
-    text.includes("비 와") ||
-    text.includes("비와")
-  ) {
+ if (
+  text.includes("날씨") ||
+  text.includes("기온") ||
+  text.includes("온도")
+) {
+  let city = "서울";
+
+  if (text.includes("수원")) city = "수원";
+  else if (text.includes("용인")) city = "용인";
+  else if (text.includes("인천")) city = "인천";
+  else if (text.includes("부산")) city = "부산";
+  else if (text.includes("대전")) city = "대전";
+  else if (text.includes("대구")) city = "대구";
+  else if (text.includes("광주")) city = "광주";
+  else if (text.includes("울산")) city = "울산";
+  else if (text.includes("제주")) city = "제주";
+  else if (text.includes("청주")) city = "청주";
+  else if (text.includes("전주")) city = "전주";
+  else if (text.includes("춘천")) city = "춘천";
+  else if (text.includes("강릉")) city = "강릉";
+  else if (text.includes("포항")) city = "포항";
+
+  try {
+    const response = await fetch(
+      `/api/weather?city=${encodeURIComponent(city)}`
+    );
+
+    if (!response.ok) {
+      throw new Error("날씨 API 응답 오류");
+    }
+
+    const weather = await response.json();
+
+    const message =
+      `${weather.city}의 현재 날씨는 ${weather.description}입니다. ` +
+      `현재 기온은 ${weather.temperature}도이고, ` +
+      `체감 온도는 ${weather.feelsLike}도입니다. ` +
+      `습도는 ${weather.humidity}퍼센트, ` +
+      `바람은 시속 ${weather.windSpeed}킬로미터입니다.`;
+
+    await speak(message);
+  } catch (error) {
+    console.error("날씨 조회 실패:", error);
+    await speak("현재 날씨 정보를 가져오지 못했어요.");
+  }
+
+  return;
+}
 
     await weather(
       text
