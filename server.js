@@ -38,7 +38,15 @@ app.get("/api/search", async (req, res) => {
   try {
     const r = await fetch(`https://www.google.com/search?q=${encodeURIComponent(q)}&hl=ko` , { headers: { "User-Agent": "Mozilla/5.0" } });
     const html = await r.text();
-    const text = html.replace(/<script[\\s\\S]*?<\\/script>/gi, " ").replace(/<style[\\s\\S]*?<\\/style>/gi, " ").replace(/<[^>]+>/g, " ").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&").replace(/\\s+/g, " ").trim();
+    const text = html
+  .replace(/<script[\s\S]*?<\/script>/gi, " ")
+  .replace(/<style[\s\S]*?<\/style>/gi, " ")
+  .replace(/<[^>]+>/g, " ")
+  .replace(/&quot;/g, '"')
+  .replace(/&#39;/g, "'")
+  .replace(/&amp;/g, "&")
+  .replace(/\s+/g, " ")
+  .trim();
     res.json({ query: q, preview: text.slice(0, 900), url: `https://www.google.com/search?q=${encodeURIComponent(q)}` });
   } catch (e) {
     res.json({ query: q, preview: "검색 결과를 직접 열어보세요.", url: `https://www.google.com/search?q=${encodeURIComponent(q)}` });
