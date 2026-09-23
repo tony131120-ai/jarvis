@@ -1,149 +1,2181 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>EVI Voice Assistant</title>
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+>
+
+<title>이비 음성 비서</title>
+
 <style>
-*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 35%,#12395b,#071624 35%,#02070c 75%);color:#dff9ff;font-family:Arial,"Noto Sans KR",sans-serif}body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.12;background-image:linear-gradient(#61d9ff 1px,transparent 1px),linear-gradient(90deg,#61d9ff 1px,transparent 1px);background-size:50px 50px}.app{width:min(1000px,94vw);margin:auto;padding:28px 0 50px}.top{display:flex;justify-content:space-between;align-items:center}.logo{font-size:25px;font-weight:800;letter-spacing:7px}.status{color:#73e8ff;font-size:13px}.hud{margin-top:28px;display:grid;grid-template-columns:1fr 250px 1fr;gap:18px;align-items:center}.side,.console{border:1px solid #1c6075;background:#06131ddd;box-shadow:0 0 30px #00b7ff18 inset;padding:20px}.side{min-height:190px}.side h3,.label{margin:0 0 14px;color:#6fe9ff;font-size:12px;letter-spacing:2px}.data{font-size:14px;line-height:2;color:#b9d9e3}.core{width:230px;height:230px;margin:auto;border-radius:50%;border:2px solid #59e4ff;position:relative;display:flex;align-items:center;justify-content:center;box-shadow:0 0 18px #36dfff,0 0 60px #00aaff44,inset 0 0 40px #00aaff22}.core:before,.core:after{content:"";position:absolute;border-radius:50%;border:1px solid #3bcff4}.core:before{inset:18px;animation:spin 7s linear infinite}.core:after{inset:42px;border-style:dashed;animation:spin 4s linear infinite reverse}.orb{width:72px;height:72px;border-radius:50%;background:#bdf7ff;box-shadow:0 0 15px #fff,0 0 50px #00d9ff;animation:pulse 1.8s ease-in-out infinite}.controls{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:28px 0}button{border:1px solid #42d9ff;background:#06202d;color:#cfffff;border-radius:10px;padding:12px 18px;font-weight:700;cursor:pointer}button:hover{background:#0a3547}button.main{border-radius:50%;width:120px;height:120px;font-size:15px;box-shadow:0 0 35px #00d9ff55}button.active{background:#0c4e61;box-shadow:0 0 40px #00d9ff88}.console{min-height:150px}.label{font-size:11px}#message{font-size:21px;line-height:1.5;margin-top:8px}.input{display:flex;gap:10px;margin-top:14px}input{flex:1;background:#06131c;border:1px solid #235a6b;color:#fff;padding:12px;border-radius:8px;outline:0}.list{max-height:140px;overflow:auto;font-size:12px}.item{padding:7px 0;border-bottom:1px solid #123746}.help{margin-top:18px;color:#7399a6;font-size:12px;line-height:1.7}@keyframes pulse{50%{transform:scale(1.13);opacity:.72}}@keyframes spin{to{transform:rotate(360deg)}}@media(max-width:760px){.hud{grid-template-columns:1fr}.core{grid-row:1}.side{min-height:130px}}
+
+*{
+  box-sizing:border-box;
+}
+
+html,
+body{
+  margin:0;
+  width:100%;
+  min-height:100%;
+}
+
+body{
+
+  background:
+    radial-gradient(
+      circle at 50% 35%,
+      #123e5c 0%,
+      #071724 35%,
+      #02070c 80%
+    );
+
+  color:#dffaff;
+
+  font-family:
+    Arial,
+    "Noto Sans KR",
+    sans-serif;
+
+  overflow-x:hidden;
+}
+
+body::before{
+
+  content:"";
+
+  position:fixed;
+
+  inset:0;
+
+  pointer-events:none;
+
+  opacity:.13;
+
+  background-image:
+    linear-gradient(
+      #5edfff 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      #5edfff 1px,
+      transparent 1px
+    );
+
+  background-size:50px 50px;
+}
+
+.app{
+
+  width:min(1050px,94vw);
+
+  margin:auto;
+
+  padding:
+    28px
+    0
+    60px;
+}
+
+/* =====================
+   HEADER
+===================== */
+
+.top{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+}
+
+.logo{
+
+  font-size:30px;
+
+  font-weight:900;
+
+  letter-spacing:7px;
+
+  color:#aef6ff;
+
+  text-shadow:
+    0 0 10px #00d9ff,
+    0 0 30px #00d9ff;
+}
+
+.status{
+
+  color:#70e8ff;
+
+  font-size:14px;
+
+  letter-spacing:1px;
+}
+
+/* =====================
+   HUD
+===================== */
+
+.hud{
+
+  margin-top:30px;
+
+  display:grid;
+
+  grid-template-columns:
+    1fr
+    260px
+    1fr;
+
+  gap:18px;
+
+  align-items:center;
+}
+
+.panel{
+
+  min-height:190px;
+
+  border:
+    1px solid
+    #1d6077;
+
+  background:
+    rgba(3,15,24,.88);
+
+  padding:20px;
+
+  box-shadow:
+    inset 0 0 30px
+    rgba(0,190,255,.08),
+    0 0 20px
+    rgba(0,190,255,.08);
+}
+
+.panel h3{
+
+  margin:0 0 15px;
+
+  color:#6deaff;
+
+  font-size:12px;
+
+  letter-spacing:3px;
+}
+
+.info{
+
+  line-height:2;
+
+  color:#b8dce7;
+
+  font-size:14px;
+}
+
+/* =====================
+   CORE
+===================== */
+
+.core{
+
+  width:240px;
+
+  height:240px;
+
+  border-radius:50%;
+
+  border:
+    2px solid
+    #5ce5ff;
+
+  margin:auto;
+
+  position:relative;
+
+  display:flex;
+
+  justify-content:center;
+
+  align-items:center;
+
+  box-shadow:
+
+    0 0 20px
+    #22dfff,
+
+    0 0 70px
+    rgba(0,190,255,.3),
+
+    inset 0 0 50px
+    rgba(0,190,255,.2);
+}
+
+.core::before{
+
+  content:"";
+
+  position:absolute;
+
+  inset:18px;
+
+  border-radius:50%;
+
+  border:
+    1px solid
+    #38d6f5;
+
+  animation:
+    spin 7s linear infinite;
+}
+
+.core::after{
+
+  content:"";
+
+  position:absolute;
+
+  inset:43px;
+
+  border-radius:50%;
+
+  border:
+    1px dashed
+    #38d6f5;
+
+  animation:
+    spin 4s linear infinite reverse;
+}
+
+.orb{
+
+  width:75px;
+
+  height:75px;
+
+  border-radius:50%;
+
+  background:#c8faff;
+
+  box-shadow:
+
+    0 0 15px white,
+    0 0 40px #00d9ff,
+    0 0 90px #00bfff;
+
+  animation:
+    pulse 1.7s infinite;
+}
+
+/* =====================
+   BUTTONS
+===================== */
+
+.controls{
+
+  display:flex;
+
+  justify-content:center;
+
+  flex-wrap:wrap;
+
+  gap:12px;
+
+  margin:30px 0;
+}
+
+button{
+
+  border:
+    1px solid
+    #42dfff;
+
+  background:
+    #061f2b;
+
+  color:#d7fbff;
+
+  border-radius:10px;
+
+  padding:
+    12px
+    18px;
+
+  font-weight:bold;
+
+  cursor:pointer;
+
+  transition:.2s;
+}
+
+button:hover{
+
+  background:#0b3849;
+
+  box-shadow:
+    0 0 20px
+    rgba(0,220,255,.3);
+}
+
+.main{
+
+  width:125px;
+
+  height:125px;
+
+  border-radius:50%;
+
+  font-size:16px;
+
+  box-shadow:
+    0 0 30px
+    rgba(0,220,255,.3);
+}
+
+.active{
+
+  background:#0b5265;
+
+  box-shadow:
+    0 0 50px
+    rgba(0,220,255,.6);
+}
+
+/* =====================
+   CONSOLE
+===================== */
+
+.console{
+
+  border:
+    1px solid
+    #1d6177;
+
+  background:
+    rgba(2,10,16,.92);
+
+  padding:20px;
+
+  min-height:180px;
+}
+
+.label{
+
+  color:#5de4ff;
+
+  font-size:11px;
+
+  letter-spacing:3px;
+}
+
+#message{
+
+  margin-top:15px;
+
+  font-size:22px;
+
+  line-height:1.6;
+}
+
+.input{
+
+  display:flex;
+
+  gap:10px;
+
+  margin-top:18px;
+}
+
+input{
+
+  flex:1;
+
+  padding:12px;
+
+  background:#06141d;
+
+  border:
+    1px solid
+    #245a6b;
+
+  color:white;
+
+  border-radius:8px;
+
+  outline:none;
+}
+
+/* =====================
+   LOG
+===================== */
+
+.list{
+
+  max-height:135px;
+
+  overflow:auto;
+
+  font-size:12px;
+}
+
+.item{
+
+  padding:7px 0;
+
+  border-bottom:
+    1px solid
+    #123744;
+}
+
+/* =====================
+   HELP
+===================== */
+
+.help{
+
+  margin-top:18px;
+
+  color:#739ba8;
+
+  font-size:12px;
+
+  line-height:1.8;
+}
+
+/* =====================
+   ANIMATION
+===================== */
+
+@keyframes pulse{
+
+  50%{
+
+    transform:scale(1.12);
+
+    opacity:.7;
+  }
+}
+
+@keyframes spin{
+
+  to{
+
+    transform:
+      rotate(360deg);
+  }
+}
+
+/* =====================
+   MOBILE
+===================== */
+
+@media(max-width:760px){
+
+  .hud{
+
+    grid-template-columns:1fr;
+  }
+
+  .core{
+
+    grid-row:1;
+  }
+
+}
+
 </style>
+
 </head>
+
 <body>
+
 <div class="app">
-<div class="top"><div class="logo">EVI</div><div id="status" class="status">대기 중</div></div>
-<div class="hud">
-<section class="side"><h3>SYSTEM</h3><div class="data">마이크: <span id="mic">확인 중</span><br>음성 인식: <span id="speech">대기</span><br>모드: <span id="mode">SLEEP</span><br>박수 감지: <span id="clap">대기</span></div></section>
-<div class="core"><div class="orb"></div></div>
-<section class="side"><h3>COMMAND LOG</h3><div id="history" class="list"></div></section>
+
+  <div class="top">
+
+    <div class="logo">
+      이비
+    </div>
+
+    <div
+      id="status"
+      class="status"
+    >
+      휴면 상태
+    </div>
+
+  </div>
+
+
+  <div class="hud">
+
+
+    <section class="panel">
+
+      <h3>SYSTEM</h3>
+
+      <div class="info">
+
+        마이크:
+        <span id="mic">
+          대기
+        </span>
+
+        <br>
+
+        음성 인식:
+        <span id="speech">
+          대기
+        </span>
+
+        <br>
+
+        상태:
+        <span id="mode">
+          SLEEP
+        </span>
+
+        <br>
+
+        박수:
+        <span id="clap">
+          대기
+        </span>
+
+      </div>
+
+    </section>
+
+
+    <div class="core">
+
+      <div class="orb"></div>
+
+    </div>
+
+
+    <section class="panel">
+
+      <h3>COMMAND LOG</h3>
+
+      <div
+        id="history"
+        class="list"
+      ></div>
+
+    </section>
+
+  </div>
+
+
+  <div class="controls">
+
+    <button
+      id="startBtn"
+      class="main"
+    >
+      마이크<br>
+      시작
+    </button>
+
+    <button id="sleepBtn">
+      휴면
+    </button>
+
+    <button id="testBtn">
+      음성 테스트
+    </button>
+
+  </div>
+
+
+  <div class="console">
+
+    <div class="label">
+      이비 OUTPUT
+    </div>
+
+    <div id="message">
+      마이크를 시작해주세요.
+    </div>
+
+    <div class="input">
+
+      <input
+        id="manual"
+        placeholder="직접 명령 입력"
+      >
+
+      <button id="send">
+        실행
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <div class="help">
+
+    마이크를 시작하면 이비가 대기합니다.
+
+    <br>
+
+    휴면 상태에서
+    <b>👏👏 박수 2번</b>
+    을 치면 이비가 깨어납니다.
+
+    <br>
+
+    활성화된 후에는
+    <b>"이비"</b>
+    라고 먼저 부른 다음 말씀하세요.
+
+    <br><br>
+
+    예:
+
+    <br>
+
+    "이비, 지금 몇 시야?"
+
+    <br>
+
+    "이비, 서울 날씨 어때?"
+
+    <br>
+
+    "이비, 유튜브 열어줘"
+
+    <br>
+
+    "이비, 마인크래프트 검색해줘"
+
+    <br>
+
+    "이비, 쉬어"
+
+  </div>
+
 </div>
-<div class="controls"><button id="startBtn" class="main">마이크<br>시작</button><button id="sleepBtn">휴면</button><button id="testBtn">음성 테스트</button></div>
-<div class="console"><div class="label">EVI OUTPUT</div><div id="message">마이크 시작을 누르면 준비합니다.</div><div class="input"><input id="manual" placeholder="마이크가 안 될 때 직접 명령 입력"><button id="send">실행</button></div></div>
-<div class="help">마이크를 시작한 뒤 <b>👏 박수를 빠르게 2번</b> 치세요. 활성화되면 음성 명령을 받습니다.<br>예: "현재 시간", "서울 날씨", "마인크래프트 검색해줘", "쉬어"</div>
-</div>
+
+
 <script>
-const $ = id => document.getElementById(id);
-let recognition=null, recognitionAvailable=false, listening=false, running=false;
-let awake=false, micStream=null, audioContext=null, analyser=null;
-let history=[]; let wakeBuffer=""; let wakeTimer=null; let speaking=false;
-const WAKE_WORDS=["이비","이비야","에이비","j비스","자비스","EVI"];
 
-function say(text){
-  $("message").textContent=text;
-  speaking=true;
-  if("speechSynthesis" in window){
-    speechSynthesis.cancel();
-    const u=new SpeechSynthesisUtterance(text); u.lang="ko-KR"; u.rate=.96; u.pitch=.9;
-    u.onend=()=>{speaking=false; if(awake) restartRecognition(250);};
-    speechSynthesis.speak(u);
-  } else { speaking=false; }
-}
-function log(t){history.unshift(t);history=history.slice(0,15);$("history").innerHTML=history.map(x=>`<div class="item">${escapeHtml(x)}</div>`).join("");}
-function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;", "'":"&#39;"}[c]));}
-function setMode(v){awake=v;$("mode").textContent=v?"ACTIVE":"SLEEP";$("status").textContent=v?"대화 대기 중":"휴면 상태";}
+/* ==================================================
+   기본 상태
+================================================== */
 
-function normalize(t){
-  return t.toLowerCase().replace(/[.,!?]/g," ").replace(/\s+/g," ").trim();
-}
-function findWake(t){
-  const n=normalize(t);
-  for(const w of WAKE_WORDS){ if(n.includes(w)) return w; }
-  return null;
-}
-function removeWake(t){
-  let n=normalize(t);
-  for(const w of WAKE_WORDS){ n=n.replace(w," "); }
-  return n.replace(/\s+/g," ").trim();
+let running = false;
+
+let awake = false;
+
+let listening = false;
+
+let recognition = null;
+
+let recognitionSupported = false;
+
+let micStream = null;
+
+let audioContext = null;
+
+let analyser = null;
+
+let gainNode = null;
+
+let clapCount = 0;
+
+let lastClap = 0;
+
+let clapCooldown = 0;
+
+let history = [];
+
+
+/* ==================================================
+   DOM
+================================================== */
+
+const $ = id =>
+  document.getElementById(id);
+
+
+/* ==================================================
+   로그
+================================================== */
+
+function log(text){
+
+  history.unshift(text);
+
+  history =
+    history.slice(0,12);
+
+  $("history").innerHTML =
+    history
+      .map(
+        x =>
+          `<div class="item">${escapeHtml(x)}</div>`
+      )
+      .join("");
 }
 
-function setupRecognition(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){$("speech").textContent="지원 안 함";return;}
-  recognitionAvailable=true;
-  recognition=new SR();
-  recognition.lang="ko-KR";
-  recognition.continuous=true;
-  recognition.interimResults=true;
-  recognition.maxAlternatives=5;
-  recognition.onstart=()=>{listening=true;$("speech").textContent=awake?"이비 대기 중":"휴면";};
-  recognition.onresult=e=>{
-    let finalText="";
-    for(let i=e.resultIndex;i<e.results.length;i++){
-      if(e.results[i].isFinal){finalText+=e.results[i][0].transcript;}
-    }
-    if(!finalText.trim()||speaking)return;
-    processSpeech(finalText.trim());
-  };
-  recognition.onerror=e=>{$("speech").textContent="재연결 중";console.log("speech",e.error);};
-  recognition.onend=()=>{listening=false;$("speech").textContent=awake?"이비 대기 중":"휴면"; if(running) restartRecognition(350);};
-}
-function restartRecognition(ms=200){if(!running||!recognitionAvailable||!recognition)return;clearTimeout(wakeTimer);wakeTimer=setTimeout(()=>{if(!listening){try{recognition.start()}catch{}}},ms);}
-function stopRecognition(){if(!recognition)return;try{recognition.stop()}catch{}}
 
-function processSpeech(text){
-  const wake=findWake(text);
-  if(!awake){
-    // 휴면 상태에서는 음성을 포함한 모든 말을 무시한다.
+function escapeHtml(text){
+
+  return text.replace(
+    /[&<>"']/g,
+    char => ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#39;"
+    }[char])
+  );
+}
+
+
+/* ==================================================
+   음성 출력
+================================================== */
+
+function speak(text){
+
+  $("message").textContent =
+    text;
+
+  if(
+    !("speechSynthesis" in window)
+  ){
     return;
   }
-  if(!wake) return; // 반드시 "이비"가 있어야 다음 내용을 처리한다.
-  const command=removeWake(text);
-  log("YOU: "+text);
-  if(!command){say("네, 말씀하세요.");return;}
-  handleCommand(command);
+
+  speechSynthesis.cancel();
+
+  const utterance =
+    new SpeechSynthesisUtterance(
+      text
+    );
+
+  utterance.lang =
+    "ko-KR";
+
+  /*
+    낮고 차분한 AI 비서 느낌
+  */
+
+  utterance.rate =
+    0.88;
+
+  utterance.pitch =
+    0.72;
+
+  utterance.volume =
+    1;
+
+  speechSynthesis.speak(
+    utterance
+  );
 }
 
-async function handleCommand(raw){
-  const t=normalize(raw);
-  if(/^(쉬어|쉬어줘|휴면|휴면해|잠자|자러가|그만할게|대기해)$/.test(t)||t.includes("휴면 상태로 들어가")){sleep();return;}
-  if(t.includes("시간")||t.includes("몇 시")||t.includes("시계")){
-    try{const r=await fetch('/api/time');const d=await r.json();say('현재 시간은 '+d.text+'입니다.');log('TIME: '+d.text);}catch{say('시간 정보를 가져오지 못했어요.');}return;
-  }
-  if(t.includes("날씨")||t.includes("기온")||t.includes("비 와")||t.includes("비가 와")){
-    const city=extractCity(t)||"서울";
-    try{const r=await fetch('/api/weather?city='+encodeURIComponent(city));const d=await r.json();if(!r.ok)throw 0;const msg=`${d.city}의 현재 날씨는 ${d.condition}이고, 기온은 ${d.temperature}도, 체감온도는 ${d.feelsLike}도예요.`;say(msg);log('WEATHER: '+msg);}catch{say('날씨 정보를 가져오지 못했어요.');}return;
-  }
-  if(t.includes("검색")||t.includes("찾아봐")||t.includes("찾아줘")||t.includes("검색해줘")){
-    let q=t.replace(/검색해줘|검색해|검색|찾아봐줘|찾아봐|찾아줘|찾아/g,'').trim();
-    if(!q){say('무엇을 찾아볼까요?');return;}
-    const r=await fetch('/api/search?q='+encodeURIComponent(q));const d=await r.json();window.open(d.url,'_blank');say(q+' 검색 결과를 열었어요.');log('SEARCH: '+q);return;
-  }
-  if(t.includes("안녕")||t.includes("반가워")){say('안녕하세요. 무엇을 도와드릴까요?');return;}
-  if(t.includes("누구")&&t.includes("너")){say('저는 이비예요. 음성으로 대화하고 여러 가지 간단한 작업을 도와드릴 수 있어요.');return;}
-  if(t.includes("고마워")||t.includes("감사")){say('천만에요.');return;}
-  if(t.includes("이름")&&t.includes("뭐")){say('제 이름은 이비예요.');return;}
-  if(t.includes("잘 지내")||t.includes("어때")){say('정상 작동 중이에요. 언제든 말씀하세요.');return;}
-  if(t.includes("유튜브")){window.open('https://www.youtube.com','_blank');say('유튜브를 열었어요.');return;}
-  if(t.includes("구글")){window.open('https://www.google.com','_blank');say('구글을 열었어요.');return;}
-  if(t.includes("네이버")){window.open('https://www.naver.com','_blank');say('네이버를 열었어요.');return;}
-  if(t.includes("계산")){
-    const expr=t.replace(/계산해줘|계산해|계산|해줘/g,'').replace(/더하기/g,'+').replace(/빼기/g,'-').replace(/곱하기/g,'*').replace(/나누기/g,'/').replace(/[^0-9+\-*/().]/g,'');
-    if(expr){try{const result=Function('"use strict";return ('+expr+')')();say('계산 결과는 '+result+'입니다.');return}catch{}}
-  }
-  say(`말씀하신 내용은 "${raw}"이에요. 현재 시간, 날씨, 검색, 계산, 사이트 열기, 일반 대화와 휴면 명령을 처리할 수 있어요.`);
-}
-function extractCity(t){const a=["서울","부산","인천","대구","대전","광주","울산","수원","용인","성남","제주","강릉","전주","청주","평택","화성","천안"] ;return a.find(x=>t.includes(x))||'';}
 
-async function startMic(){
-  if(running)return;
+/* ==================================================
+   상태
+================================================== */
+
+function setAwake(value){
+
+  awake = value;
+
+  $("mode").textContent =
+    value
+      ? "ACTIVE"
+      : "SLEEP";
+
+  $("status").textContent =
+    value
+      ? "이비 활성화"
+      : "휴면 상태";
+}
+
+
+/* ==================================================
+   활성화
+================================================== */
+
+function wakeUp(){
+
+  if(!running){
+
+    return;
+  }
+
+  if(awake){
+
+    return;
+  }
+
+  setAwake(true);
+
+  log("👏👏 이비 활성화");
+
+  speak(
+    "안녕하세요. 오늘은 무엇을 도와드릴까요?"
+  );
+
+  setTimeout(
+    startRecognition,
+    700
+  );
+}
+
+
+/* ==================================================
+   휴면
+================================================== */
+
+function sleep(){
+
+  if(!awake){
+
+    return;
+  }
+
+  setAwake(false);
+
+  stopRecognition();
+
+  speak(
+    "휴면 상태에 돌입합니다."
+  );
+
+  log(
+    "휴면 상태"
+  );
+}
+
+
+/* ==================================================
+   마이크 시작
+================================================== */
+
+async function startMicrophone(){
+
+  if(running){
+
+    return;
+  }
+
   try{
-    micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}});
-    audioContext=new (window.AudioContext||window.webkitAudioContext)();
-    analyser=audioContext.createAnalyser(); analyser.fftSize=2048;
-    const source=audioContext.createMediaStreamSource(micStream);source.connect(analyser);
-    running=true;$("mic").textContent="정상";$("startBtn").classList.add('active');$("startBtn").textContent='마이크 ON';
-    say('마이크가 준비됐어요. 휴면 상태에서는 아무 말에도 반응하지 않아요. 깨우려면 이비라고 말해주세요.');
-    log('마이크 연결 완료');
-    restartRecognition(400);
-  }catch(e){console.error(e);$("mic").textContent='권한 필요';say('마이크 권한을 허용해주세요.');}
-}
-function activate(){if(!running)return;setMode(true);say('네, 듣고 있어요. 무엇을 도와드릴까요?');log('WAKE: 이비');restartRecognition(500);}
-function sleep(){setMode(false);say('휴면 상태에 들어갈게요.');log('SLEEP');stopRecognition();restartRecognition(800);}
 
-$("startBtn").onclick=startMic;
-$("sleepBtn").onclick=()=>{if(!running)startMic();else sleep();};
-$("testBtn").onclick=()=>say(awake?'음성 인식 테스트가 정상 작동 중이에요.':'현재 휴면 상태예요.');
-$("send").onclick=()=>{const v=$("manual").value.trim();if(!v)return;$("manual").value='';if(!awake){say('현재 휴면 상태예요.');return}handleCommand(v)};
-$("manual").addEventListener('keydown',e=>{if(e.key==='Enter')$("send").click()});
-setMode(false);setupRecognition();
+    /*
+      echoCancellation:
+      스피커에서 나오는 이비 목소리를
+      마이크가 다시 듣는 문제 감소
+
+      noiseSuppression:
+      주변 소음 감소
+
+      autoGainControl:
+      작은 목소리 자동 증폭
+    */
+
+    micStream =
+      await navigator.mediaDevices
+        .getUserMedia({
+
+          audio:{
+            echoCancellation:true,
+
+            noiseSuppression:true,
+
+            autoGainControl:true,
+
+            channelCount:1,
+
+            sampleRate:48000
+          }
+
+        });
+
+
+    audioContext =
+      new (
+        window.AudioContext ||
+        window.webkitAudioContext
+      )();
+
+
+    const source =
+      audioContext
+        .createMediaStreamSource(
+          micStream
+        );
+
+
+    /*
+      마이크 신호 증폭
+    */
+
+    gainNode =
+      audioContext
+        .createGain();
+
+
+    gainNode.gain.value =
+      2.2;
+
+
+    analyser =
+      audioContext
+        .createAnalyser();
+
+
+    analyser.fftSize =
+      2048;
+
+    analyser.smoothingTimeConstant =
+      0.15;
+
+
+    source.connect(
+      gainNode
+    );
+
+    gainNode.connect(
+      analyser
+    );
+
+
+    running = true;
+
+
+    $("mic").textContent =
+      "정상";
+
+    $("startBtn")
+      .classList
+      .add("active");
+
+    $("startBtn").innerHTML =
+      "마이크<br>ON";
+
+
+    log(
+      "마이크 연결 완료"
+    );
+
+
+    speak(
+      "마이크가 준비되었습니다."
+    );
+
+
+    /*
+      박수 감지 시작
+    */
+
+    detectClap();
+
+
+  }catch(error){
+
+    console.error(error);
+
+    $("mic").textContent =
+      "권한 필요";
+
+    speak(
+      "마이크 권한을 허용해주세요."
+    );
+
+  }
+
+}
+
+
+/* ==================================================
+   박수 감지
+================================================== */
+
+function detectClap(){
+
+  if(!running){
+
+    return;
+  }
+
+
+  const data =
+    new Uint8Array(
+      analyser.fftSize
+    );
+
+
+  analyser.getByteTimeDomainData(
+    data
+  );
+
+
+  let sum = 0;
+
+  let peak = 0;
+
+
+  for(
+    let i=0;
+    i<data.length;
+    i++
+  ){
+
+    const value =
+      (data[i]-128)/128;
+
+
+    const abs =
+      Math.abs(value);
+
+
+    sum +=
+      value*value;
+
+
+    if(abs > peak){
+
+      peak = abs;
+    }
+
+  }
+
+
+  const rms =
+    Math.sqrt(
+      sum/data.length
+    );
+
+
+  /*
+    박수는 짧고 강한 피크가 특징.
+
+    감도를 크게 올리되
+    계속 큰 소리가 나는 경우에는
+    연속 박수로 판단하지 않도록 함.
+  */
+
+  const now =
+    Date.now();
+
+
+  const strongPeak =
+    peak > 0.60;
+
+
+  const strongRms =
+    rms > 0.16;
+
+
+  const clap =
+    strongPeak &&
+    strongRms;
+
+
+  if(
+    clap &&
+    now > clapCooldown
+  ){
+
+    clapCooldown =
+      now + 280;
+
+
+    registerClap();
+
+  }
+
+
+  requestAnimationFrame(
+    detectClap
+  );
+
+}
+
+
+/* ==================================================
+   박수 등록
+================================================== */
+
+function registerClap(){
+
+  const now =
+    Date.now();
+
+
+  /*
+    박수 사이 최대 1.5초
+  */
+
+  if(
+    now-lastClap >
+    1500
+  ){
+
+    clapCount = 0;
+
+  }
+
+
+  clapCount++;
+
+  lastClap =
+    now;
+
+
+  $("clap").textContent =
+    clapCount + "/2";
+
+
+  if(
+    clapCount >= 2
+  ){
+
+    clapCount = 0;
+
+    $("clap").textContent =
+      "감지 완료";
+
+
+    /*
+      아주 중요:
+
+      활성 상태에서는
+      박수로 절대 휴면시키지 않는다.
+
+      오직 휴면 상태에서만
+      박수 2번이 깨우기 역할을 한다.
+    */
+
+    if(!awake){
+
+      wakeUp();
+
+    }
+
+  }
+
+}
+
+
+/* ==================================================
+   음성 인식 설정
+================================================== */
+
+function setupRecognition(){
+
+  const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+
+  if(!SpeechRecognition){
+
+    recognitionSupported =
+      false;
+
+    $("speech").textContent =
+      "지원 안 함";
+
+    return;
+
+  }
+
+
+  recognitionSupported =
+    true;
+
+
+  recognition =
+    new SpeechRecognition();
+
+
+  recognition.lang =
+    "ko-KR";
+
+
+  recognition.continuous =
+    true;
+
+
+  /*
+    중간 결과도 받음.
+    짧은 말을 놓치는 것을 줄임.
+  */
+
+  recognition.interimResults =
+    true;
+
+
+  recognition.maxAlternatives =
+    5;
+
+
+  recognition.onstart =
+    () => {
+
+      listening = true;
+
+      $("speech").textContent =
+        "듣는 중";
+
+    };
+
+
+  recognition.onresult =
+    event => {
+
+      if(!awake){
+
+        return;
+      }
+
+
+      let finalText =
+        "";
+
+
+      for(
+        let i =
+          event.resultIndex;
+
+        i <
+          event.results.length;
+
+        i++
+      ){
+
+        const result =
+          event.results[i];
+
+
+        if(
+          result.isFinal
+        ){
+
+          /*
+            후보 5개 중 첫 번째가
+            가장 높은 확률의 결과
+          */
+
+          finalText +=
+            result[0]
+              .transcript;
+
+        }
+
+      }
+
+
+      if(!finalText.trim()){
+
+        return;
+      }
+
+
+      const text =
+        finalText
+          .trim();
+
+
+      log(
+        "YOU: " + text
+      );
+
+
+      /*
+        이비 호출어가 반드시 있어야
+        명령 처리
+      */
+
+      if(
+        containsWakeWord(text)
+      ){
+
+        const command =
+          removeWakeWord(text);
+
+
+        if(command){
+
+          handleCommand(
+            command
+          );
+
+        }else{
+
+          speak(
+            "네. 말씀하세요."
+          );
+
+        }
+
+      }
+
+    };
+
+
+  recognition.onerror =
+    error => {
+
+      console.log(
+        "음성 인식:",
+        error.error
+      );
+
+      $("speech").textContent =
+        "재연결";
+
+    };
+
+
+  recognition.onend =
+    () => {
+
+      listening = false;
+
+      $("speech").textContent =
+        "대기";
+
+
+      /*
+        활성 상태라면
+        자동으로 다시 듣기
+      */
+
+      if(
+        awake &&
+        running
+      ){
+
+        setTimeout(
+          startRecognition,
+          250
+        );
+
+      }
+
+    };
+
+}
+
+
+/* ==================================================
+   호출어
+================================================== */
+
+function containsWakeWord(text){
+
+  const normalized =
+    text
+      .replace(
+        /\s+/g,
+        ""
+      )
+      .toLowerCase();
+
+
+  return (
+    normalized.includes("이비") ||
+    normalized.includes("이비야") ||
+    normalized.includes("이비야")
+  );
+
+}
+
+
+function removeWakeWord(text){
+
+  return text
+    .replace(
+      /^\s*이비야?\s*[,\s]*/i,
+      ""
+    )
+    .trim();
+
+}
+
+
+/* ==================================================
+   음성 인식 시작
+================================================== */
+
+function startRecognition(){
+
+  if(
+    !recognitionSupported ||
+    !recognition ||
+    !running ||
+    !awake ||
+    listening
+  ){
+
+    return;
+  }
+
+
+  try{
+
+    recognition.start();
+
+  }catch{
+
+  }
+
+}
+
+
+/* ==================================================
+   음성 인식 정지
+================================================== */
+
+function stopRecognition(){
+
+  if(!recognition){
+
+    return;
+  }
+
+
+  try{
+
+    recognition.stop();
+
+  }catch{
+
+  }
+
+}
+
+
+/* ==================================================
+   명령 처리
+================================================== */
+
+async function handleCommand(
+  raw
+){
+
+  const text =
+    raw
+      .toLowerCase()
+      .replace(
+        /\s+/g,
+        " "
+      )
+      .trim();
+
+
+  /*
+    휴면
+  */
+
+  if(
+    text.includes("쉬어") ||
+    text.includes("쉬어 줘") ||
+    text.includes("휴면") ||
+    text.includes("잠들어") ||
+    text.includes("잠자")
+  ){
+
+    sleep();
+
+    return;
+
+  }
+
+
+  /*
+    시간
+  */
+
+  if(
+    text.includes("시간") ||
+    text.includes("몇 시") ||
+    text.includes("현재 시각")
+  ){
+
+    try{
+
+      const response =
+        await fetch(
+          "/api/time"
+        );
+
+
+      const data =
+        await response.json();
+
+
+      speak(
+        "현재 시간은 " +
+        data.text +
+        "입니다."
+      );
+
+
+      log(
+        "시간: " +
+        data.text
+      );
+
+    }catch{
+
+      speak(
+        "시간 정보를 가져오지 못했습니다."
+      );
+
+    }
+
+    return;
+
+  }
+
+
+  /*
+    날씨
+  */
+
+  if(
+    text.includes("날씨") ||
+    text.includes("기온") ||
+    text.includes("비 와") ||
+    text.includes("비가 와") ||
+    text.includes("춥") ||
+    text.includes("더워")
+  ){
+
+    const city =
+      extractCity(text) ||
+      "서울";
+
+
+    try{
+
+      const response =
+        await fetch(
+          "/api/weather?city=" +
+          encodeURIComponent(
+            city
+          )
+        );
+
+
+      const data =
+        await response.json();
+
+
+      if(!response.ok){
+
+        throw new Error();
+
+      }
+
+
+      const answer =
+        `${data.city}의 현재 날씨는 ${data.condition}이고, 기온은 ${data.temperature}도, 체감온도는 ${data.feelsLike}도입니다.`;
+
+
+      speak(
+        answer
+      );
+
+
+      log(
+        "날씨: " +
+        answer
+      );
+
+
+    }catch{
+
+      speak(
+        "날씨 정보를 가져오지 못했습니다."
+      );
+
+    }
+
+
+    return;
+
+  }
+
+
+  /*
+    검색
+  */
+
+  if(
+    text.includes("검색") ||
+    text.includes("찾아줘") ||
+    text.includes("찾아 봐")
+  ){
+
+    let query =
+      text
+        .replace(
+          /검색해줘/g,
+          ""
+        )
+        .replace(
+          /검색해/g,
+          ""
+        )
+        .replace(
+          /검색/g,
+          ""
+        )
+        .replace(
+          /찾아줘/g,
+          ""
+        )
+        .replace(
+          /찾아 봐/g,
+          ""
+        )
+        .trim();
+
+
+    if(!query){
+
+      speak(
+        "무엇을 검색할까요?"
+      );
+
+      return;
+
+    }
+
+
+    const response =
+      await fetch(
+        "/api/search?q=" +
+        encodeURIComponent(
+          query
+        )
+      );
+
+
+    const data =
+      await response.json();
+
+
+    window.open(
+      data.url,
+      "_blank"
+    );
+
+
+    speak(
+      query +
+      " 검색 결과를 열었습니다."
+    );
+
+
+    log(
+      "검색: " +
+      query
+    );
+
+
+    return;
+
+  }
+
+
+  /*
+    유튜브
+  */
+
+  if(
+    text.includes("유튜브")
+  ){
+
+    window.open(
+      "https://www.youtube.com/",
+      "_blank"
+    );
+
+
+    speak(
+      "유튜브를 열겠습니다."
+    );
+
+
+    return;
+
+  }
+
+
+  /*
+    네이버
+  */
+
+  if(
+    text.includes("네이버")
+  ){
+
+    window.open(
+      "https://www.naver.com/",
+      "_blank"
+    );
+
+
+    speak(
+      "네이버를 열겠습니다."
+    );
+
+
+    return;
+
+  }
+
+
+  /*
+    구글
+  */
+
+  if(
+    text.includes("구글")
+  ){
+
+    window.open(
+      "https://www.google.com/",
+      "_blank"
+    );
+
+
+    speak(
+      "구글을 열겠습니다."
+    );
+
+
+    return;
+
+  }
+
+
+  /*
+    안녕
+  */
+
+  if(
+    text.includes("안녕") ||
+    text.includes("안녕하세요")
+  ){
+
+    speak(
+      "안녕하세요. 무엇을 도와드릴까요?"
+    );
+
+    return;
+
+  }
+
+
+  /*
+    고마워
+  */
+
+  if(
+    text.includes("고마워") ||
+    text.includes("고맙다") ||
+    text.includes("감사해")
+  ){
+
+    speak(
+      "천만에요."
+    );
+
+    return;
+
+  }
+
+
+  /*
+    이름
+  */
+
+  if(
+    text.includes("너 이름") ||
+    text.includes("이름이 뭐") ||
+    text.includes("누구야")
+  ){
+
+    speak(
+      "제 이름은 이비입니다."
+    );
+
+    return;
+
+  }
+
+
+  /*
+    잘 지내
+  */
+
+  if(
+    text.includes("잘 지내") ||
+    text.includes("어때")
+  ){
+
+    speak(
+      "정상적으로 작동하고 있습니다."
+    );
+
+    return;
+
+  }
+
+
+  /*
+    계산
+  */
+
+  if(
+    text.includes("계산")
+  ){
+
+    const expression =
+      text
+        .replace(
+          /계산해줘/g,
+          ""
+        )
+        .replace(
+          /계산/g,
+          ""
+        )
+        .trim();
+
+
+    const safe =
+      expression
+        .replace(
+          /더하기/g,
+          "+"
+        )
+        .replace(
+          /빼기/g,
+          "-"
+        )
+        .replace(
+          /곱하기/g,
+          "*"
+        )
+        .replace(
+          /나누기/g,
+          "/"
+        )
+        .replace(
+          /[^0-9+\-*/(). ]/g,
+          ""
+        );
+
+
+    if(!safe){
+
+      speak(
+        "계산식을 말씀해주세요."
+      );
+
+      return;
+
+    }
+
+
+    try{
+
+      const result =
+        Function(
+          `"use strict";return (${safe})`
+        )();
+
+
+      speak(
+        "계산 결과는 " +
+        result +
+        "입니다."
+      );
+
+
+    }catch{
+
+      speak(
+        "계산식을 이해하지 못했습니다."
+      );
+
+    }
+
+
+    return;
+
+  }
+
+
+  /*
+    기본 대화
+  */
+
+  if(
+    text.includes("뭐해")
+  ){
+
+    speak(
+      "지금 당신의 명령을 기다리고 있습니다."
+    );
+
+    return;
+
+  }
+
+
+  if(
+    text.includes("도와줘")
+  ){
+
+    speak(
+      "물론입니다. 시간, 날씨, 검색, 웹사이트 열기 등의 작업을 할 수 있습니다."
+    );
+
+    return;
+
+  }
+
+
+  /*
+    알 수 없는 명령
+  */
+
+  speak(
+    `"${raw}"이라는 말씀을 들었습니다. 아직 그 명령에는 대응하지 못합니다.`
+  );
+
+
+  log(
+    "알 수 없는 명령: " +
+    raw
+  );
+
+}
+
+
+/* ==================================================
+   도시 찾기
+================================================== */
+
+function extractCity(text){
+
+  const cities = [
+
+    "서울",
+    "부산",
+    "인천",
+    "대구",
+    "대전",
+    "광주",
+    "울산",
+    "수원",
+    "용인",
+    "성남",
+    "제주",
+    "강릉",
+    "전주",
+    "청주",
+    "천안",
+    "평택"
+
+  ];
+
+
+  return (
+    cities.find(
+      city =>
+        text.includes(city)
+    ) || ""
+  );
+
+}
+
+
+/* ==================================================
+   버튼
+================================================== */
+
+$("startBtn").onclick =
+  startMicrophone;
+
+
+$("sleepBtn").onclick =
+  () => {
+
+    if(!running){
+
+      startMicrophone();
+
+      return;
+
+    }
+
+
+    if(awake){
+
+      sleep();
+
+    }else{
+
+      /*
+        버튼으로 강제 활성화할 수 있게
+        해둔 부분.
+
+        음성으로는 반드시
+        "이비" 호출어가 필요함.
+      */
+
+      wakeUp();
+
+    }
+
+  };
+
+
+$("testBtn").onclick =
+  () => {
+
+    if(!running){
+
+      speak(
+        "먼저 마이크를 시작해주세요."
+      );
+
+      return;
+
+    }
+
+
+    if(!awake){
+
+      speak(
+        "현재 휴면 상태입니다."
+      );
+
+      return;
+
+    }
+
+
+    speak(
+      "음성 시스템이 정상적으로 작동하고 있습니다."
+    );
+
+  };
+
+
+$("send").onclick =
+  () => {
+
+    const value =
+      $("manual")
+        .value
+        .trim();
+
+
+    if(!value){
+
+      return;
+
+    }
+
+
+    $("manual").value =
+      "";
+
+
+    if(!awake){
+
+      speak(
+        "현재 휴면 상태입니다."
+      );
+
+      return;
+
+    }
+
+
+    /*
+      직접 입력도
+      이비 호출어가 있어야 실행
+    */
+
+    if(
+      !containsWakeWord(
+        value
+      )
+    ){
+
+      speak(
+        "이비를 먼저 불러주세요."
+      );
+
+      return;
+
+    }
+
+
+    const command =
+      removeWakeWord(
+        value
+      );
+
+
+    handleCommand(
+      command
+    );
+
+  };
+
+
+$("manual").addEventListener(
+  "keydown",
+  event => {
+
+    if(
+      event.key === "Enter"
+    ){
+
+      $("send").click();
+
+    }
+
+  }
+);
+
+
+/* ==================================================
+   시작
+================================================== */
+
+setupRecognition();
+
 </script>
-</body></html>
+
+</body>
+
+</html>
