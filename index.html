@@ -4619,7 +4619,25 @@ async function searchYouTube(
 ) console.log(
   "YOUTUBE RESULTS:",
   youtubeResults
-); {
+);
+  setTimeout(() => {
+
+  try {
+
+    youtubePlayer.playVideo();
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "YouTube PLAY ERROR:",
+      error
+    );
+
+  }
+
+}, 300); {
 
   query =
     String(query || "").trim();
